@@ -72,10 +72,16 @@ You can inject a custom entity factory to the SDK. All entities will be send to 
 The default entity factory is the immutable function [`fromJS`](https://facebook.github.io/immutable-js/docs/#/fromJS)
 
 ```js
-function entityFactory(input, clientName = null) {
-    const output = // ... do stuff with your input
+function entityFactory(input, listOrItem, clientName = null) {
+    if (listOrItem === 'list') {
+        // do stuff with your list input
 
-    return output;
+        return output;
+    } else { // listOrItem === 'item'
+        const output = // ... do stuff with your input
+
+        return output;
+    }
 }
 
 const sdk = new RestClientSdk(oauthClient, config, clients, entityFactory);

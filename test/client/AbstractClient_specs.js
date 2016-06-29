@@ -1,7 +1,7 @@
 /* global describe, it, afterEach */
 import fetchMock from 'fetch-mock';
 import { expect } from 'chai';
-import { fromJS, Map } from 'immutable';
+import { fromJS, List, Map } from 'immutable';
 import RestClientSdk, { AbstractClient } from '../../src';
 import oauthClient from '../mock/OauthClient';
 
@@ -134,7 +134,15 @@ describe('Test Client', () => {
   });
 
   it('handle entityFactory with a custom entity factory', () => {
-    function entityFactory(input) {
+    function entityFactory(input, listOrItem, name) {
+      if (listOrItem === 'list') {
+        return List(
+          input.map(
+            (item) => fromJS(item).set('customName', item.name)
+          )
+        );
+      }
+
       const out = fromJS(input);
       return out.set('customName', input.name);
     }
@@ -150,19 +158,36 @@ describe('Test Client', () => {
     );
 
     fetchMock
-      .mock(() => true, {
+      .mock('https://api.me/v2/test/8', {
         '@id': '/v1/test/8',
         name: 'foo',
       })
+      .mock('https://api.me/v2/test', [
+        {
+          '@id': '/v1/test/8',
+          name: 'foo',
+        },
+        {
+          '@id': '/v1/test/9',
+          name: 'bar',
+        }
+      ])
       .getMock()
     ;
 
-    return EntityFactorySdk.test.find(8)
-      .then(item => Promise.all([
-        expect(item).to.be.an.instanceof(Map),
-        expect(item.get('name')).to.equal('foo'),
-        expect(item.get('customName')).to.equal('foo'),
-      ]))
-    ;
+    return Promise.all([
+      EntityFactorySdk.test.find(8)
+        .then(item => Promise.all([
+          expect(item).to.be.an.instanceof(Map),
+          expect(item.get('name')).to.equal('foo'),
+          expect(item.get('customName')).to.equal('foo'),
+        ])),
+      EntityFactorySdk.test.findAll()
+        .then(itemList => Promise.all([
+          expect(itemList).to.be.an.instanceof(List),
+          expect(itemList.first().get('name')).to.equal('foo'),
+          expect(itemList.first().get('customName')).to.equal('foo'),
+        ])),
+    ]);
   });
 });

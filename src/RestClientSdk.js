@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
 
-function createEntity(val, type = null) {
+function createEntity(val, listOrItem, type = null) {
   return fromJS(val);
 }
 

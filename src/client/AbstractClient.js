@@ -26,13 +26,13 @@ class AbstractClient {
   find(id, queryParam = {}) {
     const url = this._generateUrlFromParams(queryParam, id);
 
-    return this.createEntityFromJsonResponse(this.authorizedFetch(url));
+    return this.createEntityFromJsonResponse(this.authorizedFetch(url), 'item');
   }
 
   findBy(criteria) {
     const url = this._generateUrlFromParams(criteria);
 
-    return this.createEntityFromJsonResponse(this.authorizedFetch(url));
+    return this.createEntityFromJsonResponse(this.authorizedFetch(url), 'list');
   }
 
   findAll() {
@@ -46,7 +46,8 @@ class AbstractClient {
       this.authorizedFetch(url, {
         method: 'POST',
         body: JSON.stringify(entity.toJSON()),
-      })
+      }),
+      'item'
     );
   }
 
@@ -57,7 +58,8 @@ class AbstractClient {
       this.authorizedFetch(url, {
         method: 'PUT',
         body: JSON.stringify(entity.toJSON()),
-      })
+      }),
+      'item'
     );
   }
 
@@ -66,14 +68,15 @@ class AbstractClient {
     return this.createEntityFromJsonResponse(
       this.authorizedFetch(url, {
         method: 'DELETE',
-      })
+      }),
+      'item'
     );
   }
 
-  createEntityFromJsonResponse(requestPromise) {
+  createEntityFromJsonResponse(requestPromise, listOrItem) {
     return requestPromise
       .then(response => response.json())
-      .then((val) => this.entityFactory(val, this.getName()))
+      .then((val) => this.entityFactory(val, listOrItem, this.getName()))
     ;
   }
 
