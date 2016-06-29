@@ -4,7 +4,7 @@ function createEntity(val, type = null) {
   return fromJS(val);
 }
 
-class MapadoSdk {
+class RestClientSdk {
   constructor(oauthClient, config, clientList = {}, entityFactory = createEntity) {
     this._checkConfigValidity(config);
 
@@ -36,4 +36,4 @@ class MapadoSdk {
   }
 }
 
-export default MapadoSdk;
+export default RestClientSdk;
