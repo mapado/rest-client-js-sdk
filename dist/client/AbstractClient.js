@@ -26,13 +26,13 @@ throw new Error('AbstractClient::getName can not be called directly.\n          
 id){var queryParam=arguments.length<=1||arguments[1]===undefined?{}:arguments[1];
 var url=this._generateUrlFromParams(queryParam,id);
 
-return this.createEntityFromJsonResponse(this.authorizedFetch(url));}},{key:'findBy',value:function findBy(
+return this.createEntityFromJsonResponse(this.authorizedFetch(url),'item');}},{key:'findBy',value:function findBy(
 
 
 criteria){
 var url=this._generateUrlFromParams(criteria);
 
-return this.createEntityFromJsonResponse(this.authorizedFetch(url));}},{key:'findAll',value:function findAll()
+return this.createEntityFromJsonResponse(this.authorizedFetch(url),'list');}},{key:'findAll',value:function findAll()
 
 
 {
@@ -45,8 +45,9 @@ var url=this.getPathBase();
 return this.createEntityFromJsonResponse(
 this.authorizedFetch(url,{
 method:'POST',
-body:JSON.stringify(entity.toJSON())}));}},{key:'update',value:function update(
+body:JSON.stringify(entity.toJSON())}),
 
+'item');}},{key:'update',value:function update(
 
 
 
@@ -56,8 +57,9 @@ var url=entity.get('@id');
 return this.createEntityFromJsonResponse(
 this.authorizedFetch(url,{
 method:'PUT',
-body:JSON.stringify(entity.toJSON())}));}},{key:'delete',value:function _delete(
+body:JSON.stringify(entity.toJSON())}),
 
+'item');}},{key:'delete',value:function _delete(
 
 
 
@@ -65,15 +67,16 @@ entity){
 var url=entity.get('@id');
 return this.createEntityFromJsonResponse(
 this.authorizedFetch(url,{
-method:'DELETE'}));}},{key:'createEntityFromJsonResponse',value:function createEntityFromJsonResponse(
+method:'DELETE'}),
+
+'item');}},{key:'createEntityFromJsonResponse',value:function createEntityFromJsonResponse(
 
 
 
-
-requestPromise){var _this=this;
+requestPromise,listOrItem){var _this=this;
 return requestPromise.
 then(function(response){return response.json();}).
-then(function(val){return _this.entityFactory(val,_this.getName());});}},{key:'makeTicketingUri',value:function makeTicketingUri(
+then(function(val){return _this.entityFactory(val,listOrItem,_this.getName());});}},{key:'makeTicketingUri',value:function makeTicketingUri(
 
 
 
