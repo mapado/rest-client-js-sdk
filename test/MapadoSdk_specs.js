@@ -1,6 +1,6 @@
 /* global describe, it, afterEach */
 import { expect } from 'chai';
-import MapadoSdk, { AbstractClient } from '../src';
+import RestClientSdk, { AbstractClient } from '../src';
 import oauthClient from './mock/OauthClient';
 
 class SomeTestClient extends AbstractClient {
@@ -14,13 +14,13 @@ class SomeTestClient extends AbstractClient {
 }
 
 
-// const SomeSdk = new MapadoSdk(oauthClient);
+// const SomeSdk = new RestClientSdk(oauthClient);
 describe('Test wrong SDK configuration', () => {
-  expect(() => new MapadoSdk(oauthClient)).to.throw(RangeError);
+  expect(() => new RestClientSdk(oauthClient)).to.throw(RangeError);
 });
 
 describe('Good sdk configuration', () => {
-  const sdk = new MapadoSdk(
+  const sdk = new RestClientSdk(
     oauthClient,
     { path: 'my.api.com', scheme: 'https' }
   );
@@ -29,13 +29,13 @@ describe('Good sdk configuration', () => {
   expect(sdk.config.scheme).to.equal('https');
   expect(sdk.config.useDefaultParameters).to.be.true;
 
-  const specifyDefParam = new MapadoSdk(
+  const specifyDefParam = new RestClientSdk(
     oauthClient,
     { path: 'my.api.com', scheme: 'https', useDefaultParameters: true }
   );
   expect(specifyDefParam.config.useDefaultParameters).to.be.true;
 
-  const noDefParamSdk = new MapadoSdk(
+  const noDefParamSdk = new RestClientSdk(
     oauthClient,
     { path: 'my.api.com', scheme: 'https', useDefaultParameters: false }
   );
@@ -44,7 +44,7 @@ describe('Good sdk configuration', () => {
 
 
 describe('Inject client into SDK', () => {
-  const sdk = new MapadoSdk(
+  const sdk = new RestClientSdk(
     oauthClient,
     { path: 'my.api.com', scheme: 'https' },
     { testClient: SomeTestClient }

@@ -2,7 +2,7 @@
 import fetchMock from 'fetch-mock';
 import { expect } from 'chai';
 import { fromJS, Map } from 'immutable';
-import MapadoSdk, { AbstractClient } from '../../src';
+import RestClientSdk, { AbstractClient } from '../../src';
 import oauthClient from '../mock/OauthClient';
 
 class SomeTestClient extends AbstractClient {
@@ -32,7 +32,7 @@ class DefaultParametersTestClient extends AbstractClient {
   }
 }
 
-const SomeSdk = new MapadoSdk(
+const SomeSdk = new RestClientSdk(
   oauthClient,
   { path: 'api.me', scheme: 'https' },
   {
@@ -139,7 +139,7 @@ describe('Test Client', () => {
       return out.set('customName', input.name);
     }
 
-    const EntityFactorySdk = new MapadoSdk(
+    const EntityFactorySdk = new RestClientSdk(
       oauthClient,
       { path: 'api.me', scheme: 'https' },
       {

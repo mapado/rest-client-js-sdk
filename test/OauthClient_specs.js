@@ -28,7 +28,7 @@ describe('Oauth Client tests', () => {
 
   it('handle non empty token', () => {
     const storage = new Storage();
-    storage.setItem('mapado.api.access_token', JSON.stringify({ access_token: 'accesstoken' }));
+    storage.setItem('rest_client_sdk.api.access_token', JSON.stringify({ access_token: 'accesstoken' }));
     const oauth = new OauthClient({ path: 'oauth.me', scheme: 'http' }, '1', 'secret', storage);
 
     const hasAccessToken = oauth.hasAccessToken();

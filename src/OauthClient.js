@@ -1,6 +1,6 @@
 import URI from 'urijs';
 
-const ACCESS_TOKEN_KEY = 'mapado.api.access_token';
+const ACCESS_TOKEN_KEY = 'rest_client_sdk.api.access_token';
 
 class OauthClient {
   constructor(config, clientId, clientSecret, asyncStorage) {
