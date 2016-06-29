@@ -1,0 +1,74 @@
+{
+  "name": "rest-client-sdk",
+  "version": "0.1.0",
+  "description": "Rest Client SDK for API",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "mocha --compilers js:babel-core/register --require ./test/test_helper.js  --recursive",
+    "test:watch": "npm run test -- --watch",
+    "build": "./node_modules/.bin/babel src --out-dir dist && git add dist/ && git commit dist/ -m 'build module'"
+  },
+  "dependencies": {
+    "immutable": "^3.8.1",
+    "urijs": "^1.18.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.10.1",
+    "babel-core": "^6.10.4",
+    "babel-preset-react-native": "^1.9.0",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "chai-immutable": "^1.6.0",
+    "eslint": "^2.13.1",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.9.2",
+    "fetch-mock": "^4.6.0",
+    "form-data": "^1.0.0-rc4",
+    "mocha": "^2.5.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mapado/rest-client-js-sdk.git"
+  },
+  "keywords": [
+    "Rest",
+    "SDK",
+    "API"
+  ],
+  "author": "Mapado",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mapado/rest-client-js-sdk/issues"
+  },
+  "homepage": "https://github.com/mapado/rest-client-js-sdk#readme",
+  "babel": {
+    "presets": [
+      "react-native"
+    ]
+  },
+  "eslintConfig": {
+    "extends": "airbnb",
+    "rules": {
+      "new-cap": [
+        2,
+        {
+          "newIsCap": true,
+          "capIsNew": false
+        }
+      ],
+      "no-underscore-dangle": [
+        "error",
+        {
+          "allowAfterThis": true,
+          "allow": [
+            "_groups"
+          ]
+        }
+      ],
+      "react/prefer-es6-class": 1
+    }
+  }
+}
