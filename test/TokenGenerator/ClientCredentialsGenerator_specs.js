@@ -5,7 +5,7 @@ import {
 } from 'chai';
 import fetchMock from 'fetch-mock';
 import oauthClientCredentialsMock from '../mock/oauthClientCredentials';
-import ClientCredentialsGenerator from '../../src/TokenGenerator/ClientCredentialsGenerator';
+import { ClientCredentialsGenerator } from '../../src';
 
 const tokenConfig = {
   path: 'oauth.me',
@@ -45,7 +45,7 @@ describe('ClientCredentialsGenerator tests', () => {
       expect(token.then(a => a.access_token))
         .to.eventually.equals(oauthClientCredentialsMock.access_token),
     ]);
-  })
+  });
 
   it('test thas refreshToken method does the same as generateToken', () => {
     fetchMock
@@ -64,5 +64,5 @@ describe('ClientCredentialsGenerator tests', () => {
       expect(token.then(a => a.access_token))
         .to.eventually.equals(oauthClientCredentialsMock.access_token),
     ]);
-  })
+  });
 });

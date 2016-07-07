@@ -1,4 +1,4 @@
-import AbstractTokenGenerator from '../../src/TokenGenerator/AbstractTokenGenerator';
+import { AbstractTokenGenerator } from '../../src';
 import oauthClientCredentialsMock from './oauthClientCredentials';
 import refreshedCredentials from './refreshedCredentials';
 

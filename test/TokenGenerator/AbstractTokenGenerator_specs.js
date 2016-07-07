@@ -2,7 +2,7 @@
 import {
   expect,
 } from 'chai';
-import AbstractTokenGenerator from '../../src/TokenGenerator/AbstractTokenGenerator';
+import { AbstractTokenGenerator } from '../../src';
 
 describe('AbstractTokenGenerator tests', () => {
   it('contains all methods', () => {
@@ -16,7 +16,7 @@ describe('AbstractTokenGenerator tests', () => {
   it('test convert map to FormData', () => {
     const tokenGenerator = new AbstractTokenGenerator();
 
-    const formData = tokenGenerator.convertMapToFormData({a: 'abc', foo: 'bar'});
+    const formData = tokenGenerator.convertMapToFormData({ a: 'abc', foo: 'bar' });
     expect(formData._streams[0]).to.contain('name="a"');
     expect(formData._streams[1]).to.equal('abc');
     expect(formData._streams[3]).to.contain('name="foo"');

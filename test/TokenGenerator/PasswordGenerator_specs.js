@@ -5,7 +5,7 @@ import {
 } from 'chai';
 import fetchMock from 'fetch-mock';
 import oauthClientCredentialsMock from '../mock/passwordCredentials';
-import PasswordGenerator from '../../src/TokenGenerator/PasswordGenerator';
+import { PasswordGenerator } from '../../src';
 
 const tokenConfig = {
   path: 'oauth.me',

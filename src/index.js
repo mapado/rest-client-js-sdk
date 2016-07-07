@@ -2,12 +2,16 @@ import RestClientSdk from './RestClientSdk';
 import { AccessDeniedError } from './Error';
 import AbstractClient from './client/AbstractClient';
 import TokenStorage from './TokenStorage';
-import TokenGenerator from './TokenGenerator';
+import AbstractTokenGenerator from './TokenGenerator/AbstractTokenGenerator';
+import ClientCredentialsGenerator from './TokenGenerator/ClientCredentialsGenerator';
+import PasswordGenerator from './TokenGenerator/PasswordGenerator';
 
 export default RestClientSdk;
 export {
   AbstractClient,
   AccessDeniedError,
-  TokenGenerator,
+  AbstractTokenGenerator,
+  ClientCredentialsGenerator,
+  PasswordGenerator,
   TokenStorage,
 };
