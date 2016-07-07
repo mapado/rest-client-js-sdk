@@ -1,11 +1,13 @@
 import RestClientSdk from './RestClientSdk';
 import { AccessDeniedError } from './Error';
 import AbstractClient from './client/AbstractClient';
-import OauthClient from './OauthClient';
+import TokenStorage from './TokenStorage';
+import TokenGenerator from './TokenGenerator';
 
 export default RestClientSdk;
 export {
-  OauthClient,
-  AccessDeniedError,
   AbstractClient,
+  AccessDeniedError,
+  TokenGenerator,
+  TokenStorage,
 };

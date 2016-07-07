@@ -1,0 +1,37 @@
+import URI from 'urijs';
+
+class AbstractTokenGenerator {
+  constructor(tokenGeneratorConfig = {}) {
+    this.tokenGeneratorConfig = tokenGeneratorConfig;
+
+    this.checkTokenGeneratorConfig(this.tokenGeneratorConfig);
+  }
+
+  generateToken(parameters) {
+    throw new Error(`AbstractTokenGenerator::generateToken can not be called directly.
+                    You must implement "generateToken" method.`);
+  }
+
+  refreshToken(accessToken, parameters) {
+    throw new Error(`AbstractTokenGenerator::refreshToken can not be called directly.
+                    You must implement "refreshToken" method.`);
+  }
+
+  checkTokenGeneratorConfig(config) {
+    return true;
+  }
+
+  convertMapToFormData(parameters) {
+    const keys = Object.keys(parameters);
+
+    const formData = new FormData();
+
+    for (const key of keys) {
+      formData.append(key, parameters[key]);
+    }
+
+    return formData;
+  }
+}
+
+export default AbstractTokenGenerator;

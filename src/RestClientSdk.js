@@ -5,11 +5,11 @@ function createEntity(val, listOrItem, type = null) {
 }
 
 class RestClientSdk {
-  constructor(oauthClient, config, clientList = {}, entityFactory = createEntity) {
+  constructor(tokenStorage, config, clientList = {}, entityFactory = createEntity) {
     this._checkConfigValidity(config);
 
     this.config = this._mergeWithBaseConfig(config);
-    this.oauthClient = oauthClient;
+    this.tokenStorage = tokenStorage;
     this.entityFactory = entityFactory;
 
     Object.keys(clientList).forEach((key) => {

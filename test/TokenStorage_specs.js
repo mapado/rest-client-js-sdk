@@ -4,15 +4,18 @@ import {
   expect,
 } from 'chai';
 import fetchMock from 'fetch-mock';
-import { OauthClient } from '../src';
+import { TokenStorage } from '../src';
+import TokenGeneratorMock from './mock/TokenGeneratorMock';
 import oauthClientCredentialsMock from './mock/oauthClientCredentials';
+import refreshedCredentials from './mock/refreshedCredentials';
 import Storage from './mock/mockStorage';
 
-describe('Oauth Client tests', () => {
-  afterEach(fetchMock.restore);
 
+const tokenGeneratorMock = new TokenGeneratorMock();
+
+describe('Token storage tests', () => {
   it('handle empty token', () => {
-    const oauth = new OauthClient({ path: 'oauth.me', scheme: 'http' }, '1', 'secret', new Storage());
+    const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
 
     const hasAccessToken = oauth.hasAccessToken();
     const accessToken = oauth.getAccessToken();
@@ -28,8 +31,11 @@ describe('Oauth Client tests', () => {
 
   it('handle non empty token', () => {
     const storage = new Storage();
-    storage.setItem('rest_client_sdk.api.access_token', JSON.stringify({ access_token: 'accesstoken' }));
-    const oauth = new OauthClient({ path: 'oauth.me', scheme: 'http' }, '1', 'secret', storage);
+    storage.setItem(
+      'rest_client_sdk.api.access_token',
+      JSON.stringify({ access_token: 'accesstoken' })
+    );
+    const oauth = new TokenStorage(tokenGeneratorMock, storage);
 
     const hasAccessToken = oauth.hasAccessToken();
     const accessToken = oauth.getAccessToken();
@@ -42,30 +48,38 @@ describe('Oauth Client tests', () => {
     ]);
   });
 
-  it('handle generating client_credentials token', () => {
+  it('handle generating token', () => {
     fetchMock
-      .mock(() => true, oauthClientCredentialsMock)
-      .getMock()
+    .mock(() => true, oauthClientCredentialsMock)
+    .getMock()
     ;
 
-    const oauth = new OauthClient({ path: 'oauth.me', scheme: 'http' }, '1', 'secret', new Storage());
+    const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
 
-    formData = new FormData();
-    formData.append('grant_type', 'client_credentials');
-
-    const generatedToken = oauth.getToken(formData);
+    const generatedToken = oauth.generateToken({ grant_type: 'client_credentials' });
 
     expect(generatedToken).to.be.an.instanceOf(Promise);
 
-    return Promise.all([
+    return Promise
+    .all([
       expect(generatedToken).to.eventually.be.an.object,
       expect(generatedToken.then(a => a.access_token))
-        .to.eventually.equals(oauthClientCredentialsMock.access_token),
+      .to.eventually.equals(oauthClientCredentialsMock.access_token),
     ])
     .then(() => Promise.all([
       expect(oauth.hasAccessToken()).to.eventually.be.true,
       expect(oauth.getAccessToken())
-        .to.eventually.equals(oauthClientCredentialsMock.access_token),
-    ]));
+      .to.eventually.equals(oauthClientCredentialsMock.access_token),
+    ]))
+    .then(() => Promise.all([
+      expect(oauth.refreshToken().then(a => a.access_token))
+      .to.eventually.equals(refreshedCredentials.access_token),
+    ]))
+    .then(() => Promise.all([
+      expect(oauth.hasAccessToken()).to.eventually.be.true,
+      expect(oauth.getAccessToken())
+      .to.eventually.equals(refreshedCredentials.access_token),
+    ]))
+    ;
   });
 });

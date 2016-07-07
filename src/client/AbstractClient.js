@@ -4,7 +4,7 @@ import { AccessDeniedError } from '../Error';
 class AbstractClient {
   constructor(sdk) {
     this.sdk = sdk;
-    this._oauthClient = sdk.oauthClient;
+    this._tokenStorage = sdk.tokenStorage;
 
     this.entityFactory = sdk.entityFactory;
   }
@@ -80,7 +80,7 @@ class AbstractClient {
     ;
   }
 
-  makeTicketingUri(input) {
+  makeUri(input) {
     const url = input instanceof URI ? input : new URI(input);
     url.host(this.sdk.config.path)
       .scheme(this.sdk.config.scheme)
@@ -94,7 +94,7 @@ class AbstractClient {
   }
 
   authorizedFetch(input, init) {
-    const url = this.makeTicketingUri(input);
+    const url = this.makeUri(input);
 
     return this._doFetch(url.toString(), init);
   }
@@ -118,7 +118,7 @@ class AbstractClient {
       throw new Error('input is empty');
     }
 
-    return this._oauthClient.getAccessToken()
+    return this._tokenStorage.getAccessToken()
       .then(token => this._fetchWithToken(token, input, init))
     ;
   }
@@ -129,8 +129,8 @@ class AbstractClient {
       if (body.error === 'invalid_grant') {
         switch (body.error_description) {
           case 'The access token provided has expired.':
-            if (this._oauthClient) {
-              return this._oauthClient.refreshToken()
+            if (this._tokenStorage) {
+              return this._tokenStorage.refreshToken()
                 .then(() => this._doFetch(input, init))
                 .catch(() => {
                   throw new AccessDeniedError('Unable to renew access_token', response);
