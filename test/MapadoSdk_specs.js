@@ -1,7 +1,7 @@
 /* global describe, it, afterEach */
 import { expect } from 'chai';
 import RestClientSdk, { AbstractClient } from '../src';
-import oauthClient from './mock/OauthClient';
+import tokenStorage from './mock/tokenStorage';
 
 class SomeTestClient extends AbstractClient {
   getPathBase() {
@@ -13,15 +13,13 @@ class SomeTestClient extends AbstractClient {
   }
 }
 
-
-// const SomeSdk = new RestClientSdk(oauthClient);
 describe('Test wrong SDK configuration', () => {
-  expect(() => new RestClientSdk(oauthClient)).to.throw(RangeError);
+  expect(() => new RestClientSdk(tokenStorage)).to.throw(RangeError);
 });
 
 describe('Good sdk configuration', () => {
   const sdk = new RestClientSdk(
-    oauthClient,
+    tokenStorage,
     { path: 'my.api.com', scheme: 'https' }
   );
 
@@ -30,13 +28,13 @@ describe('Good sdk configuration', () => {
   expect(sdk.config.useDefaultParameters).to.be.true;
 
   const specifyDefParam = new RestClientSdk(
-    oauthClient,
+    tokenStorage,
     { path: 'my.api.com', scheme: 'https', useDefaultParameters: true }
   );
   expect(specifyDefParam.config.useDefaultParameters).to.be.true;
 
   const noDefParamSdk = new RestClientSdk(
-    oauthClient,
+    tokenStorage,
     { path: 'my.api.com', scheme: 'https', useDefaultParameters: false }
   );
   expect(noDefParamSdk.config.useDefaultParameters).to.be.false;
@@ -45,7 +43,7 @@ describe('Good sdk configuration', () => {
 
 describe('Inject client into SDK', () => {
   const sdk = new RestClientSdk(
-    oauthClient,
+    tokenStorage,
     { path: 'my.api.com', scheme: 'https' },
     { testClient: SomeTestClient }
   );

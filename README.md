@@ -28,13 +28,16 @@ class SomeEntityClient extends AbstractClient {
 ### Create the SDK
 #### Create the token storage
 ```js
-import { OauthClient } from 'rest-client-sdk';
+import { TokenStorage } from 'rest-client-sdk';
 
+const tokenGeneratorConfig = { path: 'oauth.me', foo: 'bar' }
+const tokenGenerator = new SomeTokenGenerator(tokenGeneratorConfig); // Some token generators are defined in `src/TokenGenerator/`
 const storage = AsyncStorage; // create a storage instance if you are not on RN. In browser and node, localforage works fine
-const clientId = 'myClientId';
-const clientSecret = 'myClientSecret';
-const oauthClient = new OauthClient({ path: 'oauth.me', scheme: 'https' }, clientId, clientSecret, storage);
+const tokenStorage = new TokenStorage(tokenGenerator, asyncStorage);
 ```
+The token generator is a class implementing `generateToken` and `refreshToken`. 
+Those methods must return an array containing an `access_token` key.
+
 The storage needs to be a class implementing `setItem(key, value)`, `getItem(key)` and `removeItem(key)`. Those functions must return a promise.
 
 At Mapado we use [localforage](http://mozilla.github.io/localForage/) in a browser environment and [React Native AsyncStorage](https://facebook.github.io/react-native/docs/asyncstorage.html) for React Native.
@@ -54,7 +57,7 @@ const clients = {
     // ...
 };
 
-const sdk = new RestClientSdk(oauthClient, config, clients);
+const sdk = new RestClientSdk(tokenStorage, config, clients);
 ```
 
 You can now call the clients this way: 
@@ -84,5 +87,5 @@ function entityFactory(input, listOrItem, clientName = null) {
     }
 }
 
-const sdk = new RestClientSdk(oauthClient, config, clients, entityFactory);
+const sdk = new RestClientSdk(tokenStorage, config, clients, entityFactory);
 ```

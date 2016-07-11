@@ -3,7 +3,7 @@ import fetchMock from 'fetch-mock';
 import { expect } from 'chai';
 import { fromJS, List, Map } from 'immutable';
 import RestClientSdk, { AbstractClient } from '../../src';
-import oauthClient from '../mock/OauthClient';
+import tokenStorageMock from '../mock/tokenStorage';
 
 class SomeTestClient extends AbstractClient {
   getPathBase() {
@@ -33,7 +33,7 @@ class DefaultParametersTestClient extends AbstractClient {
 }
 
 const SomeSdk = new RestClientSdk(
-  oauthClient,
+  tokenStorageMock,
   { path: 'api.me', scheme: 'https' },
   {
     test: SomeTestClient,
@@ -148,7 +148,7 @@ describe('Test Client', () => {
     }
 
     const EntityFactorySdk = new RestClientSdk(
-      oauthClient,
+      tokenStorageMock,
       { path: 'api.me', scheme: 'https' },
       {
         test: SomeTestClient,
@@ -170,7 +170,7 @@ describe('Test Client', () => {
         {
           '@id': '/v1/test/9',
           name: 'bar',
-        }
+        },
       ])
       .getMock()
     ;
