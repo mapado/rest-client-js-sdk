@@ -5,11 +5,11 @@ return(0,_immutable.fromJS)(val);}var
 
 
 RestClientSdk=function(){
-function RestClientSdk(oauthClient,config){var _this=this;var clientList=arguments.length<=2||arguments[2]===undefined?{}:arguments[2];var entityFactory=arguments.length<=3||arguments[3]===undefined?createEntity:arguments[3];_classCallCheck(this,RestClientSdk);
+function RestClientSdk(tokenStorage,config){var _this=this;var clientList=arguments.length<=2||arguments[2]===undefined?{}:arguments[2];var entityFactory=arguments.length<=3||arguments[3]===undefined?createEntity:arguments[3];_classCallCheck(this,RestClientSdk);
 this._checkConfigValidity(config);
 
 this.config=this._mergeWithBaseConfig(config);
-this.oauthClient=oauthClient;
+this.tokenStorage=tokenStorage;
 this.entityFactory=entityFactory;
 
 Object.keys(clientList).forEach(function(key){

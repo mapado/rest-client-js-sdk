@@ -4,7 +4,7 @@ var _Error=require('../Error');function _interopRequireDefault(obj){return obj&&
 AbstractClient=function(){
 function AbstractClient(sdk){_classCallCheck(this,AbstractClient);
 this.sdk=sdk;
-this._oauthClient=sdk.oauthClient;
+this._tokenStorage=sdk.tokenStorage;
 
 this.entityFactory=sdk.entityFactory;}_createClass(AbstractClient,[{key:'getDefaultParameters',value:function getDefaultParameters()
 
@@ -76,7 +76,7 @@ method:'DELETE'}),
 requestPromise,listOrItem){var _this=this;
 return requestPromise.
 then(function(response){return response.json();}).
-then(function(val){return _this.entityFactory(val,listOrItem,_this.getName());});}},{key:'makeTicketingUri',value:function makeTicketingUri(
+then(function(val){return _this.entityFactory(val,listOrItem,_this.getName());});}},{key:'makeUri',value:function makeUri(
 
 
 
@@ -94,7 +94,7 @@ return url;}},{key:'authorizedFetch',value:function authorizedFetch(
 
 
 input,init){
-var url=this.makeTicketingUri(input);
+var url=this.makeUri(input);
 
 return this._doFetch(url.toString(),init);}},{key:'_generateUrlFromParams',value:function _generateUrlFromParams(
 
@@ -118,7 +118,7 @@ if(!input){
 throw new Error('input is empty');}
 
 
-return this._oauthClient.getAccessToken().
+return this._tokenStorage.getAccessToken().
 then(function(token){return _this2._fetchWithToken(token,input,init);});}},{key:'_manageAccessDenied',value:function _manageAccessDenied(
 
 
@@ -129,8 +129,8 @@ then(function(body){
 if(body.error==='invalid_grant'){
 switch(body.error_description){
 case'The access token provided has expired.':
-if(_this3._oauthClient){
-return _this3._oauthClient.refreshToken().
+if(_this3._tokenStorage){
+return _this3._tokenStorage.refreshToken().
 then(function(){return _this3._doFetch(input,init);}).
 catch(function(){
 throw new _Error.AccessDeniedError('Unable to renew access_token',response);});}
