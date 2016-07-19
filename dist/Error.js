@@ -9,6 +9,17 @@ this.baseResponse=baseResponse;
 this.stack=new Error().stack;}
 
 AccessDeniedError.prototype=Object.create(Error.prototype);
-AccessDeniedError.prototype.constructor=AccessDeniedError;exports.
+AccessDeniedError.prototype.constructor=AccessDeniedError;
 
-AccessDeniedError=AccessDeniedError;
+function ForbiddenError(message,baseResponse){
+this.name='ForbiddenError';
+this.message=message;
+this.baseResponse=baseResponse;
+this.stack=new Error().stack;}
+
+ForbiddenError.prototype=Object.create(Error.prototype);
+ForbiddenError.prototype.constructor=ForbiddenError;exports.
+
+
+AccessDeniedError=AccessDeniedError;exports.
+ForbiddenError=ForbiddenError;
