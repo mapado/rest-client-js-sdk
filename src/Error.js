@@ -11,4 +11,16 @@ function AccessDeniedError(message, baseResponse) {
 AccessDeniedError.prototype = Object.create(Error.prototype);
 AccessDeniedError.prototype.constructor = AccessDeniedError;
 
-export { AccessDeniedError };
+function ForbiddenError(message, baseResponse) {
+  this.name = 'ForbiddenError';
+  this.message = message;
+  this.baseResponse = baseResponse;
+  this.stack = (new Error()).stack;
+}
+ForbiddenError.prototype = Object.create(Error.prototype);
+ForbiddenError.prototype.constructor = ForbiddenError;
+
+export {
+  AccessDeniedError,
+  ForbiddenError,
+};

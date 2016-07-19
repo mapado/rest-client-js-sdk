@@ -1,5 +1,8 @@
 import URI from 'urijs';
-import { AccessDeniedError } from '../Error';
+import {
+  AccessDeniedError,
+  ForbiddenError,
+} from '../Error';
 
 class AbstractClient {
   constructor(sdk) {
@@ -171,6 +174,8 @@ class AbstractClient {
       .then(response => {
         if (response.status === 401) {
           return this._manageAccessDenied(response, input, params);
+        } else if (response.status === 403) {
+          throw new ForbiddenError('Forbidden acces: 403 found !', response);
         }
 
         return response;
