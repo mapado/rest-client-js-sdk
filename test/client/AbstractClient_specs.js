@@ -6,7 +6,11 @@ import RestClientSdk, { AbstractClient } from '../../src';
 import tokenStorageMock from '../mock/tokenStorage';
 
 class SomeTestClient extends AbstractClient {
-  getPathBase() {
+  getPathBase(pathParameters) {
+    if (pathParameters.basePath) {
+      return pathParameters.basePath;
+    }
+
     return '/v2/test';
   }
 
@@ -189,5 +193,28 @@ describe('Test Client', () => {
           expect(itemList.first().get('customName')).to.equal('foo'),
         ])),
     ]);
+  });
+
+  it('handle getPathBase with custom path parameters', () => {
+    fetchMock
+      .mock(() => true, {
+        '@id': '/v1/test/8',
+      })
+      .getMock()
+    ;
+
+    return Promise.all([
+      SomeSdk.test.find(8, {}, { basePath: '/foo' }),
+      SomeSdk.test.findBy({ q: 'test', foo: 'bar' }, { basePath: '/foo' }),
+      SomeSdk.test.findAll({ basePath: '/foo' }),
+    ])
+    .then(() => {
+      const url1 = fetchMock.calls().matched[0][0];
+      expect(url1).to.equals('https://api.me/foo/8');
+      const url2 = fetchMock.calls().matched[1][0];
+      expect(url2).to.equals('https://api.me/foo?q=test&foo=bar');
+      const url3 = fetchMock.calls().matched[2][0];
+      expect(url3).to.equals('https://api.me/foo');
+    });
   });
 });

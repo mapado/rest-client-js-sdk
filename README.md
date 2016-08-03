@@ -50,6 +50,8 @@ const config = {
     path: 'api.me',
     scheme: 'https',
     port: 443,
+    segment: '/my-api',
+    useDefaultParameters: true,
 }; // path and scheme are mandatory
 
 const clients = {

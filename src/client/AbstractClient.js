@@ -16,7 +16,7 @@ class AbstractClient {
     return [];
   }
 
-  getPathBase() {
+  getPathBase(pathParameters = {}) {
     throw new Error(`AbstractClient::getPathBase can not be called directly.
                     You must implement "getPathBase" method.`);
   }
@@ -26,24 +26,24 @@ class AbstractClient {
                     You must implement "getName" method.`);
   }
 
-  find(id, queryParam = {}) {
-    const url = this._generateUrlFromParams(queryParam, id);
+  find(id, queryParam = {}, pathParameters = {}) {
+    const url = this._generateUrlFromParams(queryParam, pathParameters, id);
 
     return this.createEntityFromJsonResponse(this.authorizedFetch(url), 'item');
   }
 
-  findBy(criteria) {
-    const url = this._generateUrlFromParams(criteria);
+  findBy(criteria, pathParameters = {}) {
+    const url = this._generateUrlFromParams(criteria, pathParameters);
 
     return this.createEntityFromJsonResponse(this.authorizedFetch(url), 'list');
   }
 
-  findAll() {
-    return this.findBy({});
+  findAll(pathParameters = {}) {
+    return this.findBy({}, pathParameters);
   }
 
-  create(entity) {
-    const url = this.getPathBase();
+  create(entity, pathParameters = {}) {
+    const url = this.getPathBase(pathParameters);
 
     return this.createEntityFromJsonResponse(
       this.authorizedFetch(url, {
@@ -93,6 +93,12 @@ class AbstractClient {
       url.port(this.sdk.config.port);
     }
 
+    if (this.sdk.config.prefix) {
+      const segments = url.segment();
+      segments.unshift(this.sdk.config.prefix);
+      url.segment(segments);
+    }
+
     return url;
   }
 
@@ -102,13 +108,13 @@ class AbstractClient {
     return this._doFetch(url.toString(), init);
   }
 
-  _generateUrlFromParams(queryParam, id = null) {
+  _generateUrlFromParams(queryParam, pathParameters = {}, id = null) {
     const params = queryParam;
     if (this.sdk.config.useDefaultParameters) {
       Object.assign(params, this.getDefaultParameters());
     }
 
-    const url = new URI(!!id ? `${this.getPathBase()}/${id}` : this.getPathBase());
+    const url = new URI(!!id ? `${this.getPathBase(pathParameters)}/${id}` : this.getPathBase(pathParameters));
     if (params) {
       url.addSearch(params);
     }
