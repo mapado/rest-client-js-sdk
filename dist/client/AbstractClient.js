@@ -16,7 +16,7 @@ this.entityFactory=sdk.entityFactory;}_createClass(AbstractClient,[{key:'getDefa
 return[];}},{key:'getPathBase',value:function getPathBase()
 
 
-{
+{var pathParameters=arguments.length<=0||arguments[0]===undefined?{}:arguments[0];
 throw new Error('AbstractClient::getPathBase can not be called directly.\n                    You must implement "getPathBase" method.');}},{key:'getName',value:function getName()
 
 
@@ -26,24 +26,24 @@ throw new Error('AbstractClient::getName can not be called directly.\n          
 
 
 
-id){var queryParam=arguments.length<=1||arguments[1]===undefined?{}:arguments[1];
-var url=this._generateUrlFromParams(queryParam,id);
+id){var queryParam=arguments.length<=1||arguments[1]===undefined?{}:arguments[1];var pathParameters=arguments.length<=2||arguments[2]===undefined?{}:arguments[2];
+var url=this._generateUrlFromParams(queryParam,pathParameters,id);
 
 return this.createEntityFromJsonResponse(this.authorizedFetch(url),'item');}},{key:'findBy',value:function findBy(
 
 
-criteria){
-var url=this._generateUrlFromParams(criteria);
+criteria){var pathParameters=arguments.length<=1||arguments[1]===undefined?{}:arguments[1];
+var url=this._generateUrlFromParams(criteria,pathParameters);
 
 return this.createEntityFromJsonResponse(this.authorizedFetch(url),'list');}},{key:'findAll',value:function findAll()
 
 
-{
-return this.findBy({});}},{key:'create',value:function create(
+{var pathParameters=arguments.length<=0||arguments[0]===undefined?{}:arguments[0];
+return this.findBy({},pathParameters);}},{key:'create',value:function create(
 
 
-entity){
-var url=this.getPathBase();
+entity){var pathParameters=arguments.length<=1||arguments[1]===undefined?{}:arguments[1];
+var url=this.getPathBase(pathParameters);
 
 return this.createEntityFromJsonResponse(
 this.authorizedFetch(url,{
@@ -93,6 +93,12 @@ if(this.sdk.config.port){
 url.port(this.sdk.config.port);}
 
 
+if(this.sdk.config.prefix){
+var segments=url.segment();
+segments.unshift(this.sdk.config.prefix);
+url.segment(segments);}
+
+
 return url;}},{key:'authorizedFetch',value:function authorizedFetch(
 
 
@@ -102,13 +108,13 @@ var url=this.makeUri(input);
 return this._doFetch(url.toString(),init);}},{key:'_generateUrlFromParams',value:function _generateUrlFromParams(
 
 
-queryParam){var id=arguments.length<=1||arguments[1]===undefined?null:arguments[1];
+queryParam){var pathParameters=arguments.length<=1||arguments[1]===undefined?{}:arguments[1];var id=arguments.length<=2||arguments[2]===undefined?null:arguments[2];
 var params=queryParam;
 if(this.sdk.config.useDefaultParameters){
 _extends(params,this.getDefaultParameters());}
 
 
-var url=new _urijs2.default(!!id?this.getPathBase()+'/'+id:this.getPathBase());
+var url=new _urijs2.default(!!id?this.getPathBase(pathParameters)+'/'+id:this.getPathBase(pathParameters));
 if(params){
 url.addSearch(params);}
 
