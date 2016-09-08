@@ -18,10 +18,11 @@ describe('Token storage tests', () => {
     const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
 
     const hasAccessToken = oauth.hasAccessToken();
-    const accessToken = oauth.getAccessToken();
-
-
     expect(hasAccessToken).to.be.an.instanceOf(Promise);
+
+    expect(() => oauth.getAccessToken()).to.throw(Error, /No token has been generated yet/);
+    oauth.generateToken();
+    const accessToken = oauth.getAccessToken();
 
     return Promise.all([
       expect(hasAccessToken).to.eventually.be.false,
@@ -38,9 +39,11 @@ describe('Token storage tests', () => {
     const oauth = new TokenStorage(tokenGeneratorMock, storage);
 
     const hasAccessToken = oauth.hasAccessToken();
-    const accessToken = oauth.getAccessToken();
-
     expect(hasAccessToken).to.be.an.instanceOf(Promise);
+
+    expect(() => oauth.getAccessToken()).to.throw(Error, /No token has been generated yet/);
+    oauth.generateToken();
+    const accessToken = oauth.getAccessToken();
 
     return Promise.all([
       expect(hasAccessToken).to.eventually.be.true,

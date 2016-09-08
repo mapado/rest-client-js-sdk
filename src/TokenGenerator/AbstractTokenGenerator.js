@@ -1,9 +1,7 @@
-import URI from 'urijs';
-
 class AbstractTokenGenerator {
   constructor(tokenGeneratorConfig = {}) {
     this.tokenGeneratorConfig = tokenGeneratorConfig;
-
+    this.canAutogenerateToken = false;
     this.checkTokenGeneratorConfig(this.tokenGeneratorConfig);
   }
 

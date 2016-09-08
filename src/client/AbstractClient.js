@@ -8,7 +8,6 @@ class AbstractClient {
   constructor(sdk) {
     this.sdk = sdk;
     this._tokenStorage = sdk.tokenStorage;
-
     this.entityFactory = sdk.entityFactory;
   }
 
@@ -114,7 +113,10 @@ class AbstractClient {
       Object.assign(params, this.getDefaultParameters());
     }
 
-    const url = new URI(!!id ? `${this.getPathBase(pathParameters)}/${id}` : this.getPathBase(pathParameters));
+    const url = new URI(!!id ?
+      `${this.getPathBase(pathParameters)}/${id}` :
+      this.getPathBase(pathParameters)
+    );
     if (params) {
       url.addSearch(params);
     }

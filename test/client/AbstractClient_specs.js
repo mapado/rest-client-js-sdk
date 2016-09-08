@@ -44,6 +44,7 @@ const SomeSdk = new RestClientSdk(
     defParam: DefaultParametersTestClient,
   }
 );
+SomeSdk.tokenStorage.generateToken();
 
 describe('Test Client', () => {
   afterEach(fetchMock.restore);
@@ -138,7 +139,7 @@ describe('Test Client', () => {
   });
 
   it('handle entityFactory with a custom entity factory', () => {
-    function entityFactory(input, listOrItem, name) {
+    function entityFactory(input, listOrItem) {
       if (listOrItem === 'list') {
         return List(
           input.map(
