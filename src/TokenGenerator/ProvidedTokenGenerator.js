@@ -1,25 +1,21 @@
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 
-const ERROR_TOKEN_EMPTY = 'A token must be provided';
-
 class ProvidedTokenGenerator extends AbstractTokenGenerator {
-  generateToken(providedToken) {
-    this.checkTokenGeneratorConfig(providedToken);
 
+  constructor(token) {
+    super();
+    this._token = token;
+    this.canAutogenerateToken = true;
+  }
+
+  generateToken() {
     return Promise.resolve({
-      access_token: providedToken,
-      token_type: 'bearer',
+      access_token: this._token,
     });
   }
 
-  refreshToken(accessToken) {
-    return this.generateToken(accessToken);
-  }
-
-  checkTokenGeneratorConfig(providedToken) {
-    if (!providedToken || typeof providedToken === 'object') {
-      throw new RangeError(ERROR_TOKEN_EMPTY);
-    }
+  refreshToken() {
+    return this.generateToken();
   }
 }
 
