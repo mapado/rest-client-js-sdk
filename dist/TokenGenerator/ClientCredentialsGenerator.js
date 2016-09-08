@@ -5,7 +5,7 @@ var ERROR_CONFIG_EMPTY='TokenGenerator config must be set';
 var ERROR_CONFIG_PATH_SCHEME='TokenGenerator config is not valid, it should contain a "path", a "scheme" parameter';
 var ERROR_CONFIG_CLIENT_INFORMATIONS='TokenGenerator config is not valid, it should contain a "clientId", a "clientSecret" parameter';var
 
-ClientCredentialsGenerator=function(_AbstractTokenGenerat){_inherits(ClientCredentialsGenerator,_AbstractTokenGenerat);function ClientCredentialsGenerator(){_classCallCheck(this,ClientCredentialsGenerator);return _possibleConstructorReturn(this,(ClientCredentialsGenerator.__proto__||Object.getPrototypeOf(ClientCredentialsGenerator)).apply(this,arguments));}_createClass(ClientCredentialsGenerator,[{key:'generateToken',value:function generateToken()
+ClientCredentialsGenerator=function(_AbstractTokenGenerat){_inherits(ClientCredentialsGenerator,_AbstractTokenGenerat);function ClientCredentialsGenerator(){_classCallCheck(this,ClientCredentialsGenerator);return _possibleConstructorReturn(this,Object.getPrototypeOf(ClientCredentialsGenerator).apply(this,arguments));}_createClass(ClientCredentialsGenerator,[{key:'generateToken',value:function generateToken()
 {var baseParameters=arguments.length<=0||arguments[0]===undefined?{}:arguments[0];
 var parameters=baseParameters;
 parameters.grant_type='client_credentials';
@@ -17,8 +17,8 @@ scheme(this.tokenGeneratorConfig.scheme);
 
 
 if(this.tokenGeneratorConfig.port){
-uri.port(this.tokenGeneratorConfig.port);
-}
+uri.port(this.tokenGeneratorConfig.port);}
+
 
 var url=uri.toString();
 
@@ -29,30 +29,30 @@ body:this.convertMapToFormData(parameters)}).
 then(function(response){
 if(response.status!==200){
 return response.json().
-then(function(responseData){return Promise.reject(responseData);});
-}
+then(function(responseData){return Promise.reject(responseData);});}
 
-return response.json();
-});
-}},{key:'refreshToken',value:function refreshToken(
+
+return response.json();});}},{key:'refreshToken',value:function refreshToken(
+
+
 
 accessToken,parameters){
-return this.generateToken(parameters);
-}},{key:'checkTokenGeneratorConfig',value:function checkTokenGeneratorConfig(
+return this.generateToken(parameters);}},{key:'checkTokenGeneratorConfig',value:function checkTokenGeneratorConfig(
+
 
 config){
 if(!config||Object.keys(config).length===0){
-throw new RangeError(ERROR_CONFIG_EMPTY);
-}
+throw new RangeError(ERROR_CONFIG_EMPTY);}
+
 
 if(!(config.path&&config.scheme)){
-throw new RangeError(ERROR_CONFIG_PATH_SCHEME);
-}
+throw new RangeError(ERROR_CONFIG_PATH_SCHEME);}
+
 
 if(!(config.clientId&&config.clientSecret)){
-throw new RangeError(ERROR_CONFIG_CLIENT_INFORMATIONS);
-}
-}}]);return ClientCredentialsGenerator;}(_AbstractTokenGenerator2.default);exports.default=
+throw new RangeError(ERROR_CONFIG_CLIENT_INFORMATIONS);}}}]);return ClientCredentialsGenerator;}(_AbstractTokenGenerator2.default);exports.default=
+
+
 
 
 ClientCredentialsGenerator;
