@@ -15,7 +15,7 @@ class AbstractClient {
     return [];
   }
 
-  getPathBase(/* pathParameters = {} */) {
+  getPathBase(pathParameters = {}) {
     throw new Error(`AbstractClient::getPathBase can not be called directly.
                     You must implement "getPathBase" method.`);
   }

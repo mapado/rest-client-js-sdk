@@ -21,7 +21,10 @@ class TokenStorage {
       throw new Error('No token has been generated yet.');
     }
     if (! this._hasATokenBeenGenerated && this._tokenGenerator.canAutogenerateToken) {
-      this._tokenGenerator.generateToken();
+      return this._tokenGenerator.generateToken()
+        .then(() => this._asyncStorage.getItem(ACCESS_TOKEN_KEY))
+        .then(token => token && JSON.parse(token).access_token)
+      ;
     }
 
     return this._asyncStorage.getItem(ACCESS_TOKEN_KEY)
@@ -37,8 +40,7 @@ class TokenStorage {
     this._hasATokenBeenGenerated = true;
     return this._tokenGenerator.generateToken(parameters)
       .then(responseData => this._storeAccessToken(responseData)
-          .then(() => responseData)
-      )
+      .then(() => responseData))
     ;
   }
 

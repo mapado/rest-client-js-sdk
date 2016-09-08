@@ -5,17 +5,17 @@ class AbstractTokenGenerator {
     this.checkTokenGeneratorConfig(this.tokenGeneratorConfig);
   }
 
-  generateToken(/* parameters */) {
+  generateToken(parameters) {
     throw new Error(`AbstractTokenGenerator::generateToken can not be called directly.
                     You must implement "generateToken" method.`);
   }
 
-  refreshToken(/* accessToken, parameters*/) {
+  refreshToken(accessToken, parameters) {
     throw new Error(`AbstractTokenGenerator::refreshToken can not be called directly.
                     You must implement "refreshToken" method.`);
   }
 
-  checkTokenGeneratorConfig(/* config */) {
+  checkTokenGeneratorConfig(config) {
     return true;
   }
 
