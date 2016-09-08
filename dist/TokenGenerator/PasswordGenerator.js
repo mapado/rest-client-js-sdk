@@ -9,7 +9,7 @@ var ERROR_TOKEN_EMPTY='parameters must be set';
 var ERROR_TOKEN_USERNAME_PASSWORD='username and password must be passed as parameters';
 var ERROR_TOKEN_ACCESS_TOKEN_REFRESH_TOKEN='access_token and refresh_token be passed as parameters';var
 
-PasswordGenerator=function(_AbstractTokenGenerat){_inherits(PasswordGenerator,_AbstractTokenGenerat);function PasswordGenerator(){_classCallCheck(this,PasswordGenerator);return _possibleConstructorReturn(this,Object.getPrototypeOf(PasswordGenerator).apply(this,arguments));}_createClass(PasswordGenerator,[{key:'generateToken',value:function generateToken(
+PasswordGenerator=function(_AbstractTokenGenerat){_inherits(PasswordGenerator,_AbstractTokenGenerat);function PasswordGenerator(){_classCallCheck(this,PasswordGenerator);return _possibleConstructorReturn(this,(PasswordGenerator.__proto__||Object.getPrototypeOf(PasswordGenerator)).apply(this,arguments));}_createClass(PasswordGenerator,[{key:'generateToken',value:function generateToken(
 baseParameters){
 var parameters=baseParameters;
 this._checkGenerateParameters(parameters);
@@ -18,13 +18,13 @@ parameters.grant_type='password';
 parameters.client_id=this.tokenGeneratorConfig.clientId;
 parameters.client_secret=this.tokenGeneratorConfig.clientSecret;
 
-return this._doFetch(parameters);}},{key:'refreshToken',value:function refreshToken(
-
+return this._doFetch(parameters);
+}},{key:'refreshToken',value:function refreshToken(
 
 accessToken){var baseParameters=arguments.length<=1||arguments[1]===undefined?{}:arguments[1];
 if(!(accessToken&&accessToken.refresh_token)){
-throw new Error('refresh_token is not set. Did you called `generateToken` before ?');}
-
+throw new Error('refresh_token is not set. Did you called `generateToken` before ?');
+}
 
 var parameters=baseParameters;
 
@@ -34,30 +34,30 @@ parameters.client_secret=this.tokenGeneratorConfig.clientSecret;
 
 parameters.refresh_token=accessToken.refresh_token;
 
-return this._doFetch(parameters);}},{key:'checkTokenGeneratorConfig',value:function checkTokenGeneratorConfig(
-
+return this._doFetch(parameters);
+}},{key:'checkTokenGeneratorConfig',value:function checkTokenGeneratorConfig(
 
 config){
 if(!config||Object.keys(config).length===0){
-throw new RangeError(ERROR_CONFIG_EMPTY);}
-
+throw new RangeError(ERROR_CONFIG_EMPTY);
+}
 
 if(!(config.path&&config.scheme)){
-throw new RangeError(ERROR_CONFIG_PATH_SCHEME);}
-
+throw new RangeError(ERROR_CONFIG_PATH_SCHEME);
+}
 
 if(!(config.clientId&&config.clientSecret)){
-throw new RangeError(ERROR_CONFIG_CLIENT_INFORMATIONS);}}},{key:'_doFetch',value:function _doFetch(
-
-
+throw new RangeError(ERROR_CONFIG_CLIENT_INFORMATIONS);
+}
+}},{key:'_doFetch',value:function _doFetch(
 
 parameters){
 var uri=new _urijs2.default(this.tokenGeneratorConfig.path);
 uri.scheme(this.tokenGeneratorConfig.scheme);
 
 if(this.tokenGeneratorConfig.port){
-uri.port(this.tokenGeneratorConfig.port);}
-
+uri.port(this.tokenGeneratorConfig.port);
+}
 
 var url=uri.toString();
 
@@ -68,22 +68,22 @@ body:this.convertMapToFormData(parameters)}).
 then(function(response){
 if(response.status!==200){
 return response.json().
-then(function(responseData){return Promise.reject(responseData);});}
+then(function(responseData){return Promise.reject(responseData);});
+}
 
-
-return response.json();});}},{key:'_checkGenerateParameters',value:function _checkGenerateParameters(
-
-
+return response.json();
+});
+}},{key:'_checkGenerateParameters',value:function _checkGenerateParameters(
 
 parameters){
 if(!(parameters&&Object.keys(parameters).length>0)){
-throw new RangeError(ERROR_TOKEN_EMPTY);}
-
+throw new RangeError(ERROR_TOKEN_EMPTY);
+}
 
 if(!(parameters.username&&parameters.password)){
-throw new RangeError(ERROR_TOKEN_USERNAME_PASSWORD);}}}]);return PasswordGenerator;}(_AbstractTokenGenerator2.default);exports.default=
-
-
+throw new RangeError(ERROR_TOKEN_USERNAME_PASSWORD);
+}
+}}]);return PasswordGenerator;}(_AbstractTokenGenerator2.default);exports.default=
 
 
 PasswordGenerator;
