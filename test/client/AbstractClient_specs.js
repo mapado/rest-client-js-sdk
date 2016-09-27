@@ -207,7 +207,7 @@ describe('Test Client', () => {
     return Promise.all([
       SomeSdk.test.find(8, {}, { basePath: '/foo' }),
       SomeSdk.test.findBy({ q: 'test', foo: 'bar' }, { basePath: '/foo' }),
-      SomeSdk.test.findAll({ basePath: '/foo' }),
+      SomeSdk.test.findAll({}, { basePath: '/foo' }),
     ])
     .then(() => {
       const url1 = fetchMock.calls().matched[0][0];

@@ -31,18 +31,19 @@ class AbstractClient {
     return this.createEntityFromJsonResponse(this.authorizedFetch(url), 'item');
   }
 
-  findBy(criteria, pathParameters = {}) {
-    const url = this._generateUrlFromParams(criteria, pathParameters);
+  findBy(queryParam, pathParameters = {}) {
+    const url = this._generateUrlFromParams(queryParam, pathParameters);
 
     return this.createEntityFromJsonResponse(this.authorizedFetch(url), 'list');
   }
 
-  findAll(pathParameters = {}) {
-    return this.findBy({}, pathParameters);
+  findAll(queryParam = {}, pathParameters = {}) {
+    return this.findBy(queryParam, pathParameters);
   }
 
-  create(entity, pathParameters = {}) {
-    const url = this.getPathBase(pathParameters);
+  create(entity, queryParam = {}, pathParameters = {}) {
+    const url = new URI(this.getPathBase(pathParameters));
+    url.addSearch(queryParam);
 
     return this.createEntityFromJsonResponse(
       this.authorizedFetch(url, {
@@ -53,8 +54,9 @@ class AbstractClient {
     );
   }
 
-  update(entity) {
-    const url = entity.get('@id');
+  update(entity, queryParam = {}) {
+    const url = new URI(entity.get('@id'));
+    url.addSearch(queryParam);
 
     return this.createEntityFromJsonResponse(
       this.authorizedFetch(url, {
