@@ -4,45 +4,45 @@ TokenStorage=function(){
 function TokenStorage(tokenGenerator,asyncStorage){_classCallCheck(this,TokenStorage);
 this._tokenGenerator=tokenGenerator;
 this._hasATokenBeenGenerated=false;
-this.setAsyncStorage(asyncStorage);
-}_createClass(TokenStorage,[{key:'setAsyncStorage',value:function setAsyncStorage(
+this.setAsyncStorage(asyncStorage);}_createClass(TokenStorage,[{key:'setAsyncStorage',value:function setAsyncStorage(
+
 
 asyncStorage){
-this._asyncStorage=asyncStorage;
-}},{key:'hasAccessToken',value:function hasAccessToken()
+this._asyncStorage=asyncStorage;}},{key:'hasAccessToken',value:function hasAccessToken()
+
 
 {
 return this._asyncStorage.getItem(ACCESS_TOKEN_KEY).
-then(function(accessToken){return!!accessToken;});
-}},{key:'getAccessToken',value:function getAccessToken()
+then(function(accessToken){return!!accessToken;});}},{key:'getAccessToken',value:function getAccessToken()
+
 
 {var _this=this;
 if(!this._hasATokenBeenGenerated&&!this._tokenGenerator.canAutogenerateToken){
-throw new Error('No token has been generated yet.');
-}
+throw new Error('No token has been generated yet.');}
+
 if(!this._hasATokenBeenGenerated&&this._tokenGenerator.canAutogenerateToken){
 return this._tokenGenerator.generateToken().
 then(function(){return _this._asyncStorage.getItem(ACCESS_TOKEN_KEY);}).
-then(function(token){return token&&JSON.parse(token).access_token;});
+then(function(token){return token&&JSON.parse(token).access_token;});}
 
-}
+
 
 return this._asyncStorage.getItem(ACCESS_TOKEN_KEY).
-then(function(token){return token&&JSON.parse(token).access_token;});
+then(function(token){return token&&JSON.parse(token).access_token;});}},{key:'logout',value:function logout()
 
-}},{key:'logout',value:function logout()
+
 
 {
-return this._asyncStorage.removeItem(ACCESS_TOKEN_KEY);
-}},{key:'generateToken',value:function generateToken(
+return this._asyncStorage.removeItem(ACCESS_TOKEN_KEY);}},{key:'generateToken',value:function generateToken(
+
 
 parameters){var _this2=this;
 this._hasATokenBeenGenerated=true;
 return this._tokenGenerator.generateToken(parameters).
 then(function(responseData){return _this2._storeAccessToken(responseData).
-then(function(){return responseData;});});
+then(function(){return responseData;});});}},{key:'refreshToken',value:function refreshToken(
 
-}},{key:'refreshToken',value:function refreshToken(
+
 
 parameters){var _this3=this;
 return this._asyncStorage.getItem(ACCESS_TOKEN_KEY).
@@ -51,17 +51,17 @@ _this3._tokenGenerator.
 refreshToken(JSON.parse(token),parameters).
 then(function(responseData){return(
 _this3._storeAccessToken(responseData).
-then(function(){return responseData;}));}));});
+then(function(){return responseData;}));}));});}},{key:'_storeAccessToken',value:function _storeAccessToken(
 
 
 
-}},{key:'_storeAccessToken',value:function _storeAccessToken(
+
 
 responseData){
 return this._asyncStorage.
-setItem(ACCESS_TOKEN_KEY,JSON.stringify(responseData));
+setItem(ACCESS_TOKEN_KEY,JSON.stringify(responseData));}}]);return TokenStorage;}();exports.default=
 
-}}]);return TokenStorage;}();exports.default=
+
 
 
 TokenStorage;
