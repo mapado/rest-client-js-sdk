@@ -14,20 +14,27 @@ import Storage from './mock/mockStorage';
 const tokenGeneratorMock = new TokenGeneratorMock();
 
 describe('Token storage tests', () => {
-  it('handle empty token', () => {
+  it('handle empty token', (done) => {
     const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
 
     const hasAccessToken = oauth.hasAccessToken();
     expect(hasAccessToken).to.be.an.instanceOf(Promise);
 
-    expect(() => oauth.getAccessToken()).to.throw(Error, /No token has been generated yet/);
-    oauth.generateToken();
-    const accessToken = oauth.getAccessToken();
+    oauth.getAccessToken()
+    .catch(e => {
+      expect(e.message).to.equal('No token has been generated yet.');
+    })
+    .then(() => {
+      oauth.generateToken();
+      const accessToken = oauth.getAccessToken();
 
-    return Promise.all([
-      expect(hasAccessToken).to.eventually.be.false,
-      expect(accessToken).to.eventually.be.undefined,
-    ]);
+      Promise.all([
+        expect(hasAccessToken).to.eventually.be.false,
+        expect(accessToken).to.eventually.be.undefined,
+      ])
+      .then(() => done());
+    })
+    ;
   });
 
   it('handle non empty token', () => {
@@ -41,7 +48,6 @@ describe('Token storage tests', () => {
     const hasAccessToken = oauth.hasAccessToken();
     expect(hasAccessToken).to.be.an.instanceOf(Promise);
 
-    expect(() => oauth.getAccessToken()).to.throw(Error, /No token has been generated yet/);
     oauth.generateToken();
     const accessToken = oauth.getAccessToken();
 
