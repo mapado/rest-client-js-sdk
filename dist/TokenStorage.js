@@ -17,18 +17,23 @@ then(function(accessToken){return!!accessToken;});}},{key:'getAccessToken',value
 
 
 {var _this=this;
-if(!this._hasATokenBeenGenerated&&!this._tokenGenerator.canAutogenerateToken){
+return this._asyncStorage.getItem(ACCESS_TOKEN_KEY).
+then(function(token){
+if(!token){
+if(!_this._hasATokenBeenGenerated&&!_this._tokenGenerator.canAutogenerateToken){
 throw new Error('No token has been generated yet.');}
 
-if(!this._hasATokenBeenGenerated&&this._tokenGenerator.canAutogenerateToken){
-return this._tokenGenerator.generateToken().
+
+if(!_this._hasATokenBeenGenerated&&_this._tokenGenerator.canAutogenerateToken){
+return _this._tokenGenerator.generateToken().
 then(function(){return _this._asyncStorage.getItem(ACCESS_TOKEN_KEY);}).
-then(function(token){return token&&JSON.parse(token).access_token;});}
+then(function(generatedToken){return generatedToken&&JSON.parse(generatedToken).access_token;});}}
 
 
 
-return this._asyncStorage.getItem(ACCESS_TOKEN_KEY).
-then(function(token){return token&&JSON.parse(token).access_token;});}},{key:'logout',value:function logout()
+
+return token&&JSON.parse(token).access_token;});}},{key:'logout',value:function logout()
+
 
 
 
