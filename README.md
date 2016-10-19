@@ -30,10 +30,10 @@ class SomeEntityClient extends AbstractClient {
 ```js
 import { TokenStorage } from 'rest-client-sdk';
 
-const tokenGeneratorConfig = { path: 'oauth.me', foo: 'bar' }
+const tokenGeneratorConfig = { path: 'oauth.me', foo: 'bar' };
 const tokenGenerator = new SomeTokenGenerator(tokenGeneratorConfig); // Some token generators are defined in `src/TokenGenerator/`
 const storage = AsyncStorage; // create a storage instance if you are not on RN. In browser and node, localforage works fine
-const tokenStorage = new TokenStorage(tokenGenerator, asyncStorage);
+const tokenStorage = new TokenStorage(tokenGenerator, storage);
 ```
 The token generator is a class implementing `generateToken` and `refreshToken`. 
 Those methods must return an array containing an `access_token` key.
