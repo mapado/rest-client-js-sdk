@@ -2,21 +2,21 @@ Object.defineProperty(exports,"__esModule",{value:true});var _createClass=functi
 
 ProvidedTokenGenerator=function(_AbstractTokenGenerat){_inherits(ProvidedTokenGenerator,_AbstractTokenGenerat);
 
-function ProvidedTokenGenerator(token){_classCallCheck(this,ProvidedTokenGenerator);var _this=_possibleConstructorReturn(this,Object.getPrototypeOf(ProvidedTokenGenerator).call(this));
+function ProvidedTokenGenerator(token){_classCallCheck(this,ProvidedTokenGenerator);var _this=_possibleConstructorReturn(this,(ProvidedTokenGenerator.__proto__||Object.getPrototypeOf(ProvidedTokenGenerator)).call(this));
 
 _this._token=token;
-_this.canAutogenerateToken=true;return _this;}_createClass(ProvidedTokenGenerator,[{key:'generateToken',value:function generateToken()
-
+_this.canAutogenerateToken=true;return _this;
+}_createClass(ProvidedTokenGenerator,[{key:'generateToken',value:function generateToken()
 
 {
 return Promise.resolve({
-access_token:this._token});}},{key:'refreshToken',value:function refreshToken()
+access_token:this._token});
 
-
+}},{key:'refreshToken',value:function refreshToken()
 
 {
-return this.generateToken();}}]);return ProvidedTokenGenerator;}(_AbstractTokenGenerator2.default);exports.default=
-
+return this.generateToken();
+}}]);return ProvidedTokenGenerator;}(_AbstractTokenGenerator2.default);exports.default=
 
 
 ProvidedTokenGenerator;
