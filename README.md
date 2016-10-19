@@ -23,6 +23,8 @@ class SomeEntityClient extends AbstractClient {
       return 'SomeEntity'; // this will be passed to the entity factory
   }
 }
+
+export default SomeEntityClient;
 ```
 
 ### Create the SDK
