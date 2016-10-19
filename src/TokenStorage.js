@@ -25,9 +25,8 @@ class TokenStorage {
           }
 
           if (!this._hasATokenBeenGenerated && this._tokenGenerator.canAutogenerateToken) {
-            return this._tokenGenerator.generateToken()
-              .then(() => this._asyncStorage.getItem(ACCESS_TOKEN_KEY))
-              .then(generatedToken => generatedToken && JSON.parse(generatedToken).access_token)
+            return this.generateToken()
+              .then(generatedToken => generatedToken && generatedToken.access_token)
             ;
           }
         }
@@ -44,8 +43,10 @@ class TokenStorage {
   generateToken(parameters) {
     this._hasATokenBeenGenerated = true;
     return this._tokenGenerator.generateToken(parameters)
-      .then(responseData => this._storeAccessToken(responseData)
-      .then(() => responseData))
+      .then(responseData =>
+        this._storeAccessToken(responseData)
+          .then(() => responseData)
+      )
     ;
   }
 
