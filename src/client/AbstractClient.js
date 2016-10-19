@@ -167,7 +167,7 @@ class AbstractClient {
     let params = init;
 
     const tokenHeaders = {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `${this.sdk.config.authorizationType} ${accessToken}`,
     };
 
     if (params) {

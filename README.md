@@ -53,6 +53,7 @@ const config = {
     scheme: 'https',
     port: 443,
     segment: '/my-api',
+    authorizationType: 'Bearer', // default to "Bearer", but can be "Basic" or anything
     useDefaultParameters: true,
 }; // path and scheme are mandatory
 

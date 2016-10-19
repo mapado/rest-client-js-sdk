@@ -23,6 +23,8 @@ class RestClientSdk {
       true :
       config.useDefaultParameters;
 
+    newConfig.authorizationType = config.authorizationType || 'Bearer';
+
     return newConfig;
   }
 
