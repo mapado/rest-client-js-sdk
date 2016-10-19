@@ -218,4 +218,34 @@ describe('Test Client', () => {
       expect(url3).to.equals('https://api.me/foo');
     });
   });
+
+  it('handle Authorization header', () => {
+    fetchMock
+      .mock(() => true, {
+        '@id': '/v1/test/8',
+      })
+      .getMock()
+    ;
+
+    const BasicAuthSdk = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https', authorizationType: 'Basic' },
+      {
+        test: SomeTestClient,
+        defParam: DefaultParametersTestClient,
+      }
+    );
+    BasicAuthSdk.tokenStorage.generateToken();
+
+    return Promise.all([
+      SomeSdk.test.find(8),
+      BasicAuthSdk.test.find(8),
+    ])
+    .then(() => {
+      const authHeader = fetchMock.calls().matched[0][1].headers.Authorization;
+      expect(authHeader).to.include('Bearer ');
+      const basicAuthHeader = fetchMock.calls().matched[1][1].headers.Authorization;
+      expect(basicAuthHeader).to.include('Basic ');
+    });
+  });
 });
