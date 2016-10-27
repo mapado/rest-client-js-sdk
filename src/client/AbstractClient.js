@@ -138,28 +138,31 @@ class AbstractClient {
 
   _manageAccessDenied(response, input, init) {
     return response.json()
-    .then(body => {
-      if (body.error === 'invalid_grant') {
-        switch (body.error_description) {
-          case 'The access token provided has expired.':
-            if (this._tokenStorage) {
-              return this._tokenStorage.refreshToken()
-                .then(() => this._doFetch(input, init))
-                .catch(() => {
-                  throw new AccessDeniedError('Unable to renew access_token', response);
-                })
-              ;
-            }
+      .then(body => {
+        if (body.error === 'invalid_grant') {
+          switch (body.error_description) {
+            case 'The access token provided has expired.':
+              if (this._tokenStorage) {
+                return this._tokenStorage.refreshToken()
+                  .then(() => this._doFetch(input, init))
+                  .catch(() => {
+                    throw new AccessDeniedError('Unable to renew access_token', response);
+                  })
+                ;
+              }
 
-            break;
+              break;
 
-          default:
-            throw new AccessDeniedError(body.error_description, response);
+            default:
+              throw new AccessDeniedError(body.error_description, response);
+          }
         }
-      }
 
-      throw new AccessDeniedError('Unable to access ressource: 401 found !', response);
-    })
+        throw new AccessDeniedError('Unable to access ressource: 401 found !', response);
+      })
+      .catch(() => {
+        throw new AccessDeniedError('Unable to access ressource: 401 found !', response)
+      })
     ;
   }
 
