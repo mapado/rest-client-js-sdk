@@ -159,6 +159,9 @@ throw new _Error.AccessDeniedError(body.error_description,response);}
 }
 
 throw new _Error.AccessDeniedError('Unable to access ressource: 401 found !',response);
+}).
+catch(function(){
+throw new _Error.AccessDeniedError('Unable to access ressource: 401 found !',response);
 });
 
 }},{key:'_fetchWithToken',value:function _fetchWithToken(
