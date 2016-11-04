@@ -169,8 +169,9 @@ class AbstractClient {
   _fetchWithToken(accessToken, input, init) {
     let params = init;
 
-    const tokenHeaders = {
+    const baseHeaders = {
       Authorization: `${this.sdk.config.authorizationType} ${accessToken}`,
+      'Content-Type': 'application/json',
     };
 
     if (params) {
@@ -178,9 +179,9 @@ class AbstractClient {
         params.headers = {};
       }
 
-      params.headers = Object.assign(params.headers, tokenHeaders);
+      params.headers = Object.assign(params.headers, baseHeaders);
     } else {
-      params = { headers: tokenHeaders };
+      params = { headers: baseHeaders };
     }
 
     return fetch(input, params)
