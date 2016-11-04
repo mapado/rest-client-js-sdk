@@ -169,8 +169,9 @@ throw new _Error.AccessDeniedError('Unable to access ressource: 401 found !',res
 accessToken,input,init){var _this4=this;
 var params=init;
 
-var tokenHeaders={
-Authorization:this.sdk.config.authorizationType+' '+accessToken};
+var baseHeaders={
+Authorization:this.sdk.config.authorizationType+' '+accessToken,
+'Content-Type':'application/json'};
 
 
 if(params){
@@ -178,9 +179,9 @@ if(!params.headers){
 params.headers={};
 }
 
-params.headers=_extends(params.headers,tokenHeaders);
+params.headers=_extends(params.headers,baseHeaders);
 }else{
-params={headers:tokenHeaders};
+params={headers:baseHeaders};
 }
 
 return fetch(input,params).
