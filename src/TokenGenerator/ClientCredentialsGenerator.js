@@ -1,11 +1,17 @@
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
+import { memoizePromise } from '../decorator';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME = 'TokenGenerator config is not valid, it should contain a "path", a "scheme" parameter';
 const ERROR_CONFIG_CLIENT_INFORMATIONS = 'TokenGenerator config is not valid, it should contain a "clientId", a "clientSecret" parameter';
 
 class ClientCredentialsGenerator extends AbstractTokenGenerator {
+  constructor(props) {
+    super(props);
+    this.generateToken = memoizePromise(this.generateToken);
+  }
+
   generateToken(baseParameters = {}) {
     const parameters = baseParameters;
     parameters.grant_type = 'client_credentials';
