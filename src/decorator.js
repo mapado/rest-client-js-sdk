@@ -13,7 +13,7 @@ export function memoizePromise(callback) {
     const value = callback.apply(this, parameters);
     cache[cacheKey] = value;
 
-    if (!value || value.constructor.name !== 'Promise') {
+    if (!value || !(value instanceof Promise)) {
       throw new Error('Memoization Error, Async function returned non-promise value');
     }
 
