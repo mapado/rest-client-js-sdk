@@ -2,6 +2,9 @@ import URI from 'urijs';
 import {
   AccessDeniedError,
   ForbiddenError,
+  ResourceNotFoundError,
+  BadRequestError,
+  InternalServerError,
 } from '../Error';
 
 class AbstractClient {
@@ -154,14 +157,14 @@ class AbstractClient {
               break;
 
             default:
-              throw new AccessDeniedError(body.error_description, response);
+              throw new AccessDeniedError(response, body.error_description);
           }
         }
 
         throw new AccessDeniedError('Unable to access ressource: 401 found !', response);
       })
       .catch(() => {
-        throw new AccessDeniedError('Unable to access ressource: 401 found !', response)
+        throw new AccessDeniedError('Unable to access ressource: 401 found !', response);
       })
     ;
   }
@@ -186,13 +189,29 @@ class AbstractClient {
 
     return fetch(input, params)
       .then(response => {
-        if (response.status === 401) {
-          return this._manageAccessDenied(response, input, params);
-        } else if (response.status === 403) {
-          throw new ForbiddenError('Forbidden acces: 403 found !', response);
+        if (response.status < 400) {
+          return response;
         }
 
-        return response;
+        switch (true) {
+          case response.status === 401:
+            return this._manageAccessDenied(response, input, params);
+
+          case response.status === 403:
+            throw new ForbiddenError(response);
+
+          case response.status === 404:
+            throw new ResourceNotFoundError(response);
+
+          case response.status >= 400 && response.status < 500:
+            throw new BadRequestError(response);
+
+          case response.status >= 500 && response.status < 600:
+            throw new InternalServerError(response);
+
+          default:
+            return new Error(`Unexpected error, status code is ${response.status}`);
+        }
       })
     ;
   }

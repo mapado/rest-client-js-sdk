@@ -2,6 +2,9 @@ import RestClientSdk from './RestClientSdk';
 import {
   AccessDeniedError,
   ForbiddenError,
+  BadRequestError,
+  ResourceNotFoundError,
+  InternalServerError,
 } from './Error';
 import AbstractClient from './client/AbstractClient';
 import TokenStorage from './TokenStorage';
@@ -13,11 +16,15 @@ import ProvidedTokenGenerator from './TokenGenerator/ProvidedTokenGenerator';
 export default RestClientSdk;
 export {
   AbstractClient,
-  AccessDeniedError,
   AbstractTokenGenerator,
   ClientCredentialsGenerator,
-  ForbiddenError,
   PasswordGenerator,
   ProvidedTokenGenerator,
   TokenStorage,
+
+  AccessDeniedError,
+  ForbiddenError,
+  BadRequestError,
+  ResourceNotFoundError,
+  InternalServerError,
 };
