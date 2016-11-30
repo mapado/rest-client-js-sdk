@@ -2,10 +2,7 @@
   "name": "rest-client-sdk",
   "version": "0.8.2",
   "description": "Rest Client SDK for API",
-  "main": "dist/index.js",
-  "files": [
-    "dist"
-  ],
+  "main": "src/index.js",
   "scripts": {
     "test": "mocha --compilers js:babel-core/register --require ./test/test_helper.js  --recursive",
     "test:watch": "npm run test -- --watch",
