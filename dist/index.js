@@ -1,5 +1,8 @@
-Object.defineProperty(exports,"__esModule",{value:true});exports.TokenStorage=exports.ProvidedTokenGenerator=exports.PasswordGenerator=exports.ForbiddenError=exports.ClientCredentialsGenerator=exports.AbstractTokenGenerator=exports.AccessDeniedError=exports.AbstractClient=undefined;var _RestClientSdk=require('./RestClientSdk');var _RestClientSdk2=_interopRequireDefault(_RestClientSdk);
+Object.defineProperty(exports,"__esModule",{value:true});exports.InternalServerError=exports.ResourceNotFoundError=exports.BadRequestError=exports.ForbiddenError=exports.AccessDeniedError=exports.TokenStorage=exports.ProvidedTokenGenerator=exports.PasswordGenerator=exports.ClientCredentialsGenerator=exports.AbstractTokenGenerator=exports.AbstractClient=undefined;var _RestClientSdk=require('./RestClientSdk');var _RestClientSdk2=_interopRequireDefault(_RestClientSdk);
 var _Error=require('./Error');
+
+
+
 
 
 
@@ -13,10 +16,14 @@ var _ProvidedTokenGenerator=require('./TokenGenerator/ProvidedTokenGenerator');v
 
 
 AbstractClient=_AbstractClient2.default;exports.
-AccessDeniedError=_Error.AccessDeniedError;exports.
 AbstractTokenGenerator=_AbstractTokenGenerator2.default;exports.
 ClientCredentialsGenerator=_ClientCredentialsGenerator2.default;exports.
-ForbiddenError=_Error.ForbiddenError;exports.
 PasswordGenerator=_PasswordGenerator2.default;exports.
 ProvidedTokenGenerator=_ProvidedTokenGenerator2.default;exports.
-TokenStorage=_TokenStorage2.default;
+TokenStorage=_TokenStorage2.default;exports.
+
+AccessDeniedError=_Error.AccessDeniedError;exports.
+ForbiddenError=_Error.ForbiddenError;exports.
+BadRequestError=_Error.BadRequestError;exports.
+ResourceNotFoundError=_Error.ResourceNotFoundError;exports.
+InternalServerError=_Error.InternalServerError;

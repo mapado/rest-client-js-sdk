@@ -4,6 +4,9 @@ var _Error=require('../Error');function _interopRequireDefault(obj){return obj&&
 
 
 
+
+
+
 AbstractClient=function(){
 function AbstractClient(sdk){_classCallCheck(this,AbstractClient);
 this.sdk=sdk;
@@ -154,7 +157,7 @@ throw new _Error.AccessDeniedError('Unable to renew access_token',response);
 break;
 
 default:
-throw new _Error.AccessDeniedError(body.error_description,response);}
+throw new _Error.AccessDeniedError(response,body.error_description);}
 
 }
 
@@ -186,13 +189,29 @@ params={headers:baseHeaders};
 
 return fetch(input,params).
 then(function(response){
-if(response.status===401){
-return _this4._manageAccessDenied(response,input,params);
-}else if(response.status===403){
-throw new _Error.ForbiddenError('Forbidden acces: 403 found !',response);
+if(response.status<400){
+return response;
 }
 
-return response;
+switch(true){
+case response.status===401:
+return _this4._manageAccessDenied(response,input,params);
+
+case response.status===403:
+throw new _Error.ForbiddenError(response);
+
+case response.status===404:
+throw new _Error.ResourceNotFoundError(response);
+
+case response.status>=400&&response.status<500:
+throw new _Error.BadRequestError(response);
+
+case response.status>=500&&response.status<600:
+throw new _Error.InternalServerError(response);
+
+default:
+return new Error('Unexpected error, status code is '+response.status);}
+
 });
 
 }}]);return AbstractClient;}();exports.default=
