@@ -1,5 +1,6 @@
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
+import { memoizePromise } from '../decorator';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME = 'TokenGenerator config is not valid, it should contain a "path", a "scheme" parameter';
@@ -10,6 +11,11 @@ const ERROR_TOKEN_USERNAME_PASSWORD = 'username and password must be passed as p
 const ERROR_TOKEN_ACCESS_TOKEN_REFRESH_TOKEN = 'access_token and refresh_token be passed as parameters';
 
 class PasswordGenerator extends AbstractTokenGenerator {
+  constructor(props) {
+    super(props);
+    this._doFetch = memoizePromise(this._doFetch);
+  }
+
   generateToken(baseParameters) {
     const parameters = baseParameters;
     this._checkGenerateParameters(parameters);
