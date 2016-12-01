@@ -1,10 +1,11 @@
 import RestClientSdk from './RestClientSdk';
 import {
   AccessDeniedError,
-  ForbiddenError,
   BadRequestError,
-  ResourceNotFoundError,
+  ForbiddenError,
+  HttpError,
   InternalServerError,
+  ResourceNotFoundError,
 } from './Error';
 import AbstractClient from './client/AbstractClient';
 import TokenStorage from './TokenStorage';
@@ -23,8 +24,9 @@ export {
   TokenStorage,
 
   AccessDeniedError,
-  ForbiddenError,
   BadRequestError,
-  ResourceNotFoundError,
+  ForbiddenError,
+  HttpError,
   InternalServerError,
+  ResourceNotFoundError,
 };

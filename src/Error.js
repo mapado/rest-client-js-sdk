@@ -64,8 +64,9 @@ InternalServerError.prototype.constructor = InternalServerError;
 
 export {
   AccessDeniedError,
-  ForbiddenError,
   BadRequestError,
-  ResourceNotFoundError,
+  ForbiddenError,
+  HttpError,
   InternalServerError,
+  ResourceNotFoundError,
 };
