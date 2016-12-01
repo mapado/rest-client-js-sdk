@@ -13,8 +13,7 @@
     "test:watch": "npm run test -- --watch",
     "build": "babel src --out-dir dist",
     "check:src": "npm run test",
-    "prepublish": "npm run clean && npm run check:src && npm run build",
-    "publish": "echo $1"
+    "prepublish": "npm run clean && npm run check:src && npm run build"
   },
   "dependencies": {
     "immutable": "^3.8.1",
