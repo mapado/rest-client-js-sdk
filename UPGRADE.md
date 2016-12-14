@@ -1,4 +1,4 @@
-# v0.10.x
+# v0.11.x
 ## breaking changes
 
 - `ProviderTokenGenerator` does not accept a param object anymore on its second argument.
