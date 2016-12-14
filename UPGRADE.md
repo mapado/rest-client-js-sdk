@@ -1,3 +1,12 @@
+# v0.10.x
+## breaking changes
+
+- `ProviderTokenGenerator` does not accept a param object anymore on its second argument.
+
+## new features
+
+- `ProviderTokenGenerator` now accept a function on its second argument which will be called on `refreshToken`, so you can fully customize the behavior. The function must return a Promise.
+
 # v0.9.x
 ## breaking changes
 

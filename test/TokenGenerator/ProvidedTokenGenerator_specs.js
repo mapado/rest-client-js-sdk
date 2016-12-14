@@ -1,4 +1,4 @@
-/* global describe, it, afterEach */
+/* global fetch, describe, it, afterEach */
 global.FormData = require('form-data');
 import {
   expect,
@@ -70,18 +70,29 @@ describe('ProvidedTokenGenerator tests', () => {
     ;
   });
 
-  it('refresh the token if a refreshTokenUrl is set', () => {
+  it('refresh the token if the second parameter is set', () => {
     const newToken = { a: 'new token' };
     fetchMock
       .mock('^http://foo.bar', newToken)
       .getMock()
     ;
 
+    const refreshFunc = () => (
+      fetch('http://foo.bar', {
+        method: 'POST',
+      })
+        .then((response) => {
+          if (response.status !== 200) {
+            return response.json()
+              .then(responseData => Promise.reject(responseData));
+          }
+
+          return response.json();
+        })
+    );
+
     const tokenGenerator = new ProvidedTokenGenerator(
-      providedToken,
-      {
-        refreshTokenUrl: 'http://foo.bar/',
-      }
+      providedToken, refreshFunc,
     );
 
     return expect(tokenGenerator.refreshToken()).to.eventually.deep.equals(newToken)
