@@ -24,9 +24,9 @@ class AbstractTokenGenerator {
 
     const formData = new FormData();
 
-    for (const key of keys) {
+    keys.forEach((key) => {
       formData.append(key, parameters[key]);
-    }
+    });
 
     return formData;
   }
