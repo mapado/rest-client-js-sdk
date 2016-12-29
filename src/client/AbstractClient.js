@@ -72,12 +72,9 @@ class AbstractClient {
 
   delete(entity) {
     const url = entity.get('@id');
-    return this.createEntityFromJsonResponse(
-      this.authorizedFetch(url, {
-        method: 'DELETE',
-      }),
-      'item'
-    );
+    return this.authorizedFetch(url, {
+      method: 'DELETE',
+    });
   }
 
   createEntityFromJsonResponse(requestPromise, listOrItem) {
