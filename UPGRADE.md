@@ -1,3 +1,9 @@
+# v0.12.x
+## breaking changes
+
+- a `delete` does not call `createEntityFromJsonResponse` anymore as it should return a "204 No Content" or a "404 Not Found"
+
+
 # v0.11.x
 ## breaking changes
 
