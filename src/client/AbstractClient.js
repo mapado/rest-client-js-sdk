@@ -23,6 +23,11 @@ class AbstractClient {
                     You must implement "getPathBase" method.`);
   }
 
+  getEntityURI(entity) {
+    throw new Error(`AbstractClient::getEntityURI can not be called directly.
+                    You must implement "getEntityURI" method.`);
+  }
+
   getName() {
     throw new Error(`AbstractClient::getName can not be called directly.
                     You must implement "getName" method.`);
@@ -58,7 +63,7 @@ class AbstractClient {
   }
 
   update(entity, queryParam = {}) {
-    const url = new URI(entity.get('@id'));
+    const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
     return this.createEntityFromJsonResponse(
@@ -71,7 +76,7 @@ class AbstractClient {
   }
 
   delete(entity) {
-    const url = entity.get('@id');
+    const url = this.getEntityURI(entity);
     return this.authorizedFetch(url, {
       method: 'DELETE',
     });

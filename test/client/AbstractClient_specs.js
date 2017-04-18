@@ -20,6 +20,21 @@ class SomeTestClient extends AbstractClient {
   }
 }
 
+class NoAtIdClient extends AbstractClient {
+  getPathBase(pathParameters) {
+    return '/v2/no-at-id';
+  }
+
+  getName() {
+    return 'NoAtIdClient';
+  }
+
+  getEntityURI(entity) {
+    const uri = `${this.getPathBase()}/${entity.get('id')}`;
+    return uri;
+  }
+}
+
 class DefaultParametersTestClient extends AbstractClient {
   getPathBase() {
     return '/v2/def_param';
@@ -43,6 +58,7 @@ const SomeSdk = new RestClientSdk(
   {
     test: SomeTestClient,
     defParam: DefaultParametersTestClient,
+    NoAtIdClient: NoAtIdClient,
   }
 );
 SomeSdk.tokenStorage.generateToken();
@@ -248,6 +264,30 @@ describe('Test Client', () => {
       const basicAuthHeader = fetchMock.calls().matched[1][1].headers.Authorization;
       expect(basicAuthHeader).to.include('Basic ');
     });
+  });
+});
+
+describe('Test errors', () => {
+  it('handle 401 and 403 errors', () => {
+    fetchMock
+      .mock(/400$/, 400)
+      .mock(/401$/, 401)
+      .mock(/403$/, 403)
+      .mock(/404$/, 404)
+      .mock(/410$/, 410)
+      .mock(/500$/, 500)
+      .getMock()
+    ;
+
+    return Promise.all([
+      assert.isRejected(SomeSdk.test.find(400), errors.BadRequestError),
+      assert.isRejected(SomeSdk.test.find(401), errors.AccessDeniedError),
+      assert.isRejected(SomeSdk.test.find(403), errors.ForbiddenError),
+      assert.isRejected(SomeSdk.test.find(404), errors.ResourceNotFoundError),
+      assert.isRejected(SomeSdk.test.find(404), errors.BadRequestError),
+      assert.isRejected(SomeSdk.test.find(410), errors.BadRequestError),
+      assert.isRejected(SomeSdk.test.find(500), errors.InternalServerError),
+    ]);
   });
 });
 

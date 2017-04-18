@@ -16,7 +16,11 @@ import { AbstractClient } from 'rest-client-sdk';
 
 class SomeEntityClient extends AbstractClient {
   getPathBase() {
-    return '/v2/some_entities';
+    return '/v2/some_entities'; // this is the URI used for querying
+  }
+
+  getEntityURI(entity) {
+      return `${this.getPathBase}/${entity.id}`; // this will be the URI used by update / delete script
   }
 
   getName() {
@@ -65,6 +69,8 @@ const clients = {
 const sdk = new RestClientSdk(tokenStorage, config, clients);
 ```
 
+### Make calls
+#### Find
 You can now call the clients this way: 
 ```js
 sdk.someEntity.find(8); // will find the entity with id 8. ie. /v2/some_entities/8
@@ -72,6 +78,13 @@ sdk.someEntity.find(8); // will find the entity with id 8. ie. /v2/some_entities
 sdk.someEntity.findAll(); // will find all entities. ie. /v2/some_entities
 
 sdk.someEntity.findBy({ foo: 'bar' }); // will find all entities for the request: /v2/some_entities?foo=bar
+```
+
+#### Update / delete
+```js
+sdk.someEntity.update(entity);
+
+sdk.someEntity.delete(entity);
 ```
 
 ### Custom entity factory
