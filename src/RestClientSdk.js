@@ -1,16 +1,12 @@
-import { fromJS } from 'immutable';
-
-function createEntity(val, listOrItem, type = null) {
-  return fromJS(val);
-}
+import JsSerializer from './serializer/JsSerializer';
 
 class RestClientSdk {
-  constructor(tokenStorage, config, clientList = {}, entityFactory = createEntity) {
+  constructor(tokenStorage, config, clientList = {}, serializer = new JsSerializer()) {
     this._checkConfigValidity(config);
 
     this.config = this._mergeWithBaseConfig(config);
     this.tokenStorage = tokenStorage;
-    this.entityFactory = entityFactory;
+    this.serializer = serializer;
 
     Object.keys(clientList).forEach((key) => {
       this[key] = new clientList[key](this);

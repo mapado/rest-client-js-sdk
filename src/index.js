@@ -13,6 +13,7 @@ import AbstractTokenGenerator from './TokenGenerator/AbstractTokenGenerator';
 import ClientCredentialsGenerator from './TokenGenerator/ClientCredentialsGenerator';
 import PasswordGenerator from './TokenGenerator/PasswordGenerator';
 import ProvidedTokenGenerator from './TokenGenerator/ProvidedTokenGenerator';
+import Serializer from './serializer/Serializer';
 
 export default RestClientSdk;
 export {
@@ -21,6 +22,7 @@ export {
   ClientCredentialsGenerator,
   PasswordGenerator,
   ProvidedTokenGenerator,
+  Serializer,
   TokenStorage,
 
   AccessDeniedError,

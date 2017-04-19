@@ -11,7 +11,7 @@ class AbstractClient {
   constructor(sdk) {
     this.sdk = sdk;
     this._tokenStorage = sdk.tokenStorage;
-    this.entityFactory = sdk.entityFactory;
+    this.serializer = sdk.serializer;
   }
 
   getDefaultParameters() {
@@ -36,13 +36,13 @@ class AbstractClient {
   find(id, queryParam = {}, pathParameters = {}) {
     const url = this._generateUrlFromParams(queryParam, pathParameters, id);
 
-    return this.createEntityFromJsonResponse(this.authorizedFetch(url), 'item');
+    return this.deserializeResponse(this.authorizedFetch(url), 'item');
   }
 
   findBy(queryParam, pathParameters = {}) {
     const url = this._generateUrlFromParams(queryParam, pathParameters);
 
-    return this.createEntityFromJsonResponse(this.authorizedFetch(url), 'list');
+    return this.deserializeResponse(this.authorizedFetch(url), 'list');
   }
 
   findAll(queryParam = {}, pathParameters = {}) {
@@ -53,10 +53,10 @@ class AbstractClient {
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
 
-    return this.createEntityFromJsonResponse(
+    return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'POST',
-        body: JSON.stringify(entity.toJSON()),
+        body: this.serializer.serializeItem(entity, this.getName()),
       }),
       'item'
     );
@@ -66,10 +66,10 @@ class AbstractClient {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
-    return this.createEntityFromJsonResponse(
+    return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'PUT',
-        body: JSON.stringify(entity.toJSON()),
+        body: this.serializer.serializeItem(entity, this.getName()),
       }),
       'item'
     );
@@ -82,10 +82,16 @@ class AbstractClient {
     });
   }
 
-  createEntityFromJsonResponse(requestPromise, listOrItem) {
+  deserializeResponse(requestPromise, listOrItem) {
     return requestPromise
-      .then(response => response.json())
-      .then((val) => this.entityFactory(val, listOrItem, this.getName()))
+      .then(response => response.text())
+      .then((text) => {
+        if (listOrItem === 'list') {
+          return this.serializer.deserializeList(text, this.getName());
+        }
+
+        return this.serializer.deserializeItem(text, this.getName());
+      })
     ;
   }
 

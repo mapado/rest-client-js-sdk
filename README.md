@@ -24,7 +24,7 @@ class SomeEntityClient extends AbstractClient {
   }
 
   getName() {
-      return 'SomeEntity'; // this will be passed to the entity factory
+      return 'SomeEntity'; // this will be passed to the serializer
   }
 }
 
@@ -87,23 +87,41 @@ sdk.someEntity.update(entity);
 sdk.someEntity.delete(entity);
 ```
 
-### Custom entity factory
-You can inject a custom entity factory to the SDK. All entities will be send to the entityFactory.
+### Custom serializer
+You can inject a custom serializer to the SDK.
+The serializer must extends the base `Serializer` class and implement 3 methods:
+  * `deserializeItem(rawData, type)` (type is the result of `getName`)
+  * `deserializeList(rawListData, type)` (type is the result of `getName`)
+  * `serializeItem(item, type)` (type is the result of `getName`)
 
-The default entity factory is the immutable function [`fromJS`](https://facebook.github.io/immutable-js/docs/#/fromJS)
+All text response from GET / PUT / POST request will be send to `deserializeItem` or `deserializeList`.
+All content fom `update` and `create` call will be send to `serializeItem`.
 
+The default serializer uses `JSON.parse` and `JSON.stringify`, so it converts string to JSON objects.
+
+#### Example with the default serializer
 ```js
-function entityFactory(input, listOrItem, clientName = null) {
-    if (listOrItem === 'list') {
-        // do stuff with your list input
+import { Serializer } from 'rest-client-sdk';
 
-        return output;
-    } else { // listOrItem === 'item'
-        const output = // ... do stuff with your input
+class JsSerializer extends Serializer {
+  deserializeItem(rawData, type) {
+    // do stuff with your item input
+    return JSON.parse(rawData);
+  }
 
-        return output;
-    }
+  deserializeList(rawListData, type) {
+    // do stuff with your list input
+    return JSON.parse(rawListData);
+  }
+
+
+  serializeItem(entity, type) {
+    // prepare item for being sent in a request
+    return JSON.stringify(entity);
+  }
 }
 
-const sdk = new RestClientSdk(tokenStorage, config, clients, entityFactory);
+const serializer = new JsSerializer();
+
+const sdk = new RestClientSdk(tokenStorage, config, clients, serializer);
 ```

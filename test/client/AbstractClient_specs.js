@@ -1,10 +1,11 @@
 /* global describe, it, afterEach */
+/* eslint no-unused-vars: 0 */
 import fetchMock from 'fetch-mock';
 import { expect, assert } from 'chai';
-import { fromJS, List, Map } from 'immutable';
 import * as errors from '../../src/Error';
 import RestClientSdk, { AbstractClient } from '../../src';
 import tokenStorageMock from '../mock/tokenStorage';
+import WeirdSerializer from '../WeirdSerializer';
 
 class SomeTestClient extends AbstractClient {
   getPathBase(pathParameters) {
@@ -20,7 +21,7 @@ class SomeTestClient extends AbstractClient {
   }
 
   getEntityURI(entity) {
-    return entity.get('@id');
+    return entity['@id'];
   }
 }
 
@@ -34,7 +35,7 @@ class NoAtIdClient extends AbstractClient {
   }
 
   getEntityURI(entity) {
-    const uri = `${this.getPathBase()}/${entity.get('id')}`;
+    const uri = `${this.getPathBase()}/${entity.id}`;
     return uri;
   }
 }
@@ -56,7 +57,7 @@ class DefaultParametersTestClient extends AbstractClient {
   }
 
   getEntityURI(entity) {
-    return entity.get('@id');
+    return entity['@id'];
   }
 }
 
@@ -156,27 +157,14 @@ describe('Test Client', () => {
 
     return SomeSdk.test.find(8)
       .then(item => Promise.all([
-        expect(item).to.be.an.instanceof(Map),
-        expect(item.get('name')).to.equal('foo'),
-        expect(item.get('customName')).to.be.undefined,
+        expect(item).to.be.an('object'),
+        expect(item.name).to.equal('foo'),
+        expect(item.customName).to.be.undefined,
       ]))
     ;
   });
 
-  it('handle entityFactory with a custom entity factory', () => {
-    function entityFactory(input, listOrItem) {
-      if (listOrItem === 'list') {
-        return List(
-          input.map(
-            (item) => fromJS(item).set('customName', item.name)
-          )
-        );
-      }
-
-      const out = fromJS(input);
-      return out.set('customName', input.name);
-    }
-
+  it('handle entityFactory with a custom serializer', () => {
     const EntityFactorySdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https' },
@@ -184,7 +172,7 @@ describe('Test Client', () => {
         test: SomeTestClient,
         defParam: DefaultParametersTestClient,
       },
-      entityFactory
+      new WeirdSerializer()
     );
 
     fetchMock
@@ -208,15 +196,15 @@ describe('Test Client', () => {
     return Promise.all([
       EntityFactorySdk.test.find(8)
         .then(item => Promise.all([
-          expect(item).to.be.an.instanceof(Map),
-          expect(item.get('name')).to.equal('foo'),
-          expect(item.get('customName')).to.equal('foo'),
+          expect(item).to.be.an('object'),
+          expect(item.name).to.equal('foo'),
+          expect(item.customName).to.equal('foofoo'),
         ])),
       EntityFactorySdk.test.findAll()
         .then(itemList => Promise.all([
-          expect(itemList).to.be.an.instanceof(List),
-          expect(itemList.first().get('name')).to.equal('foo'),
-          expect(itemList.first().get('customName')).to.equal('foo'),
+          expect(itemList).to.be.an('array'),
+          expect(itemList[0].name).to.equal('foo'),
+          expect(itemList[0].customName).to.equal('foofoo'),
         ])),
     ]);
   });
@@ -313,15 +301,15 @@ describe('Update and delete function trigger the good urls', () => {
       .getMock()
     ;
 
-    const data = Map({
+    const data = {
       '@id': '/v2/test/8',
       foo: 'foo',
-    });
+    };
 
-    const dataNoArobase = Map({
+    const dataNoArobase = {
       id: 9,
       foo: 'foo',
-    });
+    };
 
     return Promise.all([
       SomeSdk.test.update(data),
