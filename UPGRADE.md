@@ -3,12 +3,12 @@
 
 The library does not depends on `immutablejs` anymore, so we needed to make a few breaking changes:
 
-  * Do not depend on `@id` anymore: The `AbstractClient` need to implements a `getEntityURI(entity)` and return an query string from it. This is not a great pattern, but it will do for now.
-  * The `entityFactory` does not exists anymore. It has been replaced by a `Serializer`:
+  * Do not depend on `@id` anymore: The `AbstractClient` need to implements a `getEntityURI(entity)` and return an query string from it. This is not a great pattern, but it will do for now. (https://github.com/mapado/rest-client-js-sdk/pull/19)
+  * The `entityFactory` does not exists anymore. It has been replaced by a `Serializer`: (https://github.com/mapado/rest-client-js-sdk/pull/21)
     * If you used the default entityFactory, you will now receive plain Javascript objects instead of immutable's Map or List
     * If you previously overrided the `entityFactory`, you will need to switch to the new `Serializer` object: It is much more extensible but is a bit more complex to extend. See README to know how to do it.
     * the `createEntityFromJsonResponse` method has been renamed to `deserializeResponse`
-
+  * The library moved from ES5 to bundling with rollupjs, that should not break anything and should improve size of bundle but I am not so sure of this, so patch may follow (https://github.com/mapado/rest-client-js-sdk/pull/20)
 
 
 # v0.12.x
