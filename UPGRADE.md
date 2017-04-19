@@ -1,3 +1,9 @@
+# v0.13.x
+## breaking changes
+
+- Do not depend on `@id` anymore: The `AbstractClient` need to implements a `getEntityURI(entity)` and return an query string from it. This is not a great pattern, but it will do for now.
+
+
 # v0.12.x
 ## breaking changes
 

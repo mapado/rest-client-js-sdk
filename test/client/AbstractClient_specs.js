@@ -18,6 +18,25 @@ class SomeTestClient extends AbstractClient {
   getName() {
     return 'SomeClient';
   }
+
+  getEntityURI(entity) {
+    return entity.get('@id');
+  }
+}
+
+class NoAtIdClient extends AbstractClient {
+  getPathBase(pathParameters) {
+    return '/v2/no-at-id';
+  }
+
+  getName() {
+    return 'NoAtIdClient';
+  }
+
+  getEntityURI(entity) {
+    const uri = `${this.getPathBase()}/${entity.get('id')}`;
+    return uri;
+  }
 }
 
 class DefaultParametersTestClient extends AbstractClient {
@@ -35,6 +54,10 @@ class DefaultParametersTestClient extends AbstractClient {
   getName() {
     return 'DefaultParamTest';
   }
+
+  getEntityURI(entity) {
+    return entity.get('@id');
+  }
 }
 
 const SomeSdk = new RestClientSdk(
@@ -43,6 +66,7 @@ const SomeSdk = new RestClientSdk(
   {
     test: SomeTestClient,
     defParam: DefaultParametersTestClient,
+    noAtId: NoAtIdClient,
   }
 );
 SomeSdk.tokenStorage.generateToken();
@@ -252,6 +276,8 @@ describe('Test Client', () => {
 });
 
 describe('Test errors', () => {
+  afterEach(fetchMock.restore);
+
   it('handle 401 and 403 errors', () => {
     fetchMock
       .mock(/400$/, 400)
@@ -272,5 +298,40 @@ describe('Test errors', () => {
       assert.isRejected(SomeSdk.test.find(410), errors.BadRequestError),
       assert.isRejected(SomeSdk.test.find(500), errors.InternalServerError),
     ]);
+  });
+});
+
+describe('Update and delete function trigger the good urls', () => {
+  afterEach(fetchMock.restore);
+
+  it('handle updating and deleting entities with @ids', () => {
+    fetchMock
+      .mock(() => true, {
+        '@id': '/v2/test/8',
+        foo: 'bar',
+      })
+      .getMock()
+    ;
+
+    const data = Map({
+      '@id': '/v2/test/8',
+      foo: 'foo',
+    });
+
+    const dataNoArobase = Map({
+      id: 9,
+      foo: 'foo',
+    });
+
+    return Promise.all([
+      SomeSdk.test.update(data),
+      SomeSdk.noAtId.update(dataNoArobase),
+    ])
+    .then(() => {
+      const url1 = fetchMock.calls().matched[0][0];
+      expect(url1).to.equals('https://api.me/v2/test/8');
+      const url2 = fetchMock.calls().matched[1][0];
+      expect(url2).to.equals('https://api.me/v2/no-at-id/9');
+    });
   });
 });
