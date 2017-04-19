@@ -7,6 +7,7 @@ The library does not depends on `immutablejs` anymore, so we needed to make a fe
   * The `entityFactory` does not exists anymore. It has been replaced by a `Serializer`:
     * If you used the default entityFactory, you will now receive plain Javascript objects instead of immutable's Map or List
     * If you previously overrided the `entityFactory`, you will need to switch to the new `Serializer` object: It is much more extensible but is a bit more complex to extend. See README to know how to do it.
+    * the `createEntityFromJsonResponse` method has been renamed to `deserializeResponse`
 
 
 

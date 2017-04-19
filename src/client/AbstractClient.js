@@ -36,13 +36,13 @@ class AbstractClient {
   find(id, queryParam = {}, pathParameters = {}) {
     const url = this._generateUrlFromParams(queryParam, pathParameters, id);
 
-    return this.createEntityFromJsonResponse(this.authorizedFetch(url), 'item');
+    return this.deserializeResponse(this.authorizedFetch(url), 'item');
   }
 
   findBy(queryParam, pathParameters = {}) {
     const url = this._generateUrlFromParams(queryParam, pathParameters);
 
-    return this.createEntityFromJsonResponse(this.authorizedFetch(url), 'list');
+    return this.deserializeResponse(this.authorizedFetch(url), 'list');
   }
 
   findAll(queryParam = {}, pathParameters = {}) {
@@ -53,7 +53,7 @@ class AbstractClient {
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
 
-    return this.createEntityFromJsonResponse(
+    return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'POST',
         body: this.serializer.serializeItem(entity, this.getName()),
@@ -66,7 +66,7 @@ class AbstractClient {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
-    return this.createEntityFromJsonResponse(
+    return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'PUT',
         body: this.serializer.serializeItem(entity, this.getName()),
@@ -82,7 +82,7 @@ class AbstractClient {
     });
   }
 
-  createEntityFromJsonResponse(requestPromise, listOrItem) {
+  deserializeResponse(requestPromise, listOrItem) {
     return requestPromise
       .then(response => response.text())
       .then((text) => {
