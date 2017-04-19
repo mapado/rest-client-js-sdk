@@ -56,7 +56,7 @@ class AbstractClient {
     return this.createEntityFromJsonResponse(
       this.authorizedFetch(url, {
         method: 'POST',
-        body: this.serializer.deserializeItem(entity),
+        body: this.serializer.serializeItem(entity, this.getName()),
       }),
       'item'
     );
@@ -69,7 +69,7 @@ class AbstractClient {
     return this.createEntityFromJsonResponse(
       this.authorizedFetch(url, {
         method: 'PUT',
-        body: this.serializer.deserializeItem(entity),
+        body: this.serializer.serializeItem(entity, this.getName()),
       }),
       'item'
     );
@@ -87,10 +87,10 @@ class AbstractClient {
       .then(response => response.text())
       .then((text) => {
         if (listOrItem === 'list') {
-          return this.serializer.serializeList(text, this.getName());
+          return this.serializer.deserializeList(text, this.getName());
         }
 
-        return this.serializer.serializeItem(text, this.getName());
+        return this.serializer.deserializeItem(text, this.getName());
       })
     ;
   }

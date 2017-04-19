@@ -2,18 +2,18 @@
 import { Serializer } from '../src/';
 
 class WeirdSerializer extends Serializer {
-  serializeItem(item, type) {
-    return this._serializeItem(JSON.parse(item));
+  deserializeItem(rawData, type) {
+    return this._serializeItem(JSON.parse(rawData));
   }
 
-  serializeList(list, type) {
-    const input = JSON.parse(list);
+  deserializeList(rawListData, type) {
+    const input = JSON.parse(rawListData);
 
     return input.map(this._serializeItem);
   }
 
-  deserializeItem(value) {
-    return JSON.stringify(value);
+  serializeItem(entity, type) {
+    return JSON.stringify(entity);
   }
 
   _serializeItem(item) {
