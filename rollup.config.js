@@ -9,11 +9,7 @@ export default {
   exports: 'named',
   moduleName: 'rest-client-sdk',
   plugins: [
-    commonjs({
-      namedExports: {
-        'node_modules/immutable/dist/immutable.js': ['fromJS'],
-      },
-    }),
+    commonjs(),
     resolve(),
     babel({
       exclude: 'node_modules/**',
