@@ -11,7 +11,7 @@ class AbstractClient {
   constructor(sdk) {
     this.sdk = sdk;
     this._tokenStorage = sdk.tokenStorage;
-    this.entityFactory = sdk.entityFactory;
+    this.serializer = sdk.serializer;
   }
 
   getDefaultParameters() {
@@ -56,7 +56,7 @@ class AbstractClient {
     return this.createEntityFromJsonResponse(
       this.authorizedFetch(url, {
         method: 'POST',
-        body: JSON.stringify(entity.toJSON()),
+        body: this.serializer.deserializeItem(entity),
       }),
       'item'
     );
@@ -69,7 +69,7 @@ class AbstractClient {
     return this.createEntityFromJsonResponse(
       this.authorizedFetch(url, {
         method: 'PUT',
-        body: JSON.stringify(entity.toJSON()),
+        body: this.serializer.deserializeItem(entity),
       }),
       'item'
     );
@@ -84,8 +84,14 @@ class AbstractClient {
 
   createEntityFromJsonResponse(requestPromise, listOrItem) {
     return requestPromise
-      .then(response => response.json())
-      .then((val) => this.entityFactory(val, listOrItem, this.getName()))
+      .then(response => response.text())
+      .then((text) => {
+        if (listOrItem === 'list') {
+          return this.serializer.serializeList(text, this.getName());
+        }
+
+        return this.serializer.serializeItem(text, this.getName());
+      })
     ;
   }
 

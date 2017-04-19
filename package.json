@@ -54,6 +54,7 @@
   "eslintConfig": {
     "extends": "airbnb",
     "rules": {
+      "class-methods-use-this": [0],
       "new-cap": [
         2,
         {
@@ -68,6 +69,16 @@
           "allow": [
             "_groups"
           ]
+        }
+      ],
+      "comma-dangle": [
+        "error",
+        {
+          "arrays": "always-multiline",
+          "objects": "always-multiline",
+          "imports": "always-multiline",
+          "exports": "always-multiline",
+          "functions": "never"
         }
       ],
       "react/prefer-es6-class": 1
