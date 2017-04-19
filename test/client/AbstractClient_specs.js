@@ -18,6 +18,10 @@ class SomeTestClient extends AbstractClient {
   getName() {
     return 'SomeClient';
   }
+
+  getEntityURI(entity) {
+    return entity.get('@id');
+  }
 }
 
 class NoAtIdClient extends AbstractClient {
@@ -50,6 +54,10 @@ class DefaultParametersTestClient extends AbstractClient {
   getName() {
     return 'DefaultParamTest';
   }
+
+  getEntityURI(entity) {
+    return entity.get('@id');
+  }
 }
 
 const SomeSdk = new RestClientSdk(
@@ -58,7 +66,7 @@ const SomeSdk = new RestClientSdk(
   {
     test: SomeTestClient,
     defParam: DefaultParametersTestClient,
-    NoAtIdClient: NoAtIdClient,
+    noAtId: NoAtIdClient,
   }
 );
 SomeSdk.tokenStorage.generateToken();
@@ -268,6 +276,8 @@ describe('Test Client', () => {
 });
 
 describe('Test errors', () => {
+  afterEach(fetchMock.restore);
+
   it('handle 401 and 403 errors', () => {
     fetchMock
       .mock(/400$/, 400)
@@ -291,26 +301,37 @@ describe('Test errors', () => {
   });
 });
 
-describe('Test errors', () => {
-  it('handle 401 and 403 errors', () => {
+describe('Update and delete function trigger the good urls', () => {
+  afterEach(fetchMock.restore);
+
+  it('handle updating and deleting entities with @ids', () => {
     fetchMock
-      .mock(/400$/, 400)
-      .mock(/401$/, 401)
-      .mock(/403$/, 403)
-      .mock(/404$/, 404)
-      .mock(/410$/, 410)
-      .mock(/500$/, 500)
+      .mock(() => true, {
+        '@id': '/v2/test/8',
+        foo: 'bar',
+      })
       .getMock()
     ;
 
+    const data = Map({
+      '@id': '/v2/test/8',
+      foo: 'foo',
+    });
+
+    const dataNoArobase = Map({
+      id: 9,
+      foo: 'foo',
+    });
+
     return Promise.all([
-      assert.isRejected(SomeSdk.test.find(400), errors.BadRequestError),
-      assert.isRejected(SomeSdk.test.find(401), errors.AccessDeniedError),
-      assert.isRejected(SomeSdk.test.find(403), errors.ForbiddenError),
-      assert.isRejected(SomeSdk.test.find(404), errors.ResourceNotFoundError),
-      assert.isRejected(SomeSdk.test.find(404), errors.BadRequestError),
-      assert.isRejected(SomeSdk.test.find(410), errors.BadRequestError),
-      assert.isRejected(SomeSdk.test.find(500), errors.InternalServerError),
-    ]);
+      SomeSdk.test.update(data),
+      SomeSdk.noAtId.update(dataNoArobase),
+    ])
+    .then(() => {
+      const url1 = fetchMock.calls().matched[0][0];
+      expect(url1).to.equals('https://api.me/v2/test/8');
+      const url2 = fetchMock.calls().matched[1][0];
+      expect(url2).to.equals('https://api.me/v2/no-at-id/9');
+    });
   });
 });
