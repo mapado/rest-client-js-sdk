@@ -1,4 +1,7 @@
+/* global fetch */
+
 import URI from 'urijs';
+import { handleBadResponse } from '../Error';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
 
@@ -32,10 +35,9 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator {
       method: 'POST',
       body: this.convertMapToFormData(parameters),
     })
-    .then(response => {
+    .then((response) => {
       if (response.status !== 200) {
-        return response.json()
-        .then(responseData => Promise.reject(responseData));
+        return handleBadResponse(response);
       }
 
       return response.json();

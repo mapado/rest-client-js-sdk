@@ -1,6 +1,9 @@
+/* global fetch */
+
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
+import { handleBadResponse } from '../Error';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME = 'TokenGenerator config is not valid, it should contain a "path", a "scheme" parameter';
@@ -8,7 +11,6 @@ const ERROR_CONFIG_CLIENT_INFORMATIONS = 'TokenGenerator config is not valid, it
 
 const ERROR_TOKEN_EMPTY = 'parameters must be set';
 const ERROR_TOKEN_USERNAME_PASSWORD = 'username and password must be passed as parameters';
-const ERROR_TOKEN_ACCESS_TOKEN_REFRESH_TOKEN = 'access_token and refresh_token be passed as parameters';
 
 class PasswordGenerator extends AbstractTokenGenerator {
   constructor(props) {
@@ -71,10 +73,9 @@ class PasswordGenerator extends AbstractTokenGenerator {
       method: 'POST',
       body: this.convertMapToFormData(parameters),
     })
-    .then(response => {
+    .then((response) => {
       if (response.status !== 200) {
-        return response.json()
-        .then(responseData => Promise.reject(responseData));
+        return handleBadResponse(response);
       }
 
       return response.json();

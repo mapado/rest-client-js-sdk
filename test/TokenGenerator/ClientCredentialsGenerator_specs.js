@@ -6,6 +6,12 @@ import {
 import fetchMock from 'fetch-mock';
 import oauthClientCredentialsMock from '../mock/oauthClientCredentials';
 import { ClientCredentialsGenerator } from '../../src';
+import {
+  BadRequestError,
+  ForbiddenError,
+  InternalServerError,
+  ResourceNotFoundError,
+} from '../../src/Error';
 
 const tokenConfig = {
   path: 'oauth.me',
@@ -64,5 +70,76 @@ describe('ClientCredentialsGenerator tests', () => {
       expect(token.then(a => a.access_token))
         .to.eventually.equals(oauthClientCredentialsMock.access_token),
     ]);
+  });
+
+
+  it('test that ForbiddenError is thrown', () => {
+    fetchMock
+      .mock(() => true, 403)
+      .getMock()
+    ;
+
+    const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
+    return tokenGenerator.generateToken()
+      .catch((err) => {
+        expect(err instanceof ForbiddenError).to.equals(true);
+      })
+    ;
+  });
+
+  it('test that ResourceNotFoundError is thrown', () => {
+    fetchMock
+      .mock(() => true, 404)
+      .getMock()
+    ;
+
+    const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
+    return tokenGenerator.generateToken()
+      .catch((err) => {
+        expect(err instanceof ResourceNotFoundError).to.equals(true);
+      })
+    ;
+  });
+
+  it('test that BadRequestError is thrown', () => {
+    fetchMock
+      .mock(() => true, 400)
+      .getMock()
+    ;
+
+    const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
+    return tokenGenerator.generateToken()
+      .catch((err) => {
+        expect(err instanceof BadRequestError).to.equals(true);
+      })
+    ;
+  });
+
+  it('test that InternalServerError is thrown', () => {
+    fetchMock
+      .mock(() => true, 500)
+      .getMock()
+    ;
+
+    const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
+    return tokenGenerator.generateToken()
+      .catch((err) => {
+        expect(err instanceof InternalServerError).to.equals(true);
+      })
+    ;
+  });
+
+  it('test that unexpected error is thrown', () => {
+    fetchMock
+      .mock(() => true, 401)
+      .getMock()
+    ;
+
+    const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
+    return tokenGenerator.generateToken()
+      .catch((err) => {
+        expect(err instanceof Error).to.equals(true);
+      })
+    ;
   });
 });

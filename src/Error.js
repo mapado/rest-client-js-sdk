@@ -3,7 +3,7 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
  */
 
-function HttpError(baseResponse, message) {
+function HttpError(message, baseResponse) {
   this.name = 'BadRequestError';
   this.message = message || 'Bad request';
   this.baseResponse = baseResponse;
@@ -13,7 +13,7 @@ HttpError.prototype = Object.create(Error.prototype);
 HttpError.prototype.constructor = HttpError;
 
 // 400
-function BadRequestError(baseResponse, message) {
+function BadRequestError(message, baseResponse) {
   this.name = 'BadRequestError';
   this.message = message || 'Bad request';
   this.baseResponse = baseResponse;
@@ -43,7 +43,7 @@ ForbiddenError.prototype = Object.create(BadRequestError.prototype);
 ForbiddenError.prototype.constructor = ForbiddenError;
 
 // 404
-function ResourceNotFoundError(baseResponse, message) {
+function ResourceNotFoundError(message, baseResponse) {
   this.name = 'ResourceNotFoundError';
   this.message = message || 'Resource is not found';
   this.baseResponse = baseResponse;
@@ -62,6 +62,25 @@ function InternalServerError(message, baseResponse) {
 InternalServerError.prototype = Object.create(HttpError.prototype);
 InternalServerError.prototype.constructor = InternalServerError;
 
+function handleBadResponse(response) {
+  switch (true) {
+    case response.status === 403:
+      throw new ForbiddenError(response);
+
+    case response.status === 404:
+      throw new ResourceNotFoundError(response);
+
+    case response.status >= 400 && response.status < 500:
+      throw new BadRequestError(response);
+
+    case response.status >= 500 && response.status < 600:
+      throw new InternalServerError(response);
+
+    default:
+      return new Error(`Unexpected error, status code is ${response.status}`);
+  }
+}
+
 export {
   AccessDeniedError,
   BadRequestError,
@@ -69,4 +88,5 @@ export {
   HttpError,
   InternalServerError,
   ResourceNotFoundError,
+  handleBadResponse,
 };
