@@ -1,3 +1,8 @@
+# v0.14.x
+## breaking changes
+
+Error responses in PasswordGenerator and ClientCredentialsGenerator now throw proper js errors instead of returning the response in the promise rejection
+
 # v0.13.x
 ## breaking changes
 
