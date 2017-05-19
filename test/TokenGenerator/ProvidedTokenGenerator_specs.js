@@ -26,7 +26,7 @@ describe('ProvidedTokenGenerator tests', () => {
     ]);
   });
 
-  it('test thas refreshToken refresh the token ;)', () => {
+  it('test that refreshToken refresh the token ;)', () => {
     const tokenGenerator = new ProvidedTokenGenerator(providedToken);
     const refreshedToken = tokenGenerator.refreshToken();
 
