@@ -1,4 +1,4 @@
-/* global fetch */
+/* global fetch window */
 
 import URI from 'urijs';
 import {
@@ -183,6 +183,11 @@ class AbstractClient {
       Authorization: `${this.sdk.config.authorizationType} ${accessToken}`,
       'Content-Type': 'application/json',
     };
+
+    const currentUri = typeof window === 'object' && window.location && window.location.href;
+    if (currentUri) {
+      baseHeaders.Referer = currentUri;
+    }
 
     if (params) {
       if (!params.headers) {
