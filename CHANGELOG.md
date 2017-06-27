@@ -1,10 +1,15 @@
-# v0.14.x
-## breaking changes
+# Changelog
 
+## [0.15.0] - 2017-06-27
+### Added
+  * Added the current URI as referer for http calls
+
+## [0.14.x]
+### breaking changes
 Error responses in PasswordGenerator and ClientCredentialsGenerator now throw proper js errors instead of returning the response in the promise rejection
 
-# v0.13.x
-## breaking changes
+## [0.13.x]
+### breaking changes
 
 The library does not depends on `immutablejs` anymore, so we needed to make a few breaking changes:
 
@@ -16,40 +21,40 @@ The library does not depends on `immutablejs` anymore, so we needed to make a fe
   * The library moved from ES5 to bundling with rollupjs, that should not break anything and should improve size of bundle but I am not so sure of this, so patch may follow (https://github.com/mapado/rest-client-js-sdk/pull/20)
 
 
-# v0.12.x
-## breaking changes
+## [0.12.x]
+### breaking changes
 
 - a `delete` does not call `createEntityFromJsonResponse` anymore as it should return a "204 No Content" or a "404 Not Found"
 
 
-# v0.11.x
-## breaking changes
+## [0.11.x]
+### breaking changes
 
 - `ProviderTokenGenerator` does not accept a param object anymore on its second argument.
 
-## new features
+### new features
 
 - `ProviderTokenGenerator` now accept a function on its second argument which will be called on `refreshToken`, so you can fully customize the behavior. The function must return a Promise.
 
-# v0.9.x
-## breaking changes
+## [0.9.x]
+### breaking changes
 
 - if the response status is 4xx or 5xx: an error is thrown [#13](https://github.com/mapado/rest-client-js-sdk/pull/13)
 
-## new features
+### new features
 
 - memoize token generation and refresh [#12](https://github.com/mapado/rest-client-js-sdk/pull/12)
 
 
-# v0.6.x
-## breaking changes
+## [0.6.x]
+### breaking changes
 
 The `queryParam` argument was added where needed in the AbstractClient class:
 
 - `findAll(queryParam = {}, pathParameters = {})`
 - `create(entity, queryParam = {}, pathParameters = {})`
 
-## new features
+### new features
 The `queryParam` argument was added where needed in the AbstractClient class:
 
 - `update(entity, queryParam = {})`
