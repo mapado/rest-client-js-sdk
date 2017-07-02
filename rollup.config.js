@@ -6,6 +6,7 @@ const pkg = require('./package.json');
 
 export default {
   entry: 'src/index.js',
+  sourceMap: true,
   exports: 'named',
   moduleName: 'rest-client-sdk',
   plugins: [
