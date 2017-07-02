@@ -1,6 +1,6 @@
 /* global fetch */
 
-import URI from 'urijs';
+import Url from 'domurl';
 import { handleBadResponse } from '../Error';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
@@ -21,12 +21,11 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator {
     parameters.client_id = this.tokenGeneratorConfig.clientId;
     parameters.client_secret = this.tokenGeneratorConfig.clientSecret;
 
-    const uri = (new URI(this.tokenGeneratorConfig.path))
-      .scheme(this.tokenGeneratorConfig.scheme)
-    ;
+    const uri = new Url(this.tokenGeneratorConfig.path);
+    uri.protocol = this.tokenGeneratorConfig.scheme;
 
     if (this.tokenGeneratorConfig.port) {
-      uri.port(this.tokenGeneratorConfig.port);
+      uri.port = this.tokenGeneratorConfig.port;
     }
 
     const url = uri.toString();
