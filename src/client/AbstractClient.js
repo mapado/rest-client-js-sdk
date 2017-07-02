@@ -1,10 +1,16 @@
 /* global fetch window */
 
-import URI from 'urijs';
+import Url from 'domurl';
 import {
   AccessDeniedError,
   handleBadResponse,
 } from '../Error';
+
+Url.prototype.setQueryObject = function setQueryObject(queryParam) {
+  Object.keys(queryParam).forEach((key) => {
+    this.query[key] = queryParam[key];
+  });
+};
 
 class AbstractClient {
   constructor(sdk) {
@@ -49,8 +55,8 @@ class AbstractClient {
   }
 
   create(entity, queryParam = {}, pathParameters = {}) {
-    const url = new URI(this.getPathBase(pathParameters));
-    url.addSearch(queryParam);
+    const url = new Url(this.getPathBase(pathParameters));
+    url.setQueryObject(queryParam);
 
     return this.deserializeResponse(
       this.authorizedFetch(url, {
@@ -62,8 +68,8 @@ class AbstractClient {
   }
 
   update(entity, queryParam = {}) {
-    const url = new URI(this.getEntityURI(entity));
-    url.addSearch(queryParam);
+    const url = new Url(this.getEntityURI(entity));
+    url.setQueryObject(queryParam);
 
     return this.deserializeResponse(
       this.authorizedFetch(url, {
@@ -95,19 +101,16 @@ class AbstractClient {
   }
 
   makeUri(input) {
-    const url = input instanceof URI ? input : new URI(input);
-    url.host(this.sdk.config.path)
-      .scheme(this.sdk.config.scheme)
-    ;
+    const url = input instanceof Url ? input : new Url(input);
+    url.host = this.sdk.config.path;
+    url.protocol = this.sdk.config.scheme;
 
     if (this.sdk.config.port) {
-      url.port(this.sdk.config.port);
+      url.port = this.sdk.config.port;
     }
 
     if (this.sdk.config.prefix) {
-      const segments = url.segment();
-      segments.unshift(this.sdk.config.prefix);
-      url.segment(segments);
+      u.path = `${this.sdk.config.prefix}/${url.path}`;
     }
 
     return url;
@@ -125,12 +128,12 @@ class AbstractClient {
       Object.assign(params, this.getDefaultParameters());
     }
 
-    const url = new URI(!!id ?
+    const url = new Url(!!id ?
       `${this.getPathBase(pathParameters)}/${id}` :
       this.getPathBase(pathParameters)
     );
     if (params) {
-      url.addSearch(params);
+      url.setQueryObject(params);
     }
 
     return url;
