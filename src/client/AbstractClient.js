@@ -55,7 +55,7 @@ class AbstractClient {
   }
 
   create(entity, queryParam = {}, pathParameters = {}) {
-    const url = new Url(this.getPathBase(pathParameters));
+    const url = new Url(this.getPathBase(pathParameters), true);
     url.setQueryObject(queryParam);
 
     return this.deserializeResponse(
@@ -68,7 +68,7 @@ class AbstractClient {
   }
 
   update(entity, queryParam = {}) {
-    const url = new Url(this.getEntityURI(entity));
+    const url = new Url(this.getEntityURI(entity), true);
     url.setQueryObject(queryParam);
 
     return this.deserializeResponse(
@@ -101,7 +101,15 @@ class AbstractClient {
   }
 
   makeUri(input) {
-    const url = input instanceof Url ? input : new Url(input);
+    let url;
+    if (input instanceof Url) {
+      url = input;
+    } else if (typeof input === 'object') {
+      url = new Url(input.toString(), true);
+    } else {
+      url = new Url(input, true);
+    }
+
     url.host = this.sdk.config.path;
     url.protocol = this.sdk.config.scheme;
 
@@ -110,16 +118,16 @@ class AbstractClient {
     }
 
     if (this.sdk.config.prefix) {
-      u.path = `${this.sdk.config.prefix}/${url.path}`;
+      url.path = `${this.sdk.config.prefix}/${url.path}`;
     }
 
-    return url;
+    return url.toString();
   }
 
   authorizedFetch(input, init) {
     const url = this.makeUri(input);
 
-    return this._doFetch(url.toString(), init);
+    return this._doFetch(url, init);
   }
 
   _generateUrlFromParams(queryParam, pathParameters = {}, id = null) {
@@ -128,10 +136,11 @@ class AbstractClient {
       Object.assign(params, this.getDefaultParameters());
     }
 
-    const url = new Url(!!id ?
+    const path = id ?
       `${this.getPathBase(pathParameters)}/${id}` :
-      this.getPathBase(pathParameters)
-    );
+      this.getPathBase(pathParameters);
+
+    const url = new Url(path, true);
     if (params) {
       url.setQueryObject(params);
     }

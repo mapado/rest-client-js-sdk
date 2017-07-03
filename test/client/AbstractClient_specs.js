@@ -323,3 +323,19 @@ describe('Update and delete function trigger the good urls', () => {
     });
   });
 });
+describe('Fix bugs', () => {
+  it('generate good url', () => {
+    const SomeSdk = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https', prefix: '/v1' },
+      {
+        test: SomeTestClient,
+        defParam: DefaultParametersTestClient,
+        noAtId: NoAtIdClient,
+      }
+    );
+    SomeSdk.tokenStorage.generateToken();
+
+    expect(SomeSdk.test.makeUri('foo')).to.equals('https://api.me/v1/foo');
+  });
+});

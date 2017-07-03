@@ -60,7 +60,7 @@ class PasswordGenerator extends AbstractTokenGenerator {
   }
 
   _doFetch(parameters) {
-    const uri = new Url(this.tokenGeneratorConfig.path);
+    const uri = new Url(this.tokenGeneratorConfig.path, true);
     uri.protocole = this.tokenGeneratorConfig.scheme;
 
     if (this.tokenGeneratorConfig.port) {

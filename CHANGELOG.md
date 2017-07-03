@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.1] - 2017-07-03
+### Changed
+  * Make urijs implementation work again but might be breaking
+  * Url constructor passed with `noTransform = true` for better perf and avoid potential bugs
+
 ## [1.0.0] - 2017-07-03
 ### Changed
   * Replace [urijs](https://medialize.github.io/URI.js/) dependency by smaller [domurl](https://github.com/Mikhus/domurl)

@@ -21,7 +21,7 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator {
     parameters.client_id = this.tokenGeneratorConfig.clientId;
     parameters.client_secret = this.tokenGeneratorConfig.clientSecret;
 
-    const uri = new Url(this.tokenGeneratorConfig.path);
+    const uri = new Url(this.tokenGeneratorConfig.path, true);
     uri.protocol = this.tokenGeneratorConfig.scheme;
 
     if (this.tokenGeneratorConfig.port) {
