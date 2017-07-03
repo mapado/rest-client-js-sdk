@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.0] - 2017-07-03
+### Changed
+  * Replace [urijs](https://medialize.github.io/URI.js/) dependency by smaller [domurl](https://github.com/Mikhus/domurl)
+
 ## [0.15.0] - 2017-06-27
 ### Added
   * Added the current URI as referer for http calls
