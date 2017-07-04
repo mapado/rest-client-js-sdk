@@ -1,6 +1,6 @@
 /* global fetch */
 
-import Url from 'domurl';
+import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
 import { handleBadResponse } from '../Error';
@@ -60,11 +60,11 @@ class PasswordGenerator extends AbstractTokenGenerator {
   }
 
   _doFetch(parameters) {
-    const uri = new Url(this.tokenGeneratorConfig.path, true);
-    uri.protocole = this.tokenGeneratorConfig.scheme;
+    const uri = new URI(this.tokenGeneratorConfig.path);
+    uri.scheme(this.tokenGeneratorConfig.scheme);
 
     if (this.tokenGeneratorConfig.port) {
-      uri.port = this.tokenGeneratorConfig.port;
+      uri.port(this.tokenGeneratorConfig.port);
     }
 
     const url = uri.toString();

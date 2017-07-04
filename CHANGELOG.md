@@ -1,11 +1,20 @@
 # Changelog
 
-## [1.0.1] - 2017-07-03
+## [1.0.2] - 2017-07-04
+
+This release is the same as 0.15.0 and though fully compatible
+
+### Changed
+  * Rolled back to urijs because domurl use the default node implementation which is not compatible with the stack we use.
+  The real future solution will be to use Javascript `URL` object but too early and unstable for now
+
+
+## [1.0.1] - 2017-07-03 - [YANKED]
 ### Changed
   * Make urijs implementation work again but might be breaking
   * Url constructor passed with `noTransform = true` for better perf and avoid potential bugs
 
-## [1.0.0] - 2017-07-03
+## [1.0.0] - 2017-07-03 - [YANKED]
 ### Changed
   * Replace [urijs](https://medialize.github.io/URI.js/) dependency by smaller [domurl](https://github.com/Mikhus/domurl)
 

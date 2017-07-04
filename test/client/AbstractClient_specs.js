@@ -336,6 +336,6 @@ describe('Fix bugs', () => {
     );
     SomeSdk.tokenStorage.generateToken();
 
-    expect(SomeSdk.test.makeUri('foo')).to.equals('https://api.me/v1/foo');
+    expect(SomeSdk.test.makeUri('foo').toString()).to.equals('https://api.me/v1/foo');
   });
 });
