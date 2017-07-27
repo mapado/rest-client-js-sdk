@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## [1.0.3] - 2017-07-27
 ### Changed
   * Allow overriding base headers [#24](https://github.com/mapado/rest-client-js-sdk/pull/24)
 
