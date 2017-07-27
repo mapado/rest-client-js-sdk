@@ -338,4 +338,23 @@ describe('Fix bugs', () => {
 
     expect(SomeSdk.test.makeUri('foo').toString()).to.equals('https://api.me/v1/foo');
   });
+
+  it('allow base header override', () => {
+    fetchMock
+      .mock(() => true, {
+        '@id': '/v2/test/8',
+        foo: 'bar',
+      })
+      .getMock()
+    ;
+
+    return SomeSdk.test
+      .authorizedFetch('foo', {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers['Content-Type']).to.equals('multipart/form-data');
+      })
+    ;
+  });
 });
