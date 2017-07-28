@@ -357,4 +357,29 @@ describe('Fix bugs', () => {
       })
     ;
   });
+
+  it('allow removing base header', () => {
+    fetchMock
+      .mock(() => true, {
+        '@id': '/v2/test/8',
+        foo: 'bar',
+      })
+      .getMock()
+    ;
+
+    return SomeSdk.test
+      .authorizedFetch('foo', {
+        headers: {
+          'Content-Type': undefined,
+          foo: undefined,
+          bar: null,
+          baz: '',
+          bad: 0,
+        },
+      })
+      .then(() => {
+        expect(Object.keys(fetchMock.lastOptions().headers)).to.eql(['Authorization', 'bar', 'baz', 'bad']);
+      })
+    ;
+  });
 });

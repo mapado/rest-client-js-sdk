@@ -199,6 +199,8 @@ class AbstractClient {
       params = { headers: baseHeaders };
     }
 
+    params.headers = this._removeUndefinedHeaders(params.headers);
+
     return fetch(input, params)
       .then((response) => {
         if (response.status < 400) {
@@ -214,6 +216,18 @@ class AbstractClient {
         }
       })
     ;
+  }
+
+  _removeUndefinedHeaders(headers) {
+    // remove undefined key, usefull to remove Content-Type for example
+    const localHeaders = headers;
+    Object.keys(localHeaders).forEach((key) => {
+      if (localHeaders[key] === undefined) {
+        delete localHeaders[key];
+      }
+    });
+
+    return localHeaders;
   }
 }
 
