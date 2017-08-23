@@ -370,6 +370,7 @@ describe('Fix bugs', () => {
     return SomeSdk.test
       .authorizedFetch('foo', {
         headers: {
+          Authorization: undefined,
           'Content-Type': undefined,
           foo: undefined,
           bar: null,

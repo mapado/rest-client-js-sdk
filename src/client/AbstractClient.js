@@ -180,8 +180,11 @@ class AbstractClient {
     let params = init;
 
     const baseHeaders = {
-      Authorization: `${this.sdk.config.authorizationType} ${accessToken}`,
       'Content-Type': 'application/json',
+    };
+
+    const authHeader = {
+      Authorization: `${this.sdk.config.authorizationType} ${accessToken}`,
     };
 
     const currentUri = typeof window === 'object' && window.location && window.location.href;
@@ -199,6 +202,7 @@ class AbstractClient {
       params = { headers: baseHeaders };
     }
 
+    params.headers = Object.assign(params.headers, authHeader);
     params.headers = this._removeUndefinedHeaders(params.headers);
 
     return fetch(input, params)
