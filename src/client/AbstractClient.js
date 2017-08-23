@@ -194,7 +194,7 @@ class AbstractClient {
         params.headers = {};
       }
 
-      params.headers = Object.assign(baseHeaders, params.headers);
+      params.headers = Object.assign(params.headers, baseHeaders);
     } else {
       params = { headers: baseHeaders };
     }
