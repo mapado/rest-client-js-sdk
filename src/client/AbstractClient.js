@@ -197,11 +197,12 @@ class AbstractClient {
         params.headers = {};
       }
 
-      params.headers = Object.assign(baseHeaders, params.headers, authHeader);
+      params.headers = Object.assign(baseHeaders, params.headers);
     } else {
       params = { headers: baseHeaders };
     }
 
+    params.headers = Object.assign(params.headers, authHeader);
     params.headers = this._removeUndefinedHeaders(params.headers);
 
     return fetch(input, params)
