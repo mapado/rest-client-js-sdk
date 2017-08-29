@@ -154,7 +154,11 @@ class AbstractClient {
             case 'The access token provided has expired.':
               if (this._tokenStorage) {
                 return this._tokenStorage.refreshToken()
-                  .then(() => this._doFetch(input, init))
+                  .then(() => {
+                    const params = init;
+                    delete params.headers.Authorization;
+                    return this._doFetch(input, params);
+                  })
                   .catch(() => {
                     throw new AccessDeniedError('Unable to renew access_token', response);
                   })
