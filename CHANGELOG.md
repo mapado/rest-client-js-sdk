@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.5] - 2017-08-30
+### Changed
+  * Fix token loop when token is not valid anymore
+
 ## [1.0.4] - 2017-07-28
 ### Changed
   * Remove undefined headers
