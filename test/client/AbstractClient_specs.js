@@ -253,12 +253,49 @@ describe('Test Client', () => {
     return Promise.all([
       SomeSdk.test.find(8),
       BasicAuthSdk.test.find(8),
-    ])
-    .then(() => {
+    ]).then(() => {
       const authHeader = fetchMock.calls().matched[0][1].headers.Authorization;
       expect(authHeader).to.include('Bearer ');
-      const basicAuthHeader = fetchMock.calls().matched[1][1].headers.Authorization;
+      const basicAuthHeader = fetchMock.calls().matched[1][1].headers
+        .Authorization;
       expect(basicAuthHeader).to.include('Basic ');
+    });
+  });
+
+  it('handle refreshing the authorization header', () => {
+    let send401 = true;
+    fetchMock
+      .mock('https://api.me/v2/test/8', 'GET', function() {
+        if (send401) {
+          send401 = false;
+          return {
+            status: 401,
+            body: {
+              error: 'invalid_grant',
+              error_description: 'The access token provided has expired.',
+            },
+          };
+        } else {
+          return {
+            '@id': '/v1/test/8',
+          };
+        }
+      })
+      .getMock();
+
+    const BasicAuthSdk = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https', authorizationType: 'Basic' },
+      {
+        test: SomeTestClient,
+        defParam: DefaultParametersTestClient,
+      }
+    );
+
+    BasicAuthSdk.tokenStorage.generateToken();
+    return BasicAuthSdk.test.find(8).then(() => {
+      const authHeader = fetchMock.calls().matched[1][1].headers.Authorization;
+      expect(authHeader).to.equals('Basic refreshed-access-token');
     });
   });
 });

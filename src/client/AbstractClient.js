@@ -141,24 +141,32 @@ class AbstractClient {
       throw new Error('input is empty');
     }
 
-    return this._tokenStorage.getAccessToken()
-      .then(token => this._fetchWithToken(token, input, init))
-    ;
+    return this._tokenStorage
+      .getAccessToken()
+      .then(token => this._fetchWithToken(token, input, init));
   }
 
   _manageAccessDenied(response, input, init) {
-    return response.json()
+    return response
+      .json()
       .then(body => {
         if (body.error === 'invalid_grant') {
           switch (body.error_description) {
             case 'The access token provided has expired.':
               if (this._tokenStorage) {
-                return this._tokenStorage.refreshToken()
-                  .then(() => this._doFetch(input, init))
-                  .catch(() => {
-                    throw new AccessDeniedError('Unable to renew access_token', response);
+                return this._tokenStorage
+                  .refreshToken()
+                  .then(() => {
+                    const params = Object.assign({}, init);
+                    delete params.headers.Authorization;
+                    return this._doFetch(input, params);
                   })
-                ;
+                  .catch(err => {
+                    throw new AccessDeniedError(
+                      'Unable to renew access_token',
+                      response
+                    );
+                  });
               }
 
               break;
