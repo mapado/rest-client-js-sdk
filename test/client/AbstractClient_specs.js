@@ -3,8 +3,9 @@
 import fetchMock from 'fetch-mock';
 import { expect, assert } from 'chai';
 import * as errors from '../../src/Error';
-import RestClientSdk, { AbstractClient } from '../../src';
+import RestClientSdk, { AbstractClient, TokenStorage, PasswordGenerator } from '../../src';
 import tokenStorageMock from '../mock/tokenStorage';
+import MockStorage from '../mock/mockStorage';
 import WeirdSerializer from '../WeirdSerializer';
 
 class SomeTestClient extends AbstractClient {
@@ -324,6 +325,10 @@ describe('Update and delete function trigger the good urls', () => {
   });
 });
 describe('Fix bugs', () => {
+  afterEach(() => {
+    fetchMock.restore();
+  });
+
   it('generate good url', () => {
     const SomeSdk = new RestClientSdk(
       tokenStorageMock,
@@ -379,6 +384,87 @@ describe('Fix bugs', () => {
       })
       .then(() => {
         expect(Object.keys(fetchMock.lastOptions().headers)).to.eql(['Authorization', 'bar', 'baz', 'bad']);
+      })
+    ;
+  });
+
+  it('check that the request done after refreshing a token contains the refreshed token', () => {
+    fetchMock
+      .mock({
+        name:  'generate_token',
+        matcher: (url, opts) => url === 'https://oauth.me' && opts.body._streams[7] === 'password',
+        response: {
+          body: {
+            access_token: 'an_access_token',
+            expires_in: 3600,
+            token_type: 'bearer',
+            scope: 'scope1 scope2',
+            refresh_token: 'refresh_token',
+          },
+          status: 200,
+        },
+      })
+      .mock({
+        name: 'refresh_token',
+        matcher: (url, opts) => url === 'https://oauth.me' && opts.body._streams[1].match('refresh_token'),
+        response: {
+          body: {
+            access_token: 'a_refreshed_token',
+            expires_in: 3600,
+            token_type: 'bearer',
+            scope: 'scope1 scope2',
+            refresh_token: 're_refresh_token',
+          },
+          status: 200,
+        },
+      })
+      .mock({
+        name: 'access_denied',
+        matcher: (url, opts) => url.match(/\/1$/) && opts.headers.Authorization !== 'Bearer a_refreshed_token',
+        response: {
+          status: 401,
+          body: {
+            error: 'invalid_grant',
+            error_description: 'The access token provided has expired.',
+          },
+        },
+      })
+      .mock({
+        name: 'success',
+        matcher: (url, opts) => url.match(/\/1$/) && opts.headers.Authorization === 'Bearer a_refreshed_token',
+        response: {
+          status: 200,
+          body: {
+            foofoo: 'barbarbar',
+          },
+        },
+      })
+      .getMock()
+    ;
+
+    const tokenGenerator = new PasswordGenerator({
+      path: 'oauth.me',
+      scheme: 'https',
+      clientId: 'clientId',
+      clientSecret: 'clientSecret',
+    });
+
+    const storage = new MockStorage();
+
+    const SomeInnerSdk = new RestClientSdk(
+      new TokenStorage(tokenGenerator, storage),
+      { path: 'api.me', scheme: 'https' },
+      { test: SomeTestClient }
+    );
+
+    return SomeInnerSdk.tokenStorage.generateToken({
+      username: 'foo',
+      password: 'bar',
+    })
+      .then(() => SomeInnerSdk.test.find(1))
+      .then(() => {
+        expect(fetchMock.lastOptions('access_denied').headers.Authorization).to.eql('Bearer an_access_token');
+        expect(fetchMock.lastOptions('success').headers.Authorization).to.eql('Bearer a_refreshed_token');
       })
     ;
   });

@@ -155,8 +155,13 @@ class AbstractClient {
               if (this._tokenStorage) {
                 return this._tokenStorage.refreshToken()
                   .then(() => {
-                    const params = init;
+                    const params = Object.assign(
+                      {},
+                      init,
+                      { headers: Object.assign({}, init.headers) }
+                    );
                     delete params.headers.Authorization;
+
                     return this._doFetch(input, params);
                   })
                   .catch(() => {
