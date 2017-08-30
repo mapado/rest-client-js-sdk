@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+### Changed
+  * Upgrade dependencies (rollup 0.49, eslint 4, etc.)
+  * Add prettier to project:w
+
 ## [1.0.5] - 2017-08-30
 ### Changed
   * Fix token loop when token is not valid anymore
