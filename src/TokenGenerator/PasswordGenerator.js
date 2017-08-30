@@ -6,11 +6,14 @@ import { memoizePromise } from '../decorator';
 import { handleBadResponse } from '../Error';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
-const ERROR_CONFIG_PATH_SCHEME = 'TokenGenerator config is not valid, it should contain a "path", a "scheme" parameter';
-const ERROR_CONFIG_CLIENT_INFORMATIONS = 'TokenGenerator config is not valid, it should contain a "clientId", a "clientSecret" parameter';
+const ERROR_CONFIG_PATH_SCHEME =
+  'TokenGenerator config is not valid, it should contain a "path", a "scheme" parameter';
+const ERROR_CONFIG_CLIENT_INFORMATIONS =
+  'TokenGenerator config is not valid, it should contain a "clientId", a "clientSecret" parameter';
 
 const ERROR_TOKEN_EMPTY = 'parameters must be set';
-const ERROR_TOKEN_USERNAME_PASSWORD = 'username and password must be passed as parameters';
+const ERROR_TOKEN_USERNAME_PASSWORD =
+  'username and password must be passed as parameters';
 
 class PasswordGenerator extends AbstractTokenGenerator {
   constructor(props) {
@@ -31,7 +34,9 @@ class PasswordGenerator extends AbstractTokenGenerator {
 
   refreshToken(accessToken, baseParameters = {}) {
     if (!(accessToken && accessToken.refresh_token)) {
-      throw new Error('refresh_token is not set. Did you called `generateToken` before ?');
+      throw new Error(
+        'refresh_token is not set. Did you called `generateToken` before ?'
+      );
     }
 
     const parameters = baseParameters;
@@ -72,8 +77,7 @@ class PasswordGenerator extends AbstractTokenGenerator {
     return fetch(url, {
       method: 'POST',
       body: this.convertMapToFormData(parameters),
-    })
-    .then((response) => {
+    }).then(response => {
       if (response.status !== 200) {
         return handleBadResponse(response);
       }
@@ -94,4 +98,3 @@ class PasswordGenerator extends AbstractTokenGenerator {
 }
 
 export default PasswordGenerator;
-

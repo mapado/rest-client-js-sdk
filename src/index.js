@@ -24,7 +24,6 @@ export {
   ProvidedTokenGenerator,
   Serializer,
   TokenStorage,
-
   AccessDeniedError,
   BadRequestError,
   ForbiddenError,

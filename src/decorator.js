@@ -15,17 +15,22 @@ export function memoizePromise(callback) {
 
     const isPromise = !!value && typeof value.then === 'function';
     if (!isPromise) {
-      throw new Error('Memoization Error, Async function returned non-promise value');
+      throw new Error(
+        'Memoization Error, Async function returned non-promise value'
+      );
     }
 
     // Delete the value regardless of whether it resolves or rejects
-    return value.then((internalValue) => {
-      cache[cacheKey] = false;
-      return internalValue;
-    }, (err) => {
-      cache[cacheKey] = false;
-      throw err;
-    });
+    return value.then(
+      internalValue => {
+        cache[cacheKey] = false;
+        return internalValue;
+      },
+      err => {
+        cache[cacheKey] = false;
+        throw err;
+      }
+    );
   }
 
   memoized.cache = cache;

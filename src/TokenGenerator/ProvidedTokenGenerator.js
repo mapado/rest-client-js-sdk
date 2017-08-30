@@ -2,7 +2,6 @@
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 
 class ProvidedTokenGenerator extends AbstractTokenGenerator {
-
   constructor(token, refreshTokenFunc = null) {
     super();
     this._token = token;

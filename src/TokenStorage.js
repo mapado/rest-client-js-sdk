@@ -12,28 +12,33 @@ class TokenStorage {
   }
 
   hasAccessToken() {
-    return this._asyncStorage.getItem(ACCESS_TOKEN_KEY)
+    return this._asyncStorage
+      .getItem(ACCESS_TOKEN_KEY)
       .then(accessToken => !!accessToken);
   }
 
   getAccessToken() {
-    return this._asyncStorage.getItem(ACCESS_TOKEN_KEY)
-      .then(token => {
-        if (!token) {
-          if (!this._hasATokenBeenGenerated && !this._tokenGenerator.canAutogenerateToken) {
-            throw new Error('No token has been generated yet.');
-          }
-
-          if (!this._hasATokenBeenGenerated && this._tokenGenerator.canAutogenerateToken) {
-            return this.generateToken()
-              .then(generatedToken => generatedToken && generatedToken.access_token)
-            ;
-          }
+    return this._asyncStorage.getItem(ACCESS_TOKEN_KEY).then(token => {
+      if (!token) {
+        if (
+          !this._hasATokenBeenGenerated &&
+          !this._tokenGenerator.canAutogenerateToken
+        ) {
+          throw new Error('No token has been generated yet.');
         }
 
-        return token && JSON.parse(token).access_token;
-      })
-    ;
+        if (
+          !this._hasATokenBeenGenerated &&
+          this._tokenGenerator.canAutogenerateToken
+        ) {
+          return this.generateToken().then(
+            generatedToken => generatedToken && generatedToken.access_token
+          );
+        }
+      }
+
+      return token && JSON.parse(token).access_token;
+    });
   }
 
   logout() {
@@ -42,31 +47,30 @@ class TokenStorage {
 
   generateToken(parameters) {
     this._hasATokenBeenGenerated = true;
-    return this._tokenGenerator.generateToken(parameters)
+    return this._tokenGenerator
+      .generateToken(parameters)
       .then(responseData =>
-        this._storeAccessToken(responseData)
-          .then(() => responseData)
-      )
-    ;
+        this._storeAccessToken(responseData).then(() => responseData)
+      );
   }
 
   refreshToken(parameters) {
-    return this._asyncStorage.getItem(ACCESS_TOKEN_KEY)
+    return this._asyncStorage
+      .getItem(ACCESS_TOKEN_KEY)
       .then(token =>
         this._tokenGenerator
           .refreshToken(JSON.parse(token), parameters)
           .then(responseData =>
-            this._storeAccessToken(responseData)
-              .then(() => responseData)
+            this._storeAccessToken(responseData).then(() => responseData)
           )
-      )
-    ;
+      );
   }
 
   _storeAccessToken(responseData) {
-    return this._asyncStorage
-      .setItem(ACCESS_TOKEN_KEY, JSON.stringify(responseData))
-    ;
+    return this._asyncStorage.setItem(
+      ACCESS_TOKEN_KEY,
+      JSON.stringify(responseData)
+    );
   }
 }
 

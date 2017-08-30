@@ -6,8 +6,10 @@ import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
-const ERROR_CONFIG_PATH_SCHEME = 'TokenGenerator config is not valid, it should contain a "path", a "scheme" parameter';
-const ERROR_CONFIG_CLIENT_INFORMATIONS = 'TokenGenerator config is not valid, it should contain a "clientId", a "clientSecret" parameter';
+const ERROR_CONFIG_PATH_SCHEME =
+  'TokenGenerator config is not valid, it should contain a "path", a "scheme" parameter';
+const ERROR_CONFIG_CLIENT_INFORMATIONS =
+  'TokenGenerator config is not valid, it should contain a "clientId", a "clientSecret" parameter';
 
 class ClientCredentialsGenerator extends AbstractTokenGenerator {
   constructor(props) {
@@ -21,9 +23,9 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator {
     parameters.client_id = this.tokenGeneratorConfig.clientId;
     parameters.client_secret = this.tokenGeneratorConfig.clientSecret;
 
-    const uri = (new URI(this.tokenGeneratorConfig.path))
-      .scheme(this.tokenGeneratorConfig.scheme)
-    ;
+    const uri = new URI(this.tokenGeneratorConfig.path).scheme(
+      this.tokenGeneratorConfig.scheme
+    );
 
     if (this.tokenGeneratorConfig.port) {
       uri.port(this.tokenGeneratorConfig.port);
@@ -34,8 +36,7 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator {
     return fetch(url, {
       method: 'POST',
       body: this.convertMapToFormData(parameters),
-    })
-    .then((response) => {
+    }).then(response => {
       if (response.status !== 200) {
         return handleBadResponse(response);
       }

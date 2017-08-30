@@ -14,7 +14,8 @@
     "test:watch": "npm run test -- --watch",
     "build": "rollup -c",
     "check:src": "npm run test",
-    "prepublish": "npm run clean && npm run check:src && npm run build"
+    "prepublish": "npm run clean && npm run check:src && npm run build",
+    "precommit": "lint-staged"
   },
   "dependencies": {
     "urijs": "^1.18.1"
@@ -29,12 +30,17 @@
     "chai-as-promised": "^5.3.0",
     "eslint": "^4.5.0",
     "eslint-config-airbnb": "^15.1.0",
+    "eslint-config-prettier": "^2.3.0",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-prettier": "^2.2.0",
     "eslint-plugin-react": "^7.3.0",
     "fetch-mock": "^4.6.0",
     "form-data": "^2.1.2",
+    "husky": "^0.14.3",
+    "lint-staged": "^4.0.4",
     "mocha": "^3.2.0",
+    "prettier": "^1.6.1",
     "rimraf": "^2.5.4",
     "rollup": "^0.49.2",
     "rollup-plugin-babel": "^3.0.2",
@@ -56,41 +62,6 @@
     "url": "https://github.com/mapado/rest-client-js-sdk/issues"
   },
   "homepage": "https://github.com/mapado/rest-client-js-sdk#readme",
-  "eslintConfig": {
-    "extends": "airbnb",
-    "rules": {
-      "class-methods-use-this": [
-        0
-      ],
-      "new-cap": [
-        2,
-        {
-          "newIsCap": true,
-          "capIsNew": false
-        }
-      ],
-      "no-underscore-dangle": [
-        "error",
-        {
-          "allowAfterThis": true,
-          "allow": [
-            "_groups"
-          ]
-        }
-      ],
-      "comma-dangle": [
-        "error",
-        {
-          "arrays": "always-multiline",
-          "objects": "always-multiline",
-          "imports": "always-multiline",
-          "exports": "always-multiline",
-          "functions": "never"
-        }
-      ],
-      "react/prefer-es6-class": 1
-    }
-  },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
@@ -99,5 +70,8 @@
       "path": "./dist/index.es.js",
       "threshold": "31 Kb"
     }
-  ]
+  ],
+  "lint-staged": {
+    "*.{js,jsx,json}": ["prettier --write", "git add"]
+  }
 }
