@@ -5,10 +5,9 @@ import babel from 'rollup-plugin-babel';
 const pkg = require('./package.json');
 
 export default {
-  entry: 'src/index.js',
-  sourceMap: true,
+  input: 'src/index.js',
+  sourcemap: true,
   exports: 'named',
-  moduleName: 'rest-client-sdk',
   plugins: [
     commonjs(),
     resolve(),
@@ -16,17 +15,15 @@ export default {
       exclude: 'node_modules/**',
       babelrc: false,
       presets: [
-        ['latest', {
-          es2015: {
-            modules: false,
-          },
+        ['env', {
+          modules: false,
         }],
       ],
       plugins: ['external-helpers'],
     }),
   ],
-  targets: [
-    { dest: pkg.main, format: 'umd' },
-    { dest: pkg.module, format: 'es' },
+  output: [
+    { file: pkg.main, format: 'umd', name: 'rest-client-sdk', exports: 'named' },
+    { file: pkg.module, format: 'es' },
   ],
 };
