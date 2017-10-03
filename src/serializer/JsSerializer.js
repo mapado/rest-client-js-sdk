@@ -6,11 +6,11 @@ class JsSerializer extends Serializer {
     return JSON.stringify(entity);
   }
 
-  deserializeItem(rawData, type) {
+  deserializeItem(rawData, type, response) {
     return JSON.parse(rawData);
   }
 
-  deserializeList(rawListData, type) {
+  deserializeList(rawListData, type, response) {
     return JSON.parse(rawListData);
   }
 }

@@ -79,13 +79,23 @@ class AbstractClient {
   }
 
   deserializeResponse(requestPromise, listOrItem) {
-    return requestPromise.then(response => response.text()).then(text => {
-      if (listOrItem === 'list') {
-        return this.serializer.deserializeList(text, this.getName());
-      }
+    let response;
+    return requestPromise
+      .then(res => {
+        response = res;
+        return res.text();
+      })
+      .then(text => {
+        if (listOrItem === 'list') {
+          return this.serializer.deserializeList(
+            text,
+            this.getName(),
+            response
+          );
+        }
 
-      return this.serializer.deserializeItem(text, this.getName());
-    });
+        return this.serializer.deserializeItem(text, this.getName(), response);
+      });
   }
 
   makeUri(input) {
