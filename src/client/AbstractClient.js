@@ -79,13 +79,9 @@ class AbstractClient {
   }
 
   deserializeResponse(requestPromise, listOrItem) {
-    let response;
     return requestPromise
-      .then(res => {
-        response = res;
-        return res.text();
-      })
-      .then(text => {
+      .then(response => response.text().then(text => [response, text]))
+      .then(([response, text]) => {
         if (listOrItem === 'list') {
           return this.serializer.deserializeList(
             text,
