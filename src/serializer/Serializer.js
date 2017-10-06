@@ -17,7 +17,7 @@ class Serializer {
    * @param {string} type - The result of the `getName` method of the Repository
    * @return {any} an entity
    */
-  deserializeItem(rawData, type) {
+  deserializeItem(rawData, type, response) {
     throw new TypeError('`deserializeItem` method must be implemented');
   }
 
@@ -27,7 +27,7 @@ class Serializer {
    * @param {string} type - The result of the `getName` method of the Repository
    * @return {any} a list of entities
    */
-  deserializeList(rawListData, type) {
+  deserializeList(rawListData, type, response) {
     throw new TypeError('`deserializeList` method must be implemented');
   }
 }
