@@ -12,7 +12,7 @@
     "test:watch": "npm run test -- --watch",
     "build": "rollup -c",
     "check:src": "npm run test",
-    "prepublish": "npm run clean && npm run check:src && npm run build",
+    "prepublishOnly": "npm run clean && npm run check:src && npm run build",
     "precommit": "lint-staged"
   },
   "dependencies": {
