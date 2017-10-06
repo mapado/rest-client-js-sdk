@@ -2,8 +2,12 @@
 
 ## Unreleased
 ### Changed
+
+## [1.1.0] - 2017-08-30
+### Changed
+  * Pass on response to serializer
   * Upgrade dependencies (rollup 0.49, eslint 4, etc.)
-  * Add prettier to project:w
+  * Add prettier to project
 
 ## [1.0.5] - 2017-08-30
 ### Changed
