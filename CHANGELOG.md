@@ -3,6 +3,10 @@
 ## Unreleased
 ### Changed
 
+## [1.1.1] - 2017-10-08
+### Changed
+  * upgrade rollup to 0.50.0
+
 ## [1.1.0] - 2017-08-30
 ### Changed
   * Pass on response to serializer
