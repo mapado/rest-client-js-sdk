@@ -172,7 +172,6 @@ class AbstractClient {
               }
 
               break;
-
             default:
               throw new AccessDeniedError(body.error_description, response);
           }
@@ -189,6 +188,21 @@ class AbstractClient {
           response
         );
       });
+  }
+
+  _manageBadRequest(response) {
+    return response
+      .json()
+      .then(body => {
+        if (
+          body.error === 'invalid_grant' &&
+          body.error_description === 'Invalid refresh token'
+        ) {
+          throw new AccessDeniedError('Invalid refresh token', response);
+        }
+        return handleBadResponse(response);
+      })
+      .catch(() => handleBadResponse(response));
   }
 
   _fetchWithToken(accessToken, input, init) {
@@ -222,13 +236,15 @@ class AbstractClient {
         return response;
       }
 
+      if (response.status === 400) {
+        return this._manageBadRequest(response, input, params);
+      }
+
       if (response.status === 401) {
         return this._manageAccessDenied(response, input, params);
       }
 
-      if (response.status !== 401) {
-        return handleBadResponse(response);
-      }
+      return handleBadResponse(response);
     });
   }
 
