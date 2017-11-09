@@ -65,16 +65,16 @@ InternalServerError.prototype.constructor = InternalServerError;
 function handleBadResponse(response) {
   switch (true) {
     case response.status === 403:
-      throw new ForbiddenError(response);
+      throw new ForbiddenError(null, response);
 
     case response.status === 404:
-      throw new ResourceNotFoundError(response);
+      throw new ResourceNotFoundError(null, response);
 
     case response.status >= 400 && response.status < 500:
-      throw new BadRequestError(response);
+      throw new BadRequestError(null, response);
 
     case response.status >= 500 && response.status < 600:
-      throw new InternalServerError(response);
+      throw new InternalServerError(null, response);
 
     default:
       return new Error(`Unexpected error, status code is ${response.status}`);
