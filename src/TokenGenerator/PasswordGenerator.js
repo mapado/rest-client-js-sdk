@@ -3,7 +3,7 @@
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
-import { handleBadResponse } from '../Error';
+import { AccessDeniedError, handleBadResponse, HttpError } from '../Error';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -29,7 +29,11 @@ class PasswordGenerator extends AbstractTokenGenerator {
     parameters.client_id = this.tokenGeneratorConfig.clientId;
     parameters.client_secret = this.tokenGeneratorConfig.clientSecret;
 
-    return this._doFetch(parameters);
+    if (this.tokenGeneratorConfig.scope && !parameters.scope) {
+      parameters.scope = this.tokenGeneratorConfig.scope;
+    }
+
+    return this._doFetch(parameters).then(response => response.json());
   }
 
   refreshToken(accessToken, baseParameters = {}) {
@@ -44,10 +48,20 @@ class PasswordGenerator extends AbstractTokenGenerator {
     parameters.grant_type = 'refresh_token';
     parameters.client_id = this.tokenGeneratorConfig.clientId;
     parameters.client_secret = this.tokenGeneratorConfig.clientSecret;
+    if (this.tokenGeneratorConfig.scope && !parameters.scope) {
+      parameters.scope = this.tokenGeneratorConfig.scope;
+    }
 
     parameters.refresh_token = accessToken.refresh_token;
 
-    return this._doFetch(parameters);
+    return this._doFetch(parameters)
+      .then(response => response.json())
+      .catch(err => {
+        if (err instanceof HttpError) {
+          throw new AccessDeniedError(null, err.baseResponse);
+        }
+        throw err;
+      });
   }
 
   checkTokenGeneratorConfig(config) {
@@ -78,11 +92,11 @@ class PasswordGenerator extends AbstractTokenGenerator {
       method: 'POST',
       body: this.convertMapToFormData(parameters),
     }).then(response => {
-      if (response.status !== 200) {
-        return handleBadResponse(response);
+      if (response.status >= 400) {
+        handleBadResponse(response);
       }
 
-      return response.json();
+      return response;
     });
   }
 
