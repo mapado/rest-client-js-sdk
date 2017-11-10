@@ -29,6 +29,10 @@ class PasswordGenerator extends AbstractTokenGenerator {
     parameters.client_id = this.tokenGeneratorConfig.clientId;
     parameters.client_secret = this.tokenGeneratorConfig.clientSecret;
 
+    if (this.tokenGeneratorConfig.scope && !parameters.scope) {
+      parameters.scope = this.tokenGeneratorConfig.scope;
+    }
+
     return this._doFetch(parameters).then(response => response.json());
   }
 
@@ -44,6 +48,9 @@ class PasswordGenerator extends AbstractTokenGenerator {
     parameters.grant_type = 'refresh_token';
     parameters.client_id = this.tokenGeneratorConfig.clientId;
     parameters.client_secret = this.tokenGeneratorConfig.clientSecret;
+    if (this.tokenGeneratorConfig.scope && !parameters.scope) {
+      parameters.scope = this.tokenGeneratorConfig.scope;
+    }
 
     parameters.refresh_token = accessToken.refresh_token;
 
