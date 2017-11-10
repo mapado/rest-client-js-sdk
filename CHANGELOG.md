@@ -3,6 +3,12 @@
 ## Unreleased
 ### Changed
 
+## [1.2.1] - 2017-10-08
+### Changed
+  * fix response passed as error message in Errors
+  * throw AccessDeniedError on any Error in PasswordGenerator refreshToken
+  * allow to pass scope param in tokenGeneratorConfig
+
 ## [1.1.1] - 2017-10-08
 ### Changed
   * upgrade rollup to 0.50.0
