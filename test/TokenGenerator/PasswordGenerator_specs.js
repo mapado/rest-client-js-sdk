@@ -57,7 +57,7 @@ describe('PasswordGenerator tests', () => {
     expect(token).to.be.an.instanceOf(Promise);
 
     return Promise.all([
-      expect(token).to.eventually.be.an.object,
+      expect(token).to.eventually.be.an('object'),
       expect(token.then(a => a.access_token)).to.eventually.equals(
         oauthClientCredentialsMock.access_token
       ),

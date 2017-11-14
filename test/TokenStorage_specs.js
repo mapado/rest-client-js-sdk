@@ -65,7 +65,7 @@ describe('Token storage tests', () => {
     expect(generatedToken).to.be.an.instanceOf(Promise);
 
     return Promise.all([
-      expect(generatedToken).to.eventually.be.an.object,
+      expect(generatedToken).to.eventually.be.an('object'),
       expect(generatedToken.then(a => a.access_token)).to.eventually.equals(
         oauthClientCredentialsMock.access_token
       ),
