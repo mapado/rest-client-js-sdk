@@ -1,6 +1,8 @@
 Mapado Rest Client JS SDK [![Build Status](https://travis-ci.org/mapado/rest-client-js-sdk.svg?branch=master)](https://travis-ci.org/mapado/rest-client-js-sdk)
 =================
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/mapado/rest-client-js-sdk.svg)](https://greenkeeper.io/)
+
 Rest client SDK for API for Javascript usage.
 
 This client tries to avoid the complexity of implementing a custom SDK for every API you have. You just have to implements your model and a little configuration and it will hide the complexity for you.
