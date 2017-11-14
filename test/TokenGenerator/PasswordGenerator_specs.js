@@ -1,8 +1,6 @@
 /* global describe, it, afterEach */
 global.FormData = require('form-data');
-import {
-  expect,
-} from 'chai';
+import { expect } from 'chai';
 import fetchMock from 'fetch-mock';
 import oauthClientCredentialsMock from '../mock/passwordCredentials';
 import { PasswordGenerator } from '../../src';
@@ -29,25 +27,29 @@ describe('PasswordGenerator tests', () => {
     }
 
     expect(createTokenGenerator()).to.throw(RangeError, /config must be set/);
-    expect(createTokenGenerator({ foo: 'bar' })).to.throw(RangeError, /should contain a "path"/);
-    expect(createTokenGenerator({ path: 'oauth.me', scheme: 'https' })).to.throw(RangeError, /should contain a "clientId"/);
+    expect(createTokenGenerator({ foo: 'bar' })).to.throw(
+      RangeError,
+      /should contain a "path"/
+    );
+    expect(
+      createTokenGenerator({ path: 'oauth.me', scheme: 'https' })
+    ).to.throw(RangeError, /should contain a "clientId"/);
     expect(createTokenGenerator(tokenConfig)).not.to.throw('good config');
   });
 
   it('test generateToken method', () => {
-    fetchMock
-      .mock(
-        () => true,
-        'POST',
-        oauthClientCredentialsMock
-      )
-      .getMock()
-    ;
+    fetchMock.post(() => true, oauthClientCredentialsMock);
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
 
-    expect(() => tokenGenerator.generateToken()).to.throw(RangeError, 'parameters must be set');
-    expect(() => tokenGenerator.generateToken({ foo: 'bar' })).to.throw(RangeError, 'username and password');
+    expect(() => tokenGenerator.generateToken()).to.throw(
+      RangeError,
+      'parameters must be set'
+    );
+    expect(() => tokenGenerator.generateToken({ foo: 'bar' })).to.throw(
+      RangeError,
+      'username and password'
+    );
     const token = tokenGenerator.generateToken({
       username: 'foo',
       password: 'bar',
@@ -56,28 +58,26 @@ describe('PasswordGenerator tests', () => {
 
     return Promise.all([
       expect(token).to.eventually.be.an.object,
-      expect(token.then(a => a.access_token))
-        .to.eventually.equals(oauthClientCredentialsMock.access_token),
-      expect(token.then(a => a.refresh_token))
-        .to.eventually.equals(oauthClientCredentialsMock.refresh_token),
+      expect(token.then(a => a.access_token)).to.eventually.equals(
+        oauthClientCredentialsMock.access_token
+      ),
+      expect(token.then(a => a.refresh_token)).to.eventually.equals(
+        oauthClientCredentialsMock.refresh_token
+      ),
     ]);
-  })
+  });
 
   it('test that refreshToken refresh the token ;)', () => {
-    fetchMock
-      .mock(() => true, oauthClientCredentialsMock)
-      .getMock()
-    ;
+    fetchMock.mock(() => true, oauthClientCredentialsMock);
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
 
+    expect(() => tokenGenerator.refreshToken()).to.throw(
+      Error,
+      /refresh_token is not set/
+    );
 
-    expect(() => tokenGenerator.refreshToken()).to.throw(Error, /refresh_token is not set/)
-
-    fetchMock
-      .mock(() => true, oauthClientCredentialsMock)
-      .getMock()
-    ;
+    fetchMock.mock(() => true, oauthClientCredentialsMock);
 
     const generateTokenPromise = tokenGenerator.generateToken({
       username: 'foo',
@@ -85,80 +85,71 @@ describe('PasswordGenerator tests', () => {
     });
 
     return Promise.all([
-      generateTokenPromise.then((accessToken) => {
-        expect(() => tokenGenerator.refreshToken(accessToken)).not.to.throw(Error)
-        expect(tokenGenerator.refreshToken(accessToken).then(token => token.access_token)).to.eventually.equals(oauthClientCredentialsMock.access_token)
+      generateTokenPromise.then(accessToken => {
+        expect(() => tokenGenerator.refreshToken(accessToken)).not.to.throw(
+          Error
+        );
+        expect(
+          tokenGenerator
+            .refreshToken(accessToken)
+            .then(token => token.access_token)
+        ).to.eventually.equals(oauthClientCredentialsMock.access_token);
       }),
     ]);
   });
 
   it('test that ForbiddenError is thrown', () => {
-    fetchMock
-      .mock(() => true, 403)
-      .getMock()
-    ;
+    fetchMock.mock(() => true, 403);
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
-    return tokenGenerator.generateToken({ password: 'foo', username: 'bar' })
-      .catch((err) => {
+    return tokenGenerator
+      .generateToken({ password: 'foo', username: 'bar' })
+      .catch(err => {
         expect(err instanceof ForbiddenError).to.equals(true);
-      })
-    ;
+      });
   });
 
   it('test that ResourceNotFoundError is thrown', () => {
-    fetchMock
-      .mock(() => true, 404)
-      .getMock()
-    ;
+    fetchMock.mock(() => true, 404);
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
-    return tokenGenerator.generateToken({ password: 'foo', username: 'bar' })
-      .catch((err) => {
+    return tokenGenerator
+      .generateToken({ password: 'foo', username: 'bar' })
+      .catch(err => {
         expect(err instanceof ResourceNotFoundError).to.equals(true);
-      })
-    ;
+      });
   });
 
   it('test that BadRequestError is thrown', () => {
-    fetchMock
-      .mock(() => true, 400)
-      .getMock()
-    ;
+    fetchMock.mock(() => true, 400);
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
-    return tokenGenerator.generateToken({ password: 'foo', username: 'bar' })
-      .catch((err) => {
+    return tokenGenerator
+      .generateToken({ password: 'foo', username: 'bar' })
+      .catch(err => {
         expect(err instanceof BadRequestError).to.equals(true);
-      })
-    ;
+      });
   });
 
   it('test that InternalServerError is thrown', () => {
-    fetchMock
-      .mock(() => true, 500)
-      .getMock()
-    ;
+    fetchMock.mock(() => true, 500);
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
-    return tokenGenerator.generateToken({ password: 'foo', username: 'bar' })
-      .catch((err) => {
+    return tokenGenerator
+      .generateToken({ password: 'foo', username: 'bar' })
+      .catch(err => {
         expect(err instanceof InternalServerError).to.equals(true);
-      })
-    ;
+      });
   });
 
   it('test that unexpected error is thrown', () => {
-    fetchMock
-      .mock(() => true, 401)
-      .getMock()
-    ;
+    fetchMock.mock(() => true, 401);
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
-    return tokenGenerator.generateToken({ password: 'foo', username: 'bar' })
-      .catch((err) => {
+    return tokenGenerator
+      .generateToken({ password: 'foo', username: 'bar' })
+      .catch(err => {
         expect(err instanceof Error).to.equals(true);
-      })
-    ;
+      });
   });
 });
