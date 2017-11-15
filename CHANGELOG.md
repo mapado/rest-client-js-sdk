@@ -3,7 +3,7 @@
 ## Unreleased
 ### Changed
 
-## [1.2.1] - 2017-10-08
+## [1.2.0] - 2017-11-10
 ### Changed
   * fix response passed as error message in Errors
   * throw AccessDeniedError on any Error in PasswordGenerator refreshToken
