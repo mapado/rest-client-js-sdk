@@ -9,6 +9,7 @@ import {
   ForbiddenError,
   InternalServerError,
   ResourceNotFoundError,
+  AccessDeniedError,
 } from '../../src/Error';
 
 const tokenConfig = {
@@ -96,6 +97,25 @@ describe('PasswordGenerator tests', () => {
         ).to.eventually.equals(oauthClientCredentialsMock.access_token);
       }),
     ]);
+  });
+
+  it('test that refreshToken throws AccessDeniedError on 400', () => {
+    const tokenGenerator = new PasswordGenerator(tokenConfig);
+
+    fetchMock.mock(() => true, oauthClientCredentialsMock);
+
+    const generateTokenPromise = tokenGenerator.generateToken({
+      username: 'foo',
+      password: 'bar',
+    });
+
+    fetchMock.mock(() => true, 400);
+
+    return generateTokenPromise.then(accessToken => {
+      return tokenGenerator.refreshToken(accessToken).catch(err => {
+        expect(err instanceof AccessDeniedError).to.equals(true);
+      });
+    });
   });
 
   it('test that ForbiddenError is thrown', () => {

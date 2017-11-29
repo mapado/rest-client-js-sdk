@@ -3,7 +3,7 @@
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
-import { AccessDeniedError, handleBadResponse, HttpError } from '../Error';
+import { AccessDeniedError, handleBadResponse, BadRequestError } from '../Error';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -57,7 +57,7 @@ class PasswordGenerator extends AbstractTokenGenerator {
     return this._doFetch(parameters)
       .then(response => response.json())
       .catch(err => {
-        if (err instanceof HttpError) {
+        if (err instanceof BadRequestError) {
           throw new AccessDeniedError(null, err.baseResponse);
         }
         throw err;
