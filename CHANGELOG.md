@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## [1.3.2] - 2017-12-04
+
+### Changed
+
+* fix simultaneous refresh token throwing error when trying to access to
+  response body twice
+
 ## [1.3.1] - 2017-12-04
 
 ### Changed
