@@ -59,7 +59,7 @@ class PasswordGenerator extends AbstractTokenGenerator {
     parameters.refresh_token = accessToken.refresh_token;
 
     return this._doFetch(parameters)
-      .then(response => response.json())
+      .then(response => response.clone().json())
       .catch(err => {
         if (err instanceof BadRequestError) {
           throw new AccessDeniedError(err.message, err.baseResponse);
