@@ -1,15 +1,34 @@
 /* eslint no-unused-vars: 0, no-underscore-dangle: 0 */
 import fetchMock from 'fetch-mock';
-import { expect, assert } from 'chai';
 import * as errors from '../../src/Error';
 import RestClientSdk, {
   AbstractClient,
+  Serializer,
   TokenStorage,
   PasswordGenerator,
-} from '../../src';
-import tokenStorageMock from '../mock/tokenStorage';
-import MockStorage from '../mock/mockStorage';
-import WeirdSerializer from '../WeirdSerializer';
+} from '../../src/index';
+import tokenStorageMock from '../../__mocks__/tokenStorage';
+import MockStorage from '../../__mocks__/mockStorage';
+
+class WeirdSerializer extends Serializer {
+  deserializeItem(rawData, type) {
+    return this._serializeItem(JSON.parse(rawData));
+  }
+
+  deserializeList(rawListData, type) {
+    const input = JSON.parse(rawListData);
+
+    return input.map(this._serializeItem);
+  }
+
+  serializeItem(entity, type) {
+    return JSON.stringify(entity);
+  }
+
+  _serializeItem(item) {
+    return Object.assign({}, item, { customName: `${item.name}${item.name}` });
+  }
+}
 
 class SomeTestClient extends AbstractClient {
   getPathBase(pathParameters) {
@@ -79,7 +98,7 @@ SomeSdk.tokenStorage.generateToken();
 describe('Test Client', () => {
   afterEach(fetchMock.restore);
 
-  it('handle find query', () => {
+  test('handle find query', () => {
     fetchMock.mock(() => true, {
       '@id': '/v1/test/8',
     });
@@ -91,24 +110,24 @@ describe('Test Client', () => {
       SomeSdk.defParam.find(8, { q: 'test', foo: 'bar' }),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
-      expect(url1).to.equals('https://api.me/v2/test/8');
+      expect(url1).toEqual('https://api.me/v2/test/8');
 
       const url2 = fetchMock.calls().matched[1][0];
-      expect(url2).to.equals('https://api.me/v2/test/8?q=test&foo=bar');
+      expect(url2).toEqual('https://api.me/v2/test/8?q=test&foo=bar');
 
       const url3 = fetchMock.calls().matched[2][0];
-      expect(url3).to.equals(
+      expect(url3).toEqual(
         'https://api.me/v2/def_param/8?_groups=test_read%2Ctest_write&dp=df'
       );
 
       const url4 = fetchMock.calls().matched[3][0];
-      expect(url4).to.equals(
+      expect(url4).toEqual(
         'https://api.me/v2/def_param/8?q=test&foo=bar&_groups=test_read%2Ctest_write&dp=df'
       );
     });
   });
 
-  it('handle findBy query', () => {
+  test('handle findBy query', () => {
     fetchMock.mock(() => true, {
       '@id': '/v1/test/8',
     });
@@ -118,16 +137,16 @@ describe('Test Client', () => {
       SomeSdk.defParam.findBy({ q: 'test', foo: 'bar' }),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
-      expect(url1).to.equals('https://api.me/v2/test?q=test&foo=bar');
+      expect(url1).toEqual('https://api.me/v2/test?q=test&foo=bar');
 
       const url2 = fetchMock.calls().matched[1][0];
-      expect(url2).to.equals(
+      expect(url2).toEqual(
         'https://api.me/v2/def_param?q=test&foo=bar&_groups=test_read%2Ctest_write&dp=df'
       );
     });
   });
 
-  it('handle findAll query', () => {
+  test('handle findAll query', () => {
     fetchMock.mock(() => true, {
       '@id': '/v1/test/8',
     });
@@ -137,16 +156,16 @@ describe('Test Client', () => {
       SomeSdk.defParam.findAll(),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
-      expect(url1).to.equals('https://api.me/v2/test');
+      expect(url1).toEqual('https://api.me/v2/test');
 
       const url2 = fetchMock.calls().matched[1][0];
-      expect(url2).to.equals(
+      expect(url2).toEqual(
         'https://api.me/v2/def_param?_groups=test_read%2Ctest_write&dp=df'
       );
     });
   });
 
-  it('handle entityFactory', () => {
+  test('handle entityFactory', () => {
     fetchMock.mock(() => true, {
       '@id': '/v1/test/8',
       name: 'foo',
@@ -156,14 +175,14 @@ describe('Test Client', () => {
       .find(8)
       .then(item =>
         Promise.all([
-          expect(item).to.be.an('object'),
-          expect(item.name).to.equal('foo'),
-          expect(item.customName).to.be.undefined,
+          expect(typeof item).toBe('object'),
+          expect(item.name).toBe('foo'),
+          expect(item.customName).toBeUndefined(),
         ])
       );
   });
 
-  it('handle entityFactory with a custom serializer', () => {
+  test('handle entityFactory with a custom serializer', () => {
     const EntityFactorySdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https' },
@@ -195,24 +214,24 @@ describe('Test Client', () => {
         .find(8)
         .then(item =>
           Promise.all([
-            expect(item).to.be.an('object'),
-            expect(item.name).to.equal('foo'),
-            expect(item.customName).to.equal('foofoo'),
+            expect(typeof item).toBe('object'),
+            expect(item.name).toBe('foo'),
+            expect(item.customName).toBe('foofoo'),
           ])
         ),
       EntityFactorySdk.test
         .findAll()
         .then(itemList =>
           Promise.all([
-            expect(itemList).to.be.an('array'),
-            expect(itemList[0].name).to.equal('foo'),
-            expect(itemList[0].customName).to.equal('foofoo'),
+            expect(Array.isArray(itemList)).toBe(true),
+            expect(itemList[0].name).toBe('foo'),
+            expect(itemList[0].customName).toBe('foofoo'),
           ])
         ),
     ]);
   });
 
-  it('handle getPathBase with custom path parameters', () => {
+  test('handle getPathBase with custom path parameters', () => {
     fetchMock.mock(() => true, {
       '@id': '/v1/test/8',
     });
@@ -223,15 +242,15 @@ describe('Test Client', () => {
       SomeSdk.test.findAll({}, { basePath: '/foo' }),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
-      expect(url1).to.equals('https://api.me/foo/8');
+      expect(url1).toEqual('https://api.me/foo/8');
       const url2 = fetchMock.calls().matched[1][0];
-      expect(url2).to.equals('https://api.me/foo?q=test&foo=bar');
+      expect(url2).toEqual('https://api.me/foo?q=test&foo=bar');
       const url3 = fetchMock.calls().matched[2][0];
-      expect(url3).to.equals('https://api.me/foo');
+      expect(url3).toEqual('https://api.me/foo');
     });
   });
 
-  it('handle Authorization header', () => {
+  test('handle Authorization header', () => {
     fetchMock.mock(() => true, {
       '@id': '/v1/test/8',
     });
@@ -250,10 +269,10 @@ describe('Test Client', () => {
       () => {
         const authHeader = fetchMock.calls().matched[0][1].headers
           .Authorization;
-        expect(authHeader).to.include('Bearer ');
+        expect(authHeader).toContain('Bearer ');
         const basicAuthHeader = fetchMock.calls().matched[1][1].headers
           .Authorization;
-        expect(basicAuthHeader).to.include('Basic ');
+        expect(basicAuthHeader).toContain('Basic ');
       }
     );
   });
@@ -262,7 +281,7 @@ describe('Test Client', () => {
 describe('Test errors', () => {
   afterEach(fetchMock.restore);
 
-  it('handle 401 and 403 errors', () => {
+  test('handle 401 and 403 errors', () => {
     fetchMock
       .mock(/400$/, 400)
       .mock(/401$/, 401)
@@ -272,13 +291,27 @@ describe('Test errors', () => {
       .mock(/500$/, 500);
 
     return Promise.all([
-      assert.isRejected(SomeSdk.test.find(400), errors.BadRequestError),
-      assert.isRejected(SomeSdk.test.find(401), errors.AccessDeniedError),
-      assert.isRejected(SomeSdk.test.find(403), errors.ForbiddenError),
-      assert.isRejected(SomeSdk.test.find(404), errors.ResourceNotFoundError),
-      assert.isRejected(SomeSdk.test.find(404), errors.BadRequestError),
-      assert.isRejected(SomeSdk.test.find(410), errors.BadRequestError),
-      assert.isRejected(SomeSdk.test.find(500), errors.InternalServerError),
+      expect(SomeSdk.test.find(400)).rejects.toBeInstanceOf(
+        errors.BadRequestError
+      ),
+      expect(SomeSdk.test.find(401)).rejects.toBeInstanceOf(
+        errors.AccessDeniedError
+      ),
+      expect(SomeSdk.test.find(403)).rejects.toBeInstanceOf(
+        errors.ForbiddenError
+      ),
+      expect(SomeSdk.test.find(404)).rejects.toBeInstanceOf(
+        errors.ResourceNotFoundError
+      ),
+      expect(SomeSdk.test.find(404)).rejects.toBeInstanceOf(
+        errors.BadRequestError
+      ),
+      expect(SomeSdk.test.find(410)).rejects.toBeInstanceOf(
+        errors.BadRequestError
+      ),
+      expect(SomeSdk.test.find(500)).rejects.toBeInstanceOf(
+        errors.InternalServerError
+      ),
     ]);
   });
 });
@@ -286,7 +319,7 @@ describe('Test errors', () => {
 describe('Update and delete function trigger the good urls', () => {
   afterEach(fetchMock.restore);
 
-  it('handle updating and deleting entities with @ids', () => {
+  test('handle updating and deleting entities with @ids', () => {
     fetchMock.mock(() => true, {
       '@id': '/v2/test/8',
       foo: 'bar',
@@ -307,9 +340,9 @@ describe('Update and delete function trigger the good urls', () => {
       SomeSdk.noAtId.update(dataNoArobase),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
-      expect(url1).to.equals('https://api.me/v2/test/8');
+      expect(url1).toEqual('https://api.me/v2/test/8');
       const url2 = fetchMock.calls().matched[1][0];
-      expect(url2).to.equals('https://api.me/v2/no-at-id/9');
+      expect(url2).toEqual('https://api.me/v2/no-at-id/9');
     });
   });
 });
@@ -318,7 +351,7 @@ describe('Fix bugs', () => {
     fetchMock.restore();
   });
 
-  it('generate good url', () => {
+  test('generate good url', () => {
     const SomeInnerSdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https', prefix: '/v1' },
@@ -330,12 +363,12 @@ describe('Fix bugs', () => {
     );
     SomeInnerSdk.tokenStorage.generateToken();
 
-    expect(SomeInnerSdk.test.makeUri('foo').toString()).to.equals(
+    expect(SomeInnerSdk.test.makeUri('foo').toString()).toEqual(
       'https://api.me/v1/foo'
     );
   });
 
-  it('allow base header override', () => {
+  test('allow base header override', () => {
     fetchMock.mock(() => true, {
       '@id': '/v2/test/8',
       foo: 'bar',
@@ -346,13 +379,13 @@ describe('Fix bugs', () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       .then(() => {
-        expect(fetchMock.lastOptions().headers['Content-Type']).to.equals(
+        expect(fetchMock.lastOptions().headers['Content-Type']).toEqual(
           'multipart/form-data'
         );
       });
   });
 
-  it('allow removing base header', () => {
+  test('allow removing base header', () => {
     fetchMock.mock(() => true, {
       '@id': '/v2/test/8',
       foo: 'bar',
@@ -369,8 +402,9 @@ describe('Fix bugs', () => {
         },
       })
       .then(() => {
-        expect(Object.keys(fetchMock.lastOptions().headers)).to.eql([
+        expect(Object.keys(fetchMock.lastOptions().headers)).toEqual([
           'Authorization',
+          'Referer',
           'bar',
           'baz',
           'bad',
@@ -378,7 +412,7 @@ describe('Fix bugs', () => {
       });
   });
 
-  it('check that the request done after refreshing a token contains the refreshed token', () => {
+  test('check that the request done after refreshing a token contains the refreshed token', () => {
     fetchMock
       .mock({
         name: 'generate_token',
@@ -461,8 +495,8 @@ describe('Fix bugs', () => {
       .then(() => {
         expect(
           fetchMock.lastOptions('access_denied').headers.Authorization
-        ).to.eql('Bearer an_access_token');
-        expect(fetchMock.lastOptions('success').headers.Authorization).to.eql(
+        ).toEqual('Bearer an_access_token');
+        expect(fetchMock.lastOptions('success').headers.Authorization).toEqual(
           'Bearer a_refreshed_token'
         );
       });

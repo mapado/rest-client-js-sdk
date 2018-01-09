@@ -7,9 +7,7 @@
   "files": ["dist", "src"],
   "scripts": {
     "clean": "rimraf dist",
-    "test":
-      "mocha --require babel-core/register --require ./test/test_helper.js  --recursive",
-    "test:watch": "npm run test -- --watch",
+    "test": "jest",
     "build": "rollup -c",
     "check:src": "npm run test",
     "prepublishOnly": "npm run clean && npm run check:src && npm run build",
@@ -21,11 +19,10 @@
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-core": "^6.24.1",
+    "babel-jest": "^22.0.4",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.6.1",
     "bundlesize": "^0.15.3",
-    "chai": "^4.1.2",
-    "chai-as-promised": "^7.1.1",
     "eslint": "^4.15.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-config-prettier": "^2.7.0",
@@ -36,8 +33,8 @@
     "fetch-mock": "^5.13.1",
     "form-data": "^2.1.2",
     "husky": "^0.14.3",
+    "jest": "^22.0.4",
     "lint-staged": "^6.0.0",
-    "mocha": "^4.0.1",
     "prettier": "^1.9.2",
     "rimraf": "^2.6.2",
     "rollup": "^0.53.3",
@@ -67,5 +64,8 @@
   ],
   "lint-staged": {
     "*.{js,jsx,json,md}": ["prettier --write", "git add"]
+  },
+  "jest": {
+    "setupFiles": ["./setupJest.js"]
   }
 }

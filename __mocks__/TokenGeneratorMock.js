@@ -1,5 +1,5 @@
 /* eslint no-unused-vars: 0 */
-import { AbstractTokenGenerator } from '../../src';
+import { AbstractTokenGenerator } from '../src/index';
 import oauthClientCredentialsMock from './oauthClientCredentials.json';
 import refreshedCredentials from './refreshedCredentials.json';
 
