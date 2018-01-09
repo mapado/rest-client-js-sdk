@@ -32,8 +32,8 @@
   },
   "overrides": [
     {
-      files: ["test/**/*"],
-      env: { "mocha": true }
+      files: ["__tests__/**/*"],
+      env: { "jest": true }
     }
   ]
 }

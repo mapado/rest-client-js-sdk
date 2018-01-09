@@ -1,39 +1,38 @@
-import { expect } from 'chai';
 import fetchMock from 'fetch-mock';
 import { TokenStorage } from '../src';
-import TokenGeneratorMock from './mock/TokenGeneratorMock';
-import oauthClientCredentialsMock from './mock/oauthClientCredentials.json';
-import refreshedCredentials from './mock/refreshedCredentials.json';
-import Storage from './mock/mockStorage';
+import TokenGeneratorMock from '../__mocks__/TokenGeneratorMock';
+import oauthClientCredentialsMock from '../__mocks__/oauthClientCredentials.json';
+import refreshedCredentials from '../__mocks__/refreshedCredentials.json';
+import Storage from '../__mocks__/mockStorage';
 
 global.FormData = require('form-data');
 
 const tokenGeneratorMock = new TokenGeneratorMock();
 
 describe('Token storage tests', () => {
-  it('handle empty token', done => {
+  test('handle empty token', () => {
     const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
 
     const hasAccessToken = oauth.hasAccessToken();
-    expect(hasAccessToken).to.be.an.instanceOf(Promise);
+    expect(hasAccessToken).toBeInstanceOf(Promise);
 
-    oauth
+    return oauth
       .getAccessToken()
       .catch(e => {
-        expect(e.message).to.equal('No token has been generated yet.');
+        expect(e.message).toBe('No token has been generated yet.');
       })
       .then(() => {
         oauth.generateToken();
         const accessToken = oauth.getAccessToken();
 
-        Promise.all([
-          expect(hasAccessToken).to.eventually.be.false,
-          expect(accessToken).to.eventually.be.undefined,
-        ]).then(() => done());
+        return Promise.all([
+          expect(hasAccessToken).resolves.toBe(false),
+          expect(accessToken).resolves.toBeUndefined(),
+        ]);
       });
   });
 
-  it('handle non empty token', () => {
+  test('handle non empty token', () => {
     const storage = new Storage();
     storage.setItem(
       'rest_client_sdk.api.access_token',
@@ -42,18 +41,18 @@ describe('Token storage tests', () => {
     const oauth = new TokenStorage(tokenGeneratorMock, storage);
 
     const hasAccessToken = oauth.hasAccessToken();
-    expect(hasAccessToken).to.be.an.instanceOf(Promise);
+    expect(hasAccessToken).toBeInstanceOf(Promise);
 
     oauth.generateToken();
     const accessToken = oauth.getAccessToken();
 
     return Promise.all([
-      expect(hasAccessToken).to.eventually.be.true,
-      expect(accessToken).to.eventually.be.equals('accesstoken'),
+      expect(hasAccessToken).resolves.toBe(true),
+      expect(accessToken).resolves.toEqual('accesstoken'),
     ]);
   });
 
-  it('handle generating token', () => {
+  test('handle generating token', () => {
     fetchMock.mock(() => true, oauthClientCredentialsMock);
 
     const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
@@ -62,18 +61,18 @@ describe('Token storage tests', () => {
       grant_type: 'client_credentials',
     });
 
-    expect(generatedToken).to.be.an.instanceOf(Promise);
+    expect(generatedToken).toBeInstanceOf(Promise);
 
     return Promise.all([
-      expect(generatedToken).to.eventually.be.an('object'),
-      expect(generatedToken.then(a => a.access_token)).to.eventually.equals(
+      expect(typeof generatedToken).toBe('object'),
+      expect(generatedToken.then(a => a.access_token)).resolves.toEqual(
         oauthClientCredentialsMock.access_token
       ),
     ])
       .then(() =>
         Promise.all([
-          expect(oauth.hasAccessToken()).to.eventually.be.true,
-          expect(oauth.getAccessToken()).to.eventually.equals(
+          expect(oauth.hasAccessToken()).resolves.toBe(true),
+          expect(oauth.getAccessToken()).resolves.toEqual(
             oauthClientCredentialsMock.access_token
           ),
         ])
@@ -82,13 +81,13 @@ describe('Token storage tests', () => {
         Promise.all([
           expect(
             oauth.refreshToken().then(a => a.access_token)
-          ).to.eventually.equals(refreshedCredentials.access_token),
+          ).resolves.toEqual(refreshedCredentials.access_token),
         ])
       )
       .then(() =>
         Promise.all([
-          expect(oauth.hasAccessToken()).to.eventually.be.true,
-          expect(oauth.getAccessToken()).to.eventually.equals(
+          expect(oauth.hasAccessToken()).resolves.toBe(true),
+          expect(oauth.getAccessToken()).resolves.toEqual(
             refreshedCredentials.access_token
           ),
         ])
