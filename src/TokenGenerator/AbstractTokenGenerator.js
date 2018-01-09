@@ -1,3 +1,5 @@
+/* eslint no-unused-vars: 0 */
+
 class AbstractTokenGenerator {
   constructor(tokenGeneratorConfig = {}) {
     this.tokenGeneratorConfig = tokenGeneratorConfig;

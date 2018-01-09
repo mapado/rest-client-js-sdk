@@ -1,8 +1,6 @@
-/* global describe, it, afterEach */
-global.FormData = require('form-data');
 import { expect } from 'chai';
 import fetchMock from 'fetch-mock';
-import oauthClientCredentialsMock from '../mock/oauthClientCredentials';
+import oauthClientCredentialsMock from '../mock/oauthClientCredentials.json';
 import { ClientCredentialsGenerator } from '../../src';
 import {
   BadRequestError,
@@ -10,6 +8,8 @@ import {
   InternalServerError,
   ResourceNotFoundError,
 } from '../../src/Error';
+
+global.FormData = require('form-data');
 
 const tokenConfig = {
   path: 'oauth.me',

@@ -1,5 +1,3 @@
-/* global fetch */
-
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';

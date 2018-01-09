@@ -1,3 +1,5 @@
+/* eslint import/prefer-default-export: 0 */
+
 // memoize promise returning function so that it returns
 // the same promise if called again before resolve / reject
 export function memoizePromise(callback) {

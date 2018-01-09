@@ -1,4 +1,3 @@
-/* global fetch */
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 
 class ProvidedTokenGenerator extends AbstractTokenGenerator {

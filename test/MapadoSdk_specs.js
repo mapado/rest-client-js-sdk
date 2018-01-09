@@ -1,4 +1,4 @@
-/* global describe, it, afterEach */
+/* eslint no-unused-expressions: 0 */
 import { expect } from 'chai';
 import RestClientSdk, { AbstractClient } from '../src';
 import tokenStorage from './mock/tokenStorage';
@@ -18,28 +18,29 @@ describe('Test wrong SDK configuration', () => {
 });
 
 describe('Good sdk configuration', () => {
-  const sdk = new RestClientSdk(
-    tokenStorage,
-    { path: 'my.api.com', scheme: 'https' }
-  );
+  const sdk = new RestClientSdk(tokenStorage, {
+    path: 'my.api.com',
+    scheme: 'https',
+  });
 
   expect(sdk.config.path).to.equal('my.api.com');
   expect(sdk.config.scheme).to.equal('https');
   expect(sdk.config.useDefaultParameters).to.be.true;
 
-  const specifyDefParam = new RestClientSdk(
-    tokenStorage,
-    { path: 'my.api.com', scheme: 'https', useDefaultParameters: true }
-  );
+  const specifyDefParam = new RestClientSdk(tokenStorage, {
+    path: 'my.api.com',
+    scheme: 'https',
+    useDefaultParameters: true,
+  });
   expect(specifyDefParam.config.useDefaultParameters).to.be.true;
 
-  const noDefParamSdk = new RestClientSdk(
-    tokenStorage,
-    { path: 'my.api.com', scheme: 'https', useDefaultParameters: false }
-  );
+  const noDefParamSdk = new RestClientSdk(tokenStorage, {
+    path: 'my.api.com',
+    scheme: 'https',
+    useDefaultParameters: false,
+  });
   expect(noDefParamSdk.config.useDefaultParameters).to.be.false;
 });
-
 
 describe('Inject client into SDK', () => {
   const sdk = new RestClientSdk(
@@ -53,4 +54,3 @@ describe('Inject client into SDK', () => {
   expect(sdk.testClient.getPathBase()).to.equal('/v2/test');
   expect(sdk.testClient.sdk).to.equal(sdk);
 });
-

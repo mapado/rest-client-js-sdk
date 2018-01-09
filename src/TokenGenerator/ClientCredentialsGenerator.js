@@ -1,5 +1,3 @@
-/* global fetch */
-
 import URI from 'urijs';
 import { handleBadResponse } from '../Error';
 import AbstractTokenGenerator from './AbstractTokenGenerator';

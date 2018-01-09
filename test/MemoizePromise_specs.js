@@ -1,11 +1,10 @@
-/* global describe, it, afterEach */
 import { expect } from 'chai';
 import { memoizePromise } from '../src/decorator';
 
 let count;
-function someFunctionReturningAPromise(params) {
+function someFunctionReturningAPromise() {
   return new Promise(resolve => {
-    count++;
+    count++; // eslint-disable-line no-plusplus
     return resolve(count);
   });
 }
@@ -59,4 +58,3 @@ describe('Test 2 simultaneous calls return promises', () => {
     ]);
   });
 });
-
