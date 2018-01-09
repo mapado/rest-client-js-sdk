@@ -1,5 +1,4 @@
-/* global describe, it, afterEach */
-/* eslint no-unused-vars: 0 */
+/* eslint no-unused-vars: 0, no-underscore-dangle: 0 */
 import fetchMock from 'fetch-mock';
 import { expect, assert } from 'chai';
 import * as errors from '../../src/Error';
@@ -320,7 +319,7 @@ describe('Fix bugs', () => {
   });
 
   it('generate good url', () => {
-    const SomeSdk = new RestClientSdk(
+    const SomeInnerSdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https', prefix: '/v1' },
       {
@@ -329,9 +328,9 @@ describe('Fix bugs', () => {
         noAtId: NoAtIdClient,
       }
     );
-    SomeSdk.tokenStorage.generateToken();
+    SomeInnerSdk.tokenStorage.generateToken();
 
-    expect(SomeSdk.test.makeUri('foo').toString()).to.equals(
+    expect(SomeInnerSdk.test.makeUri('foo').toString()).to.equals(
       'https://api.me/v1/foo'
     );
   });

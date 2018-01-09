@@ -1,12 +1,12 @@
-/* global describe, it, afterEach */
-global.FormData = require('form-data');
 import { expect } from 'chai';
 import fetchMock from 'fetch-mock';
 import { TokenStorage } from '../src';
 import TokenGeneratorMock from './mock/TokenGeneratorMock';
-import oauthClientCredentialsMock from './mock/oauthClientCredentials';
-import refreshedCredentials from './mock/refreshedCredentials';
+import oauthClientCredentialsMock from './mock/oauthClientCredentials.json';
+import refreshedCredentials from './mock/refreshedCredentials.json';
 import Storage from './mock/mockStorage';
+
+global.FormData = require('form-data');
 
 const tokenGeneratorMock = new TokenGeneratorMock();
 

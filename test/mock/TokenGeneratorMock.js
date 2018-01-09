@@ -1,16 +1,17 @@
+/* eslint no-unused-vars: 0 */
 import { AbstractTokenGenerator } from '../../src';
-import oauthClientCredentialsMock from './oauthClientCredentials';
-import refreshedCredentials from './refreshedCredentials';
+import oauthClientCredentialsMock from './oauthClientCredentials.json';
+import refreshedCredentials from './refreshedCredentials.json';
 
 class TokenGeneratorMock extends AbstractTokenGenerator {
   generateToken(parameters) {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       resolve(oauthClientCredentialsMock);
     });
   }
 
   refreshToken(accessToken, parameters) {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       resolve(refreshedCredentials);
     });
   }

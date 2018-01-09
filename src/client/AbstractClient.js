@@ -1,5 +1,3 @@
-/* global fetch window */
-
 import URI from 'urijs';
 import { AccessDeniedError, handleBadResponse } from '../Error';
 
@@ -14,11 +12,13 @@ class AbstractClient {
     return [];
   }
 
+  // eslint-disable-next-line no-unused-vars
   getPathBase(pathParameters = {}) {
     throw new Error(`AbstractClient::getPathBase can not be called directly.
                     You must implement "getPathBase" method.`);
   }
 
+  // eslint-disable-next-line no-unused-vars
   getEntityURI(entity) {
     throw new Error(`AbstractClient::getEntityURI can not be called directly.
                     You must implement "getEntityURI" method.`);
@@ -217,6 +217,7 @@ class AbstractClient {
 
     params.headers = this._removeUndefinedHeaders(params.headers);
 
+    // eslint-disable-next-line consistent-return
     return fetch(input, params).then(response => {
       if (response.status < 400) {
         return response;

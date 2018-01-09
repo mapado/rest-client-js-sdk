@@ -1,8 +1,6 @@
-/* global describe, it, afterEach */
-global.FormData = require('form-data');
 import { expect } from 'chai';
 import fetchMock from 'fetch-mock';
-import oauthClientCredentialsMock from '../mock/passwordCredentials';
+import oauthClientCredentialsMock from '../mock/passwordCredentials.json';
 import { PasswordGenerator } from '../../src';
 import {
   BadRequestError,
@@ -11,6 +9,8 @@ import {
   ResourceNotFoundError,
   AccessDeniedError,
 } from '../../src/Error';
+
+global.FormData = require('form-data');
 
 const tokenConfig = {
   path: 'oauth.me',
@@ -111,11 +111,11 @@ describe('PasswordGenerator tests', () => {
 
     fetchMock.mock(() => true, 400);
 
-    return generateTokenPromise.then(accessToken => {
-      return tokenGenerator.refreshToken(accessToken).catch(err => {
+    return generateTokenPromise.then(accessToken =>
+      tokenGenerator.refreshToken(accessToken).catch(err => {
         expect(err instanceof AccessDeniedError).to.equals(true);
-      });
-    });
+      })
+    );
   });
 
   it('test that ForbiddenError is thrown', () => {

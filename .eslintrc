@@ -1,8 +1,6 @@
 {
-  "extends": [
-    "airbnb",
-    "prettier"
-  ],
+  "extends": ["airbnb", "prettier"],
+  "env": { "browser": true },
   "plugins": ["prettier"],
   "rules": {
     "class-methods-use-this": [0],
@@ -31,5 +29,11 @@
       }
     ],
     "react/prefer-es6-class": 1
-  }
+  },
+  "overrides": [
+    {
+      files: ["test/**/*"],
+      env: { "mocha": true }
+    }
+  ]
 }

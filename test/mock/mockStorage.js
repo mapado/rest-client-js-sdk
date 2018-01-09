@@ -8,6 +8,7 @@ export default class Storage {
   }
 
   setItem(key, value) {
-    return Promise.resolve(this._map[key] = value);
+    // eslint-disable-next-line no-return-assign
+    return Promise.resolve((this._map[key] = value));
   }
 }
