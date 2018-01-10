@@ -15,10 +15,6 @@ class RestClientSdk {
     this.mapping = mapping;
 
     this._repositoryList = {};
-
-    this.mapping.getMappingKeys().forEach(key => {
-      this[key] = this.getRepository(key);
-    });
   }
 
   getRepository(key) {

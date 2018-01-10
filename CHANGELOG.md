@@ -1,12 +1,9 @@
 # Changelog
 
-## Next moves
-### Changed
-  * [Deprecation] Calling `restClientSdk.foo.xxx` is deprecated, you must now call `restClientSdk.getRepository('foo').xxx`
-
 ## Unreleased
 
 ### Changed
+  * [Breaking] Calling `restClientSdk.foo.xxx` is deprecated, you must now call `restClientSdk.getRepository('foo').xxx`
   * [Breaking] RestClientSdk now takes a Mapping instance instead of a clientList. This instance is required
   * [Breaking] `getName` has been removed and replaced by the classmetadata key. Its return was previously sent to the serializer, it's now the key attribute from the mapping that is sent now.
   Beware that now, the `key` is now used both to call the repository name, and passed to the serializer

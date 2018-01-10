@@ -28,7 +28,7 @@ const productMetadata = new ClassMetadata(
 const idAttr = new Attribute(
     '@id', // serializedKey: mandatory, the key returned from your API
     'id', // attributeName: optional, the name in your entity, default to the `serializedKey` attribute
-    'string' // type: optional, default to `string`
+    'string', // type: optional, default to `string`
     true // isIdentifier: optional, default to `false`
 );
 const name = new Attribute('name');
@@ -42,7 +42,7 @@ categoryMetadata.setAttributeList([
     new Attribute('id', 'id', 'string', true),
     new Attribute('name'),
 ]);
-categoryList.setRelationList([
+categoryMetadata.setRelationList([
   new Relation('product', MANY_TO_ONE),
 ]);
 

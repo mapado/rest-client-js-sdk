@@ -61,9 +61,9 @@ describe('Mapado Sdk tests', () => {
       mapping
     );
 
-    expect(sdk.test).toBeInstanceOf(AbstractClient);
-    expect(typeof sdk.test.find).toBe('function');
-    expect(sdk.test.getPathBase()).toBe('/v2/test');
-    expect(sdk.test.sdk).toBe(sdk);
+    expect(sdk.getRepository('test')).toBeInstanceOf(AbstractClient);
+    expect(typeof sdk.getRepository('test').find).toBe('function');
+    expect(sdk.getRepository('test').getPathBase()).toBe('/v2/test');
+    expect(sdk.getRepository('test').sdk).toBe(sdk);
   });
 });

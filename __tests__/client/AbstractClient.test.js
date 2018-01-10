@@ -84,10 +84,10 @@ describe('Test Client', () => {
     });
 
     return Promise.all([
-      SomeSdk.test.find(8),
-      SomeSdk.test.find(8, { q: 'test', foo: 'bar' }),
-      SomeSdk.defParam.find(8),
-      SomeSdk.defParam.find(8, { q: 'test', foo: 'bar' }),
+      SomeSdk.getRepository('test').find(8),
+      SomeSdk.getRepository('test').find(8, { q: 'test', foo: 'bar' }),
+      SomeSdk.getRepository('defParam').find(8),
+      SomeSdk.getRepository('defParam').find(8, { q: 'test', foo: 'bar' }),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/v2/test/8');
@@ -113,8 +113,8 @@ describe('Test Client', () => {
     });
 
     return Promise.all([
-      SomeSdk.test.findBy({ q: 'test', foo: 'bar' }),
-      SomeSdk.defParam.findBy({ q: 'test', foo: 'bar' }),
+      SomeSdk.getRepository('test').findBy({ q: 'test', foo: 'bar' }),
+      SomeSdk.getRepository('defParam').findBy({ q: 'test', foo: 'bar' }),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/v2/test?q=test&foo=bar');
@@ -132,8 +132,8 @@ describe('Test Client', () => {
     });
 
     return Promise.all([
-      SomeSdk.test.findAll(),
-      SomeSdk.defParam.findAll(),
+      SomeSdk.getRepository('test').findAll(),
+      SomeSdk.getRepository('defParam').findAll(),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/v2/test');
@@ -151,7 +151,7 @@ describe('Test Client', () => {
       name: 'foo',
     });
 
-    return SomeSdk.test
+    return SomeSdk.getRepository('test')
       .find(8)
       .then(item =>
         Promise.all([
@@ -187,7 +187,7 @@ describe('Test Client', () => {
       ]);
 
     return Promise.all([
-      EntityFactorySdk.test
+      EntityFactorySdk.getRepository('test')
         .find(8)
         .then(item =>
           Promise.all([
@@ -196,7 +196,7 @@ describe('Test Client', () => {
             expect(item.customName).toBe('foofoo'),
           ])
         ),
-      EntityFactorySdk.test
+      EntityFactorySdk.getRepository('test')
         .findAll()
         .then(itemList =>
           Promise.all([
@@ -214,9 +214,12 @@ describe('Test Client', () => {
     });
 
     return Promise.all([
-      SomeSdk.test.find(8, {}, { basePath: '/foo' }),
-      SomeSdk.test.findBy({ q: 'test', foo: 'bar' }, { basePath: '/foo' }),
-      SomeSdk.test.findAll({}, { basePath: '/foo' }),
+      SomeSdk.getRepository('test').find(8, {}, { basePath: '/foo' }),
+      SomeSdk.getRepository('test').findBy(
+        { q: 'test', foo: 'bar' },
+        { basePath: '/foo' }
+      ),
+      SomeSdk.getRepository('test').findAll({}, { basePath: '/foo' }),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/foo/8');
@@ -239,16 +242,16 @@ describe('Test Client', () => {
     );
     BasicAuthSdk.tokenStorage.generateToken();
 
-    return Promise.all([SomeSdk.test.find(8), BasicAuthSdk.test.find(8)]).then(
-      () => {
-        const authHeader = fetchMock.calls().matched[0][1].headers
-          .Authorization;
-        expect(authHeader).toContain('Bearer ');
-        const basicAuthHeader = fetchMock.calls().matched[1][1].headers
-          .Authorization;
-        expect(basicAuthHeader).toContain('Basic ');
-      }
-    );
+    return Promise.all([
+      SomeSdk.getRepository('test').find(8),
+      BasicAuthSdk.getRepository('test').find(8),
+    ]).then(() => {
+      const authHeader = fetchMock.calls().matched[0][1].headers.Authorization;
+      expect(authHeader).toContain('Bearer ');
+      const basicAuthHeader = fetchMock.calls().matched[1][1].headers
+        .Authorization;
+      expect(basicAuthHeader).toContain('Basic ');
+    });
   });
 });
 
@@ -265,25 +268,25 @@ describe('Test errors', () => {
       .mock(/500$/, 500);
 
     return Promise.all([
-      expect(SomeSdk.test.find(400)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(400)).rejects.toBeInstanceOf(
         errors.BadRequestError
       ),
-      expect(SomeSdk.test.find(401)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(401)).rejects.toBeInstanceOf(
         errors.AccessDeniedError
       ),
-      expect(SomeSdk.test.find(403)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(403)).rejects.toBeInstanceOf(
         errors.ForbiddenError
       ),
-      expect(SomeSdk.test.find(404)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(404)).rejects.toBeInstanceOf(
         errors.ResourceNotFoundError
       ),
-      expect(SomeSdk.test.find(404)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(404)).rejects.toBeInstanceOf(
         errors.BadRequestError
       ),
-      expect(SomeSdk.test.find(410)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(410)).rejects.toBeInstanceOf(
         errors.BadRequestError
       ),
-      expect(SomeSdk.test.find(500)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(500)).rejects.toBeInstanceOf(
         errors.InternalServerError
       ),
     ]);
@@ -310,8 +313,8 @@ describe('Update and delete function trigger the good urls', () => {
     };
 
     return Promise.all([
-      SomeSdk.test.update(data),
-      SomeSdk.noAtId.update(dataNoArobase),
+      SomeSdk.getRepository('test').update(data),
+      SomeSdk.getRepository('noAtId').update(dataNoArobase),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/v2/test/8');
@@ -333,9 +336,11 @@ describe('Fix bugs', () => {
     );
     SomeInnerSdk.tokenStorage.generateToken();
 
-    expect(SomeInnerSdk.test.makeUri('foo').toString()).toEqual(
-      'https://api.me/v1/foo'
-    );
+    expect(
+      SomeInnerSdk.getRepository('test')
+        .makeUri('foo')
+        .toString()
+    ).toEqual('https://api.me/v1/foo');
   });
 
   test('allow base header override', () => {
@@ -344,7 +349,7 @@ describe('Fix bugs', () => {
       foo: 'bar',
     });
 
-    return SomeSdk.test
+    return SomeSdk.getRepository('test')
       .authorizedFetch('foo', {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
@@ -361,7 +366,7 @@ describe('Fix bugs', () => {
       foo: 'bar',
     });
 
-    return SomeSdk.test
+    return SomeSdk.getRepository('test')
       .authorizedFetch('foo', {
         headers: {
           'Content-Type': undefined,
@@ -461,7 +466,7 @@ describe('Fix bugs', () => {
         username: 'foo',
         password: 'bar',
       })
-      .then(() => SomeInnerSdk.test.find(1))
+      .then(() => SomeInnerSdk.getRepository('test').find(1))
       .then(() => {
         expect(
           fetchMock.lastOptions('access_denied').headers.Authorization
