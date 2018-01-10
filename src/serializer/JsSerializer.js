@@ -2,15 +2,15 @@
 import Serializer from './Serializer';
 
 class JsSerializer extends Serializer {
-  serializeItem(entity, type) {
-    return JSON.stringify(entity);
+  serializeItem(object, classMetadata) {
+    return JSON.stringify(object);
   }
 
-  deserializeItem(rawData, type, response) {
+  deserializeItem(rawData, classMetadata, response) {
     return JSON.parse(rawData);
   }
 
-  deserializeList(rawListData, type, response) {
+  deserializeList(rawListData, classMetadata, response) {
     return JSON.parse(rawListData);
   }
 }

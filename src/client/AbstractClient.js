@@ -60,10 +60,22 @@ class AbstractClient {
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
 
+    const oldSerializedModel = this.metadata.getDefaultSerializedModel();
+    const newSerializedModel = this.serializer.normalizeItem(
+      entity,
+      this.metadata
+    );
+
+    const diff = this.sdk.unitOfWork.getDirtyData(
+      newSerializedModel,
+      oldSerializedModel,
+      this.metadata
+    );
+
     return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'POST',
-        body: this.serializer.serializeItem(entity, this.metadata.key),
+        body: this.serializer.serializeItem(diff, this.metadata),
       }),
       'item'
     );
@@ -73,10 +85,15 @@ class AbstractClient {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
+    const newSerializedModel = this.serializer.normalizeItem(
+      entity,
+      this.metadata
+    );
+
     return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'PUT',
-        body: this.serializer.serializeItem(entity, this.metadata.key),
+        body: this.serializer.serializeItem(newSerializedModel, this.metadata),
       }),
       'item'
     );
@@ -94,18 +111,10 @@ class AbstractClient {
       .then(response => response.text().then(text => [response, text]))
       .then(([response, text]) => {
         if (listOrItem === 'list') {
-          return this.serializer.deserializeList(
-            text,
-            this.metadata.key,
-            response
-          );
+          return this.serializer.deserializeList(text, this.metadata, response);
         }
 
-        return this.serializer.deserializeItem(
-          text,
-          this.metadata.key,
-          response
-        );
+        return this.serializer.deserializeItem(text, this.metadata, response);
       });
   }
 

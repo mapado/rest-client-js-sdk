@@ -15,6 +15,7 @@ import RestClientSdk, {
 } from '../../src/index';
 import tokenStorageMock from '../../__mocks__/tokenStorage';
 import MockStorage from '../../__mocks__/mockStorage';
+import unitOfWorkMapping from '../../__mocks__/unitOfWorkMapping';
 
 class WeirdSerializer extends Serializer {
   deserializeItem(rawData, type) {
@@ -473,6 +474,53 @@ describe('Fix bugs', () => {
         ).toEqual('Bearer an_access_token');
         expect(fetchMock.lastOptions('success').headers.Authorization).toEqual(
           'Bearer a_refreshed_token'
+        );
+      });
+  });
+});
+
+describe.only('Test unit of work', () => {
+  test('posting data with unit of work', () => {
+    const tokenGenerator = new PasswordGenerator({
+      path: 'oauth.me',
+      scheme: 'https',
+      clientId: 'clientId',
+      clientSecret: 'clientSecret',
+    });
+    const sdk = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https' },
+      unitOfWorkMapping
+    );
+
+    const cart = {
+      '@id': '/v1/carts/1',
+      status: null,
+      cartItemList: [
+        {
+          '@id': null,
+          quantity: 1,
+          cart: null,
+        },
+      ],
+    };
+
+    fetchMock.mock(() => true, {});
+
+    sdk
+      .getRepository('carts')
+      .create(cart)
+      .then(() => {
+        expect(fetchMock.lastOptions().body).toEqual(
+          JSON.stringify({
+            '@id': '/v1/carts/1',
+            cartItemList: [
+              {
+                '@id': null,
+                quantity: 1,
+              },
+            ],
+          })
         );
       });
   });
