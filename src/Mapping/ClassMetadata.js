@@ -25,6 +25,10 @@ class ClassMetadata {
     return this._identifierAttribute;
   }
 
+  getAttributeList() {
+    return this._attributeList;
+  }
+
   setAttributeList(attributeList) {
     this._attributeList = {};
 
