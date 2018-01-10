@@ -62,6 +62,7 @@ cartItemMetadata.setAttributeList([
   new Attribute('quantity', 'quantity', 'integer'),
 ]);
 cartItemMetadata.setRelationList([
+  new Relation(MANY_TO_ONE, 'carts', 'cart'),
   new Relation(ONE_TO_MANY, 'cart_item_details', 'cartItemDetailList'),
 ]);
 

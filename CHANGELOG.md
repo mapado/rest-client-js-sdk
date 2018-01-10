@@ -2,10 +2,14 @@
 
 ## Unreleased
 
+### Added 
+  * [Might break] Custom serializer can implement `normalizeItem`, `denormalizeItem` and `denormalizeList`, default implementation is a passthrough.
+  You must implement it if you have a custom serialization that do not use plain javascript objects.
+
 ### Changed
   * [Breaking] Calling `restClientSdk.foo.xxx` is deprecated, you must now call `restClientSdk.getRepository('foo').xxx`
   * [Breaking] RestClientSdk now takes a Mapping instance instead of a clientList. This instance is required
-  * [Breaking] `getName` has been removed and replaced by the classmetadata key. Its return was previously sent to the serializer, it's now the key attribute from the mapping that is sent now.
+  * [Breaking] `getName` has been removed and replaced by the classmetadata key. Its return was previously sent to the serializer, it's now the mapping that is sent now.
   Beware that now, the `key` is now used both to call the repository name, and passed to the serializer
   Before:
   ```js
