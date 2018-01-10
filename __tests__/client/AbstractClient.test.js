@@ -6,6 +6,12 @@ import RestClientSdk, {
   Serializer,
   TokenStorage,
   PasswordGenerator,
+  Mapping,
+  ClassMetadata,
+  Attribute,
+  Relation,
+  ONE_TO_MANY,
+  MANY_TO_ONE,
 } from '../../src/index';
 import tokenStorageMock from '../../__mocks__/tokenStorage';
 import MockStorage from '../../__mocks__/mockStorage';
@@ -36,62 +42,36 @@ class SomeTestClient extends AbstractClient {
       return pathParameters.basePath;
     }
 
-    return '/v2/test';
-  }
-
-  getName() {
-    return 'SomeClient';
-  }
-
-  getEntityURI(entity) {
-    return entity['@id'];
-  }
-}
-
-class NoAtIdClient extends AbstractClient {
-  getPathBase(pathParameters) {
-    return '/v2/no-at-id';
-  }
-
-  getName() {
-    return 'NoAtIdClient';
-  }
-
-  getEntityURI(entity) {
-    const uri = `${this.getPathBase()}/${entity.id}`;
-    return uri;
+    return `${this.sdk.mapping.idPrefix}/test`;
   }
 }
 
 class DefaultParametersTestClient extends AbstractClient {
-  getPathBase() {
-    return '/v2/def_param';
-  }
-
   getDefaultParameters() {
     return {
       _groups: 'test_read,test_write',
       dp: 'df',
     };
   }
-
-  getName() {
-    return 'DefaultParamTest';
-  }
-
-  getEntityURI(entity) {
-    return entity['@id'];
-  }
 }
+
+const mapping = new Mapping('/v2');
+const testMetadata = new ClassMetadata('test', 'test', SomeTestClient);
+testMetadata.setAttributeList([new Attribute('@id', '@id', 'string', true)]);
+const defParamMetadata = new ClassMetadata(
+  'defParam',
+  'def_param',
+  DefaultParametersTestClient
+);
+defParamMetadata.setAttributeList([new Attribute('id', 'id', 'integer', true)]);
+const noAtIdMetadata = new ClassMetadata('noAtId', 'no-at-id');
+noAtIdMetadata.setAttributeList([new Attribute('id', 'id', 'integer', true)]);
+mapping.setMapping([testMetadata, defParamMetadata, noAtIdMetadata]);
 
 const SomeSdk = new RestClientSdk(
   tokenStorageMock,
   { path: 'api.me', scheme: 'https' },
-  {
-    test: SomeTestClient,
-    defParam: DefaultParametersTestClient,
-    noAtId: NoAtIdClient,
-  }
+  mapping
 );
 SomeSdk.tokenStorage.generateToken();
 
@@ -186,10 +166,7 @@ describe('Test Client', () => {
     const EntityFactorySdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https' },
-      {
-        test: SomeTestClient,
-        defParam: DefaultParametersTestClient,
-      },
+      mapping,
       new WeirdSerializer()
     );
 
@@ -258,10 +235,7 @@ describe('Test Client', () => {
     const BasicAuthSdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https', authorizationType: 'Basic' },
-      {
-        test: SomeTestClient,
-        defParam: DefaultParametersTestClient,
-      }
+      mapping
     );
     BasicAuthSdk.tokenStorage.generateToken();
 
@@ -355,11 +329,7 @@ describe('Fix bugs', () => {
     const SomeInnerSdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https', prefix: '/v1' },
-      {
-        test: SomeTestClient,
-        defParam: DefaultParametersTestClient,
-        noAtId: NoAtIdClient,
-      }
+      mapping
     );
     SomeInnerSdk.tokenStorage.generateToken();
 
@@ -483,7 +453,7 @@ describe('Fix bugs', () => {
     const SomeInnerSdk = new RestClientSdk(
       new TokenStorage(tokenGenerator, storage),
       { path: 'api.me', scheme: 'https' },
-      { test: SomeTestClient }
+      mapping
     );
 
     return SomeInnerSdk.tokenStorage

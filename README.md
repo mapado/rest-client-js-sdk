@@ -12,26 +12,44 @@ and it will hide the complexity for you.
 
 ## Usage
 
-### Declare your clients
+### Declare your mapping
 
 ```js
-import { AbstractClient } from 'rest-client-sdk';
+import { Mapping, Attribute, Relation, ClassMetadata, MANY_TO_ONE, ONE_TO_MANY } from 'rest-client-sdk';
 
-class SomeEntityClient extends AbstractClient {
-  getPathBase() {
-    return '/v2/some_entities'; // this is the URI used for querying
-  }
+const mapping = new Mapping('/v1');
 
-  getEntityURI(entity) {
-    return `${this.getPathBase}/${entity.id}`; // this will be the URI used by update / delete script
-  }
+const productMetadata = new ClassMetadata(
+    'products', // key: mandatory, will be passed in your serializer
+    'my_products', // pathRoot: optional, the endpoint of your API: will be added to the mapping prefix ('/v1' here)
+    SomeRepositoryClass, // repositoryClass: optional, See "Overriding repository" for more detail
+);
 
-  getName() {
-    return 'SomeEntity'; // this will be passed to the serializer
-  }
-}
+const idAttr = new Attribute(
+    '@id', // serializedKey: mandatory, the key returned from your API
+    'id', // attributeName: optional, the name in your entity, default to the `serializedKey` attribute
+    'string' // type: optional, default to `string`
+    true // isIdentifier: optional, default to `false`
+);
+const name = new Attribute('name');
+productMetadata.setAttributeList([ idAttr, name ]);
+productMetadata.setRelationList([
+  new Relation('categoryList', ONE_TO_MANY),
+]);
 
-export default SomeEntityClient;
+const categoryMetadata = new ClassMetadata('categories');
+categoryMetadata.setAttributeList([
+    new Attribute('id', 'id', 'string', true),
+    new Attribute('name'),
+]);
+categoryList.setRelationList([
+  new Relation('product', MANY_TO_ONE),
+]);
+
+mapping.setMapping([
+    productMetadata,
+    categoryMetadata,
+]);
 ```
 
 ### Create the SDK
@@ -72,12 +90,7 @@ const config = {
   useDefaultParameters: true,
 }; // path and scheme are mandatory
 
-const clients = {
-  someEntity: SomeEntityClient,
-  // ...
-};
-
-const sdk = new RestClientSdk(tokenStorage, config, clients);
+const sdk = new RestClientSdk(tokenStorage, config, mapping);
 ```
 
 ### Make calls
@@ -87,19 +100,41 @@ const sdk = new RestClientSdk(tokenStorage, config, clients);
 You can now call the clients this way:
 
 ```js
-sdk.someEntity.find(8); // will find the entity with id 8. ie. /v2/some_entities/8
+sdk.getRepository('products').find(8); // will find the entity with id 8. ie. /v2/my_products/8
 
-sdk.someEntity.findAll(); // will find all entities. ie. /v2/some_entities
+sdk.getRepository('products').findAll(); // will find all entities. ie. /v2/my_products
 
-sdk.someEntity.findBy({ foo: 'bar' }); // will find all entities for the request: /v2/some_entities?foo=bar
+sdk.getRepository('products').findBy({ foo: 'bar' }); // will find all entities for the request: /v2/my_products?foo=bar
 ```
 
 #### Update / delete
 
 ```js
-sdk.someEntity.update(entity);
+sdk.getRepository('products').create(entity);
 
-sdk.someEntity.delete(entity);
+sdk.getRepository('products').update(entity);
+
+sdk.getRepository('products').delete(entity);
+```
+
+### Overriding repository
+
+You can override the default repository
+
+```js
+import { AbstractClient } from 'rest-client-sdk';
+
+class SomeEntityClient extends AbstractClient {
+  getPathBase(pathParameters) {
+    return '/v2/some_entities'; // you need to return the full query string for the collection GET query
+  }
+
+  getEntityURI(entity) {
+    return `${this.getPathBase()}/${entity.id}`; // this will be the URI used by update / delete script
+  }
+}
+
+export default SomeEntityClient;
 ```
 
 ### Custom serializer
@@ -107,9 +142,9 @@ sdk.someEntity.delete(entity);
 You can inject a custom serializer to the SDK. The serializer must extends the
 base `Serializer` class and implement 3 methods:
 
-* `deserializeItem(rawData, type)` (type is the result of `getName`)
-* `deserializeList(rawListData, type)` (type is the result of `getName`)
-* `serializeItem(item, type)` (type is the result of `getName`)
+* `deserializeItem(rawData, type)` (type is the key of the mapping)
+* `deserializeList(rawListData, type)` (type is the key of the mapping)
+* `serializeItem(item, type)` (type is the key of the mapping)
 
 All text response from GET / PUT / POST request will be send to
 `deserializeItem` or `deserializeList`. All content fom `update` and `create`

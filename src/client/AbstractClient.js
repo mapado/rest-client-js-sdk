@@ -2,10 +2,11 @@ import URI from 'urijs';
 import { AccessDeniedError, handleBadResponse } from '../Error';
 
 class AbstractClient {
-  constructor(sdk) {
+  constructor(sdk, metadata) {
     this.sdk = sdk;
     this._tokenStorage = sdk.tokenStorage;
     this.serializer = sdk.serializer;
+    this.metadata = metadata;
   }
 
   getDefaultParameters() {
@@ -13,20 +14,30 @@ class AbstractClient {
   }
 
   // eslint-disable-next-line no-unused-vars
-  getPathBase(pathParameters = {}) {
-    throw new Error(`AbstractClient::getPathBase can not be called directly.
-                    You must implement "getPathBase" method.`);
+  getPathBase(pathParameters) {
+    const { idPrefix } = this.sdk.mapping;
+
+    if (!idPrefix) {
+      return `/${this.metadata.pathRoot}`;
+    }
+
+    return `${idPrefix}/${this.metadata.pathRoot}`;
   }
 
-  // eslint-disable-next-line no-unused-vars
   getEntityURI(entity) {
-    throw new Error(`AbstractClient::getEntityURI can not be called directly.
-                    You must implement "getEntityURI" method.`);
-  }
+    const idAttr = this.metadata.getIdentifierAttribute();
+    const { attributeName } = idAttr;
+    let idValue = entity[attributeName];
 
-  getName() {
-    throw new Error(`AbstractClient::getName can not be called directly.
-                    You must implement "getName" method.`);
+    if (Number.isFinite(idValue)) {
+      idValue = idValue.toString();
+    }
+
+    const pathBase = this.getPathBase({});
+    if (idValue.indexOf(pathBase) > -1) {
+      return idValue;
+    }
+    return `${pathBase}/${idValue}`;
   }
 
   find(id, queryParam = {}, pathParameters = {}) {
@@ -52,7 +63,7 @@ class AbstractClient {
     return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'POST',
-        body: this.serializer.serializeItem(entity, this.getName()),
+        body: this.serializer.serializeItem(entity, this.metadata.key),
       }),
       'item'
     );
@@ -65,7 +76,7 @@ class AbstractClient {
     return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'PUT',
-        body: this.serializer.serializeItem(entity, this.getName()),
+        body: this.serializer.serializeItem(entity, this.metadata.key),
       }),
       'item'
     );
@@ -85,12 +96,16 @@ class AbstractClient {
         if (listOrItem === 'list') {
           return this.serializer.deserializeList(
             text,
-            this.getName(),
+            this.metadata.key,
             response
           );
         }
 
-        return this.serializer.deserializeItem(text, this.getName(), response);
+        return this.serializer.deserializeItem(
+          text,
+          this.metadata.key,
+          response
+        );
       });
   }
 
