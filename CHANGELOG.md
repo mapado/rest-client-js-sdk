@@ -45,6 +45,7 @@ Now:
   const sdk = new RestClientSdk(/* ... */, mapping); // `foo` will be used in serializer too
   sdk.foo.find();
 ```
+* [Breaking] Custom Serializer: If you had a Collection entity containing the result of you entities, you will need to implement the [iterable protocol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#The_iterable_protocol) on this object, this way, we can register all entities in the unit of work.
 
 ### Removed
 

@@ -117,7 +117,24 @@ class AbstractClient {
       .then(response => response.text().then(text => [response, text]))
       .then(([response, text]) => {
         if (listOrItem === 'list') {
-          return this.serializer.deserializeList(text, this.metadata, response);
+          const decodedList = this.serializer.decodeList(
+            text,
+            this.metadata,
+            response
+          );
+
+          // eslint-disable-next-line no-restricted-syntax
+          for (const decodedItem of decodedList) {
+            const identifier =
+              decodedItem[this.metadata.getIdentifierAttribute().serializedKey];
+            this.sdk.unitOfWork.registerClean(identifier, decodedItem);
+          }
+
+          return this.serializer.denormalizeList(
+            decodedList,
+            this.metadata,
+            response
+          );
         }
 
         const decodedItem = this.serializer.decodeItem(
@@ -170,7 +187,22 @@ class AbstractClient {
     }
 
     const pathBase = this.getPathBase(pathParameters);
-    const url = new URI(id ? `${pathBase}/${id}` : pathBase);
+
+    let url = null;
+    if (id) {
+      const testPathBase = this.sdk.mapping.idPrefix
+        ? `${this.sdk.mapping.idPrefix}${pathBase}`
+        : pathBase;
+
+      if (typeof id === 'string' && id.startsWith(testPathBase)) {
+        url = new URI(id);
+      } else {
+        url = new URI(`${pathBase}/${id}`);
+      }
+    } else {
+      url = new URI(pathBase);
+    }
+
     if (params) {
       url.addSearch(params);
     }

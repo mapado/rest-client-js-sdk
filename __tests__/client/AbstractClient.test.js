@@ -116,8 +116,15 @@ describe('Test Client', () => {
   });
 
   test('handle findBy query', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
+    fetchMock.mock({
+      matcher: '*',
+      response: {
+        body: [
+          {
+            '@id': '/v2/tests/8',
+          },
+        ],
+      },
     });
 
     return Promise.all([
@@ -135,9 +142,11 @@ describe('Test Client', () => {
   });
 
   test('handle findAll query', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-    });
+    fetchMock.mock(() => true, [
+      {
+        '@id': '/v2/test/8',
+      },
+    ]);
 
     return Promise.all([
       SomeSdk.getRepository('test').findAll(),
@@ -217,9 +226,35 @@ describe('Test Client', () => {
   });
 
   test('handle getPathBase with custom path parameters', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-    });
+    fetchMock
+      .mock({
+        matcher: 'end:/foo',
+        response: {
+          body: [
+            {
+              '@id': '/v2/tests/8',
+            },
+          ],
+        },
+      })
+      .mock({
+        matcher: 'end:/foo?q=test&foo=bar',
+        response: {
+          body: [
+            {
+              '@id': '/v2/tests/8',
+            },
+          ],
+        },
+      })
+      .mock({
+        matcher: 'end:/foo/8',
+        response: {
+          body: {
+            '@id': '/v2/tests/8',
+          },
+        },
+      });
 
     const SomeSdkNoPrefix = new RestClientSdk(
       tokenStorageMock,
@@ -485,19 +520,23 @@ describe('Fix bugs', () => {
 });
 
 describe('Test unit of work', () => {
-  test('posting data with unit of work', () => {
+  let unitOfWorkSdk = null;
+
+  beforeEach(() => {
     const tokenGenerator = new PasswordGenerator({
       path: 'oauth.me',
       scheme: 'https',
       clientId: 'clientId',
       clientSecret: 'clientSecret',
     });
-    const sdk = new RestClientSdk(
+    unitOfWorkSdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https' },
       unitOfWorkMapping
     );
+  });
 
+  test('posting data with unit of work', () => {
     const cart = {
       '@id': '/v2/carts/1',
       status: null,
@@ -512,7 +551,7 @@ describe('Test unit of work', () => {
 
     fetchMock.mock(() => true, {});
 
-    return sdk
+    return unitOfWorkSdk
       .getRepository('carts')
       .create(cart)
       .then(() => {
@@ -530,23 +569,11 @@ describe('Test unit of work', () => {
       });
   });
 
-  test('updating data data with unit of work', async () => {
-    const tokenGenerator = new PasswordGenerator({
-      path: 'oauth.me',
-      scheme: 'https',
-      clientId: 'clientId',
-      clientSecret: 'clientSecret',
-    });
-    const sdk = new RestClientSdk(
-      tokenStorageMock,
-      { path: 'api.me', scheme: 'https' },
-      unitOfWorkMapping
-    );
-
+  test('updating data with unit of work', async () => {
     fetchMock
       .mock({
         name: 'get_cart',
-        matcher: url => true,
+        matcher: 'end:/v12/carts/1',
         method: 'GET',
         response: JSON.stringify({
           '@id': '/v12/carts/1',
@@ -562,7 +589,7 @@ describe('Test unit of work', () => {
       })
       .mock({
         name: 'put_cart',
-        matcher: url => true,
+        matcher: 'end:/v12/carts/1',
         method: 'PUT',
         response: JSON.stringify({
           '@id': '/v12/carts/1',
@@ -577,7 +604,7 @@ describe('Test unit of work', () => {
         }),
       });
 
-    const repo = sdk.getRepository('carts');
+    const repo = unitOfWorkSdk.getRepository('carts');
     const cart = await repo.find('/v12/carts/1');
     cart.status = 'foo';
 
@@ -588,5 +615,98 @@ describe('Test unit of work', () => {
 
     updatedCart = await repo.update(cart);
     expect(fetchMock.lastOptions('put_cart').body).toEqual('{}');
+  });
+
+  test('updating partial data with unit of work', async () => {
+    fetchMock
+      .mock({
+        name: 'get_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'GET',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'foo',
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      })
+      .mock({
+        name: 'put_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'PUT',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.find('/v12/carts/1');
+
+    await repo.update({ '@id': '/v12/carts/1', status: null });
+    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+      JSON.stringify({ status: null })
+    );
+  });
+
+  test('find all register', async () => {
+    fetchMock
+      .mock({
+        name: 'get_carts',
+        matcher: 'end:/v12/carts',
+        method: 'GET',
+        response: JSON.stringify([
+          {
+            '@id': '/v12/carts/1',
+            status: 'foo',
+            cartItemList: [
+              {
+                '@id': null,
+                quantity: 1,
+                cart: null,
+              },
+            ],
+          },
+        ]),
+      })
+      .mock({
+        name: 'put_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'PUT',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cartList = await repo.findAll();
+    const cart = cartList[0];
+
+    cart.status = 'bar';
+
+    await repo.update(cart);
+    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+      JSON.stringify({ status: 'bar' })
+    );
   });
 });
