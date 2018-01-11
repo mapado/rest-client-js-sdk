@@ -49,6 +49,7 @@ Now:
 
 ### Removed
 
+* Dropped support for node 6
 * AbstractClient does not need to specify `getPathBase` anymore: this is generated via the classmetata. You can still override it.
 * `getEntityURI` is not mandatory anymore. it will be autogenerate by the AbstractClient. You can still override it
 * There is no need to create an empty client extending `AbstractClient` now, the default will be `AbstractClient`
