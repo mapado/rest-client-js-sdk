@@ -19,9 +19,7 @@ class AbstractClient {
   }
 
   getEntityURI(entity) {
-    const idAttr = this.metadata.getIdentifierAttribute();
-    const { attributeName } = idAttr;
-    let idValue = entity[attributeName];
+    let idValue = this._getEntityIdentifier(entity);
 
     if (Number.isFinite(idValue)) {
       idValue = idValue.toString();
@@ -84,8 +82,7 @@ class AbstractClient {
       this.metadata
     );
 
-    const identifier =
-      newSerializedModel[this.metadata.getIdentifierAttribute().serializedKey];
+    const identifier = this._getEntityIdentifier(newSerializedModel);
     const oldModel = this.sdk.unitOfWork.getDirtyEntity(identifier);
 
     if (oldModel) {
@@ -107,8 +104,12 @@ class AbstractClient {
 
   delete(entity) {
     const url = this.getEntityURI(entity);
+    const identifier = this._getEntityIdentifier(entity);
+
     return this.authorizedFetch(url, {
       method: 'DELETE',
+    }).then(() => {
+      this.sdk.unitOfWork.clear(identifier);
     });
   }
 
@@ -125,8 +126,7 @@ class AbstractClient {
 
           // eslint-disable-next-line no-restricted-syntax
           for (const decodedItem of decodedList) {
-            const identifier =
-              decodedItem[this.metadata.getIdentifierAttribute().serializedKey];
+            const identifier = this._getEntityIdentifier(decodedItem);
             this.sdk.unitOfWork.registerClean(identifier, decodedItem);
           }
 
@@ -143,8 +143,7 @@ class AbstractClient {
           response
         );
 
-        const identifier =
-          decodedItem[this.metadata.getIdentifierAttribute().serializedKey];
+        const identifier = this._getEntityIdentifier(decodedItem);
         this.sdk.unitOfWork.registerClean(identifier, decodedItem);
 
         return this.serializer.denormalizeItem(
@@ -318,6 +317,10 @@ class AbstractClient {
     });
 
     return localHeaders;
+  }
+
+  _getEntityIdentifier(object) {
+    return object[this.metadata.getIdentifierAttribute().serializedKey];
   }
 }
 

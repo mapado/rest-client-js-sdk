@@ -709,4 +709,33 @@ describe('Test unit of work', () => {
       JSON.stringify({ status: 'bar' })
     );
   });
+
+  test.only('delete entity will clear the unit of work', async () => {
+    fetchMock
+      .mock({
+        matcher: 'end:/v12/carts/1',
+        method: 'DELETE',
+        response: {
+          status: 204,
+          body: null,
+        },
+      })
+      .mock({
+        matcher: 'end:/v12/carts/1',
+        method: 'GET',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'foo',
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.find(1);
+
+    expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeTruthy();
+
+    await repo.delete(cart);
+
+    expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeUndefined();
+  });
 });
