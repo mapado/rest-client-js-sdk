@@ -6,6 +6,12 @@ import RestClientSdk, {
   Serializer,
   TokenStorage,
   PasswordGenerator,
+  Mapping,
+  ClassMetadata,
+  Attribute,
+  Relation,
+  ONE_TO_MANY,
+  MANY_TO_ONE,
 } from '../../src/index';
 import tokenStorageMock from '../../__mocks__/tokenStorage';
 import MockStorage from '../../__mocks__/mockStorage';
@@ -36,62 +42,36 @@ class SomeTestClient extends AbstractClient {
       return pathParameters.basePath;
     }
 
-    return '/v2/test';
-  }
-
-  getName() {
-    return 'SomeClient';
-  }
-
-  getEntityURI(entity) {
-    return entity['@id'];
-  }
-}
-
-class NoAtIdClient extends AbstractClient {
-  getPathBase(pathParameters) {
-    return '/v2/no-at-id';
-  }
-
-  getName() {
-    return 'NoAtIdClient';
-  }
-
-  getEntityURI(entity) {
-    const uri = `${this.getPathBase()}/${entity.id}`;
-    return uri;
+    return `${this.sdk.mapping.idPrefix}/test`;
   }
 }
 
 class DefaultParametersTestClient extends AbstractClient {
-  getPathBase() {
-    return '/v2/def_param';
-  }
-
   getDefaultParameters() {
     return {
       _groups: 'test_read,test_write',
       dp: 'df',
     };
   }
-
-  getName() {
-    return 'DefaultParamTest';
-  }
-
-  getEntityURI(entity) {
-    return entity['@id'];
-  }
 }
+
+const mapping = new Mapping('/v2');
+const testMetadata = new ClassMetadata('test', 'test', SomeTestClient);
+testMetadata.setAttributeList([new Attribute('@id', '@id', 'string', true)]);
+const defParamMetadata = new ClassMetadata(
+  'defParam',
+  'def_param',
+  DefaultParametersTestClient
+);
+defParamMetadata.setAttributeList([new Attribute('id', 'id', 'integer', true)]);
+const noAtIdMetadata = new ClassMetadata('noAtId', 'no-at-id');
+noAtIdMetadata.setAttributeList([new Attribute('id', 'id', 'integer', true)]);
+mapping.setMapping([testMetadata, defParamMetadata, noAtIdMetadata]);
 
 const SomeSdk = new RestClientSdk(
   tokenStorageMock,
   { path: 'api.me', scheme: 'https' },
-  {
-    test: SomeTestClient,
-    defParam: DefaultParametersTestClient,
-    noAtId: NoAtIdClient,
-  }
+  mapping
 );
 SomeSdk.tokenStorage.generateToken();
 
@@ -104,10 +84,10 @@ describe('Test Client', () => {
     });
 
     return Promise.all([
-      SomeSdk.test.find(8),
-      SomeSdk.test.find(8, { q: 'test', foo: 'bar' }),
-      SomeSdk.defParam.find(8),
-      SomeSdk.defParam.find(8, { q: 'test', foo: 'bar' }),
+      SomeSdk.getRepository('test').find(8),
+      SomeSdk.getRepository('test').find(8, { q: 'test', foo: 'bar' }),
+      SomeSdk.getRepository('defParam').find(8),
+      SomeSdk.getRepository('defParam').find(8, { q: 'test', foo: 'bar' }),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/v2/test/8');
@@ -133,8 +113,8 @@ describe('Test Client', () => {
     });
 
     return Promise.all([
-      SomeSdk.test.findBy({ q: 'test', foo: 'bar' }),
-      SomeSdk.defParam.findBy({ q: 'test', foo: 'bar' }),
+      SomeSdk.getRepository('test').findBy({ q: 'test', foo: 'bar' }),
+      SomeSdk.getRepository('defParam').findBy({ q: 'test', foo: 'bar' }),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/v2/test?q=test&foo=bar');
@@ -152,8 +132,8 @@ describe('Test Client', () => {
     });
 
     return Promise.all([
-      SomeSdk.test.findAll(),
-      SomeSdk.defParam.findAll(),
+      SomeSdk.getRepository('test').findAll(),
+      SomeSdk.getRepository('defParam').findAll(),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/v2/test');
@@ -171,7 +151,7 @@ describe('Test Client', () => {
       name: 'foo',
     });
 
-    return SomeSdk.test
+    return SomeSdk.getRepository('test')
       .find(8)
       .then(item =>
         Promise.all([
@@ -186,10 +166,7 @@ describe('Test Client', () => {
     const EntityFactorySdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https' },
-      {
-        test: SomeTestClient,
-        defParam: DefaultParametersTestClient,
-      },
+      mapping,
       new WeirdSerializer()
     );
 
@@ -210,7 +187,7 @@ describe('Test Client', () => {
       ]);
 
     return Promise.all([
-      EntityFactorySdk.test
+      EntityFactorySdk.getRepository('test')
         .find(8)
         .then(item =>
           Promise.all([
@@ -219,7 +196,7 @@ describe('Test Client', () => {
             expect(item.customName).toBe('foofoo'),
           ])
         ),
-      EntityFactorySdk.test
+      EntityFactorySdk.getRepository('test')
         .findAll()
         .then(itemList =>
           Promise.all([
@@ -237,9 +214,12 @@ describe('Test Client', () => {
     });
 
     return Promise.all([
-      SomeSdk.test.find(8, {}, { basePath: '/foo' }),
-      SomeSdk.test.findBy({ q: 'test', foo: 'bar' }, { basePath: '/foo' }),
-      SomeSdk.test.findAll({}, { basePath: '/foo' }),
+      SomeSdk.getRepository('test').find(8, {}, { basePath: '/foo' }),
+      SomeSdk.getRepository('test').findBy(
+        { q: 'test', foo: 'bar' },
+        { basePath: '/foo' }
+      ),
+      SomeSdk.getRepository('test').findAll({}, { basePath: '/foo' }),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/foo/8');
@@ -258,23 +238,20 @@ describe('Test Client', () => {
     const BasicAuthSdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https', authorizationType: 'Basic' },
-      {
-        test: SomeTestClient,
-        defParam: DefaultParametersTestClient,
-      }
+      mapping
     );
     BasicAuthSdk.tokenStorage.generateToken();
 
-    return Promise.all([SomeSdk.test.find(8), BasicAuthSdk.test.find(8)]).then(
-      () => {
-        const authHeader = fetchMock.calls().matched[0][1].headers
-          .Authorization;
-        expect(authHeader).toContain('Bearer ');
-        const basicAuthHeader = fetchMock.calls().matched[1][1].headers
-          .Authorization;
-        expect(basicAuthHeader).toContain('Basic ');
-      }
-    );
+    return Promise.all([
+      SomeSdk.getRepository('test').find(8),
+      BasicAuthSdk.getRepository('test').find(8),
+    ]).then(() => {
+      const authHeader = fetchMock.calls().matched[0][1].headers.Authorization;
+      expect(authHeader).toContain('Bearer ');
+      const basicAuthHeader = fetchMock.calls().matched[1][1].headers
+        .Authorization;
+      expect(basicAuthHeader).toContain('Basic ');
+    });
   });
 });
 
@@ -291,25 +268,25 @@ describe('Test errors', () => {
       .mock(/500$/, 500);
 
     return Promise.all([
-      expect(SomeSdk.test.find(400)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(400)).rejects.toBeInstanceOf(
         errors.BadRequestError
       ),
-      expect(SomeSdk.test.find(401)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(401)).rejects.toBeInstanceOf(
         errors.AccessDeniedError
       ),
-      expect(SomeSdk.test.find(403)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(403)).rejects.toBeInstanceOf(
         errors.ForbiddenError
       ),
-      expect(SomeSdk.test.find(404)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(404)).rejects.toBeInstanceOf(
         errors.ResourceNotFoundError
       ),
-      expect(SomeSdk.test.find(404)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(404)).rejects.toBeInstanceOf(
         errors.BadRequestError
       ),
-      expect(SomeSdk.test.find(410)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(410)).rejects.toBeInstanceOf(
         errors.BadRequestError
       ),
-      expect(SomeSdk.test.find(500)).rejects.toBeInstanceOf(
+      expect(SomeSdk.getRepository('test').find(500)).rejects.toBeInstanceOf(
         errors.InternalServerError
       ),
     ]);
@@ -336,8 +313,8 @@ describe('Update and delete function trigger the good urls', () => {
     };
 
     return Promise.all([
-      SomeSdk.test.update(data),
-      SomeSdk.noAtId.update(dataNoArobase),
+      SomeSdk.getRepository('test').update(data),
+      SomeSdk.getRepository('noAtId').update(dataNoArobase),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/v2/test/8');
@@ -355,17 +332,15 @@ describe('Fix bugs', () => {
     const SomeInnerSdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https', prefix: '/v1' },
-      {
-        test: SomeTestClient,
-        defParam: DefaultParametersTestClient,
-        noAtId: NoAtIdClient,
-      }
+      mapping
     );
     SomeInnerSdk.tokenStorage.generateToken();
 
-    expect(SomeInnerSdk.test.makeUri('foo').toString()).toEqual(
-      'https://api.me/v1/foo'
-    );
+    expect(
+      SomeInnerSdk.getRepository('test')
+        .makeUri('foo')
+        .toString()
+    ).toEqual('https://api.me/v1/foo');
   });
 
   test('allow base header override', () => {
@@ -374,7 +349,7 @@ describe('Fix bugs', () => {
       foo: 'bar',
     });
 
-    return SomeSdk.test
+    return SomeSdk.getRepository('test')
       .authorizedFetch('foo', {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
@@ -391,7 +366,7 @@ describe('Fix bugs', () => {
       foo: 'bar',
     });
 
-    return SomeSdk.test
+    return SomeSdk.getRepository('test')
       .authorizedFetch('foo', {
         headers: {
           'Content-Type': undefined,
@@ -483,7 +458,7 @@ describe('Fix bugs', () => {
     const SomeInnerSdk = new RestClientSdk(
       new TokenStorage(tokenGenerator, storage),
       { path: 'api.me', scheme: 'https' },
-      { test: SomeTestClient }
+      mapping
     );
 
     return SomeInnerSdk.tokenStorage
@@ -491,7 +466,7 @@ describe('Fix bugs', () => {
         username: 'foo',
         password: 'bar',
       })
-      .then(() => SomeInnerSdk.test.find(1))
+      .then(() => SomeInnerSdk.getRepository('test').find(1))
       .then(() => {
         expect(
           fetchMock.lastOptions('access_denied').headers.Authorization

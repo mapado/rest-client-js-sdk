@@ -14,6 +14,10 @@ import ClientCredentialsGenerator from './TokenGenerator/ClientCredentialsGenera
 import PasswordGenerator from './TokenGenerator/PasswordGenerator';
 import ProvidedTokenGenerator from './TokenGenerator/ProvidedTokenGenerator';
 import Serializer from './serializer/Serializer';
+import Mapping from './Mapping';
+import ClassMetadata from './Mapping/ClassMetadata';
+import Attribute from './Mapping/Attribute';
+import Relation, { ONE_TO_MANY, MANY_TO_ONE } from './Mapping/Relation';
 
 export default RestClientSdk;
 export {
@@ -30,4 +34,10 @@ export {
   HttpError,
   InternalServerError,
   ResourceNotFoundError,
+  Mapping,
+  ClassMetadata,
+  Attribute,
+  Relation,
+  ONE_TO_MANY,
+  MANY_TO_ONE,
 };

@@ -1,21 +1,30 @@
 import JsSerializer from './serializer/JsSerializer';
+import Mapping from './Mapping';
 
 class RestClientSdk {
-  constructor(
-    tokenStorage,
-    config,
-    clientList = {},
-    serializer = new JsSerializer()
-  ) {
+  constructor(tokenStorage, config, mapping, serializer = new JsSerializer()) {
     this._checkConfigValidity(config);
+
+    if (!(mapping instanceof Mapping)) {
+      throw new TypeError('mapping should be an instance of `Mapping`');
+    }
 
     this.config = this._mergeWithBaseConfig(config);
     this.tokenStorage = tokenStorage;
     this.serializer = serializer;
+    this.mapping = mapping;
 
-    Object.keys(clientList).forEach(key => {
-      this[key] = new clientList[key](this);
-    });
+    this._repositoryList = {};
+  }
+
+  getRepository(key) {
+    if (!this._repositoryList[key]) {
+      const metadata = this.mapping.getClassMetadataByKey(key);
+      // eslint-disable-next-line new-cap
+      this._repositoryList[key] = new metadata.repositoryClass(this, metadata);
+    }
+
+    return this._repositoryList[key];
   }
 
   _mergeWithBaseConfig(config) {
