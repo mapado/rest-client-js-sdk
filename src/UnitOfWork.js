@@ -30,8 +30,11 @@ function findOldRelation(newRelationValue, oldRelationValue, classMetadata) {
 
   const foundValue =
     oldRelationValue &&
-    oldRelationValue.find(oldRelationValue => {
-      const oldRelationValueId = getEntityId(oldRelationValue, idSerializedKey);
+    oldRelationValue.find(innerOldRelationValue => {
+      const oldRelationValueId = getEntityId(
+        innerOldRelationValue,
+        idSerializedKey
+      );
 
       return relationValueId === oldRelationValueId;
     });
@@ -55,6 +58,10 @@ function getIdentifierForList(newValue, idSerializedKey) {
     } else if (typeof value === 'string') {
       return value;
     }
+
+    throw new TypeError(
+      'new value should include a list of string or objects containing the serialized key'
+    );
   });
 }
 
