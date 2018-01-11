@@ -18,21 +18,27 @@ import MockStorage from '../../__mocks__/mockStorage';
 import unitOfWorkMapping from '../../__mocks__/unitOfWorkMapping';
 
 class WeirdSerializer extends Serializer {
-  deserializeItem(rawData, type) {
-    return this._serializeItem(JSON.parse(rawData));
-  }
-
-  deserializeList(rawListData, type) {
-    const input = JSON.parse(rawListData);
-
-    return input.map(this._serializeItem);
-  }
-
-  serializeItem(entity, type) {
+  encodeItem(entity) {
     return JSON.stringify(entity);
   }
 
-  _serializeItem(item) {
+  decodeItem(rawData) {
+    return JSON.parse(rawData);
+  }
+
+  denormalizeItem(object) {
+    return this._addInfoToItem(object);
+  }
+
+  decodeList(rawData) {
+    return JSON.parse(rawData);
+  }
+
+  denormalizeList(objectList) {
+    return objectList.map(this._addInfoToItem);
+  }
+
+  _addInfoToItem(item) {
     return Object.assign({}, item, { customName: `${item.name}${item.name}` });
   }
 }
@@ -43,7 +49,7 @@ class SomeTestClient extends AbstractClient {
       return pathParameters.basePath;
     }
 
-    return `${this.sdk.mapping.idPrefix}/test`;
+    return '/test';
   }
 }
 
@@ -57,6 +63,7 @@ class DefaultParametersTestClient extends AbstractClient {
 }
 
 const mapping = new Mapping('/v2');
+const mappingNoPrefix = new Mapping();
 const testMetadata = new ClassMetadata('test', 'test', SomeTestClient);
 testMetadata.setAttributeList([new Attribute('@id', '@id', 'string', true)]);
 const defParamMetadata = new ClassMetadata(
@@ -68,6 +75,7 @@ defParamMetadata.setAttributeList([new Attribute('id', 'id', 'integer', true)]);
 const noAtIdMetadata = new ClassMetadata('noAtId', 'no-at-id');
 noAtIdMetadata.setAttributeList([new Attribute('id', 'id', 'integer', true)]);
 mapping.setMapping([testMetadata, defParamMetadata, noAtIdMetadata]);
+mappingNoPrefix.setMapping([testMetadata, defParamMetadata, noAtIdMetadata]);
 
 const SomeSdk = new RestClientSdk(
   tokenStorageMock,
@@ -76,12 +84,11 @@ const SomeSdk = new RestClientSdk(
 );
 SomeSdk.tokenStorage.generateToken();
 
+afterEach(fetchMock.restore);
 describe('Test Client', () => {
-  afterEach(fetchMock.restore);
-
   test('handle find query', () => {
     fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
+      '@id': '/v2/test/8',
     });
 
     return Promise.all([
@@ -110,7 +117,7 @@ describe('Test Client', () => {
 
   test('handle findBy query', () => {
     fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
+      '@id': '/v2/test/8',
     });
 
     return Promise.all([
@@ -129,7 +136,7 @@ describe('Test Client', () => {
 
   test('handle findAll query', () => {
     fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
+      '@id': '/v2/test/8',
     });
 
     return Promise.all([
@@ -148,7 +155,7 @@ describe('Test Client', () => {
 
   test('handle entityFactory', () => {
     fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
+      '@id': '/v2/test/8',
       name: 'foo',
     });
 
@@ -173,16 +180,16 @@ describe('Test Client', () => {
 
     fetchMock
       .mock('https://api.me/v2/test/8', {
-        '@id': '/v1/test/8',
+        '@id': '/v2/test/8',
         name: 'foo',
       })
       .mock('https://api.me/v2/test', [
         {
-          '@id': '/v1/test/8',
+          '@id': '/v2/test/8',
           name: 'foo',
         },
         {
-          '@id': '/v1/test/9',
+          '@id': '/v2/test/9',
           name: 'bar',
         },
       ]);
@@ -211,16 +218,22 @@ describe('Test Client', () => {
 
   test('handle getPathBase with custom path parameters', () => {
     fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
+      '@id': '/v2/test/8',
     });
 
+    const SomeSdkNoPrefix = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https' },
+      mappingNoPrefix
+    );
+
     return Promise.all([
-      SomeSdk.getRepository('test').find(8, {}, { basePath: '/foo' }),
-      SomeSdk.getRepository('test').findBy(
+      SomeSdkNoPrefix.getRepository('test').find(8, {}, { basePath: '/foo' }),
+      SomeSdkNoPrefix.getRepository('test').findBy(
         { q: 'test', foo: 'bar' },
         { basePath: '/foo' }
       ),
-      SomeSdk.getRepository('test').findAll({}, { basePath: '/foo' }),
+      SomeSdkNoPrefix.getRepository('test').findAll({}, { basePath: '/foo' }),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/foo/8');
@@ -233,7 +246,7 @@ describe('Test Client', () => {
 
   test('handle Authorization header', () => {
     fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
+      '@id': '/v2/test/8',
     });
 
     const BasicAuthSdk = new RestClientSdk(
@@ -257,8 +270,6 @@ describe('Test Client', () => {
 });
 
 describe('Test errors', () => {
-  afterEach(fetchMock.restore);
-
   test('handle 401 and 403 errors', () => {
     fetchMock
       .mock(/400$/, 400)
@@ -295,8 +306,6 @@ describe('Test errors', () => {
 });
 
 describe('Update and delete function trigger the good urls', () => {
-  afterEach(fetchMock.restore);
-
   test('handle updating and deleting entities with @ids', () => {
     fetchMock.mock(() => true, {
       '@id': '/v2/test/8',
@@ -325,14 +334,10 @@ describe('Update and delete function trigger the good urls', () => {
   });
 });
 describe('Fix bugs', () => {
-  afterEach(() => {
-    fetchMock.restore();
-  });
-
   test('generate good url', () => {
     const SomeInnerSdk = new RestClientSdk(
       tokenStorageMock,
-      { path: 'api.me', scheme: 'https', prefix: '/v1' },
+      { path: 'api.me', scheme: 'https' },
       mapping
     );
     SomeInnerSdk.tokenStorage.generateToken();
@@ -341,7 +346,7 @@ describe('Fix bugs', () => {
       SomeInnerSdk.getRepository('test')
         .makeUri('foo')
         .toString()
-    ).toEqual('https://api.me/v1/foo');
+    ).toEqual('https://api.me/v2/foo');
   });
 
   test('allow base header override', () => {
@@ -479,7 +484,7 @@ describe('Fix bugs', () => {
   });
 });
 
-describe.only('Test unit of work', () => {
+describe('Test unit of work', () => {
   test('posting data with unit of work', () => {
     const tokenGenerator = new PasswordGenerator({
       path: 'oauth.me',
@@ -494,7 +499,7 @@ describe.only('Test unit of work', () => {
     );
 
     const cart = {
-      '@id': '/v1/carts/1',
+      '@id': '/v2/carts/1',
       status: null,
       cartItemList: [
         {
@@ -507,13 +512,13 @@ describe.only('Test unit of work', () => {
 
     fetchMock.mock(() => true, {});
 
-    sdk
+    return sdk
       .getRepository('carts')
       .create(cart)
       .then(() => {
         expect(fetchMock.lastOptions().body).toEqual(
           JSON.stringify({
-            '@id': '/v1/carts/1',
+            '@id': '/v2/carts/1',
             cartItemList: [
               {
                 '@id': null,
@@ -523,5 +528,65 @@ describe.only('Test unit of work', () => {
           })
         );
       });
+  });
+
+  test('updating data data with unit of work', async () => {
+    const tokenGenerator = new PasswordGenerator({
+      path: 'oauth.me',
+      scheme: 'https',
+      clientId: 'clientId',
+      clientSecret: 'clientSecret',
+    });
+    const sdk = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https' },
+      unitOfWorkMapping
+    );
+
+    fetchMock
+      .mock({
+        name: 'get_cart',
+        matcher: url => true,
+        method: 'GET',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      })
+      .mock({
+        name: 'put_cart',
+        matcher: url => true,
+        method: 'PUT',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'foo',
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      });
+
+    const repo = sdk.getRepository('carts');
+    const cart = await repo.find('/v12/carts/1');
+    cart.status = 'foo';
+
+    let updatedCart = await repo.update(cart);
+    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+      JSON.stringify({ status: 'foo' })
+    );
+
+    updatedCart = await repo.update(cart);
+    expect(fetchMock.lastOptions('put_cart').body).toEqual('{}');
   });
 });
