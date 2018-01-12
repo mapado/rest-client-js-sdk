@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 2.0.0-rc.4
+Fix issue with list denormalized oo objects
+
+## 2.0.0-rc.3
+Cleaner relations, matches the Arguments attributes
+
 ## 2.0.0-rc.2
 
 ### Changed
