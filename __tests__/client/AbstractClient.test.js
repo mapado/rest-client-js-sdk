@@ -14,6 +14,7 @@ import RestClientSdk, {
 import tokenStorageMock from '../../__mocks__/tokenStorage';
 import MockStorage from '../../__mocks__/mockStorage';
 import unitOfWorkMapping from '../../__mocks__/unitOfWorkMapping';
+import MemberSerializer from '../../__mocks__/memberSerializer';
 
 class WeirdSerializer extends Serializer {
   encodeItem(entity) {
@@ -708,7 +709,61 @@ describe('Test unit of work', () => {
     );
   });
 
-  test.only('delete entity will clear the unit of work', async () => {
+  test('find all with object as response', async () => {
+    unitOfWorkSdk.serializer = new MemberSerializer();
+    fetchMock
+      .mock({
+        name: 'get_carts',
+        matcher: 'end:/v12/carts',
+        method: 'GET',
+        response: JSON.stringify({
+          members: [
+            {
+              '@id': '/v12/carts/1',
+              status: 'foo',
+              phone_number: '01234',
+              cartItemList: [
+                {
+                  '@id': null,
+                  quantity: 1,
+                  cart: null,
+                },
+              ],
+            },
+          ],
+        }),
+      })
+      .mock({
+        name: 'put_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'PUT',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          phone_number: '01234',
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cartList = await repo.findAll();
+    const cart = cartList.members[0];
+
+    cart.status = 'bar';
+
+    await repo.update(cart);
+    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+      JSON.stringify({ status: 'bar' })
+    );
+  });
+
+  test('delete entity will clear the unit of work', async () => {
     fetchMock
       .mock({
         matcher: 'end:/v12/carts/1',

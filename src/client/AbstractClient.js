@@ -118,34 +118,37 @@ class AbstractClient {
       .then(response => response.text().then(text => [response, text]))
       .then(([response, text]) => {
         if (listOrItem === 'list') {
-          const decodedList = this.serializer.decodeList(
+          // for list, we need to deserialize the result to get an object
+          const itemList = this.serializer.deserializeList(
             text,
             this.metadata,
             response
           );
 
           // eslint-disable-next-line no-restricted-syntax
-          for (const decodedItem of decodedList) {
+          for (const decodedItem of itemList) {
             const identifier = this._getEntityIdentifier(decodedItem);
-            this.sdk.unitOfWork.registerClean(identifier, decodedItem);
+            const normalizedItem = this.serializer.normalizeItem(decodedItem);
+
+            // then we register the re-normalized item
+            this.sdk.unitOfWork.registerClean(identifier, normalizedItem);
           }
 
-          return this.serializer.denormalizeList(
-            decodedList,
-            this.metadata,
-            response
-          );
+          return itemList;
         }
 
+        // for items, we can just decode the item (ie. transform it to JS object)
         const decodedItem = this.serializer.decodeItem(
           text,
           this.metadata,
           response
         );
 
+        // and register it directy without deserializing + renormalizing
         const identifier = this._getEntityIdentifier(decodedItem);
         this.sdk.unitOfWork.registerClean(identifier, decodedItem);
 
+        // and finally return the denormalized item
         return this.serializer.denormalizeItem(
           decodedItem,
           this.metadata,
