@@ -10,8 +10,6 @@ import RestClientSdk, {
   ClassMetadata,
   Attribute,
   Relation,
-  ONE_TO_MANY,
-  MANY_TO_ONE,
 } from '../../src/index';
 import tokenStorageMock from '../../__mocks__/tokenStorage';
 import MockStorage from '../../__mocks__/mockStorage';

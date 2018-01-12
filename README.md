@@ -15,7 +15,7 @@ and it will hide the complexity for you.
 ### Declare your mapping
 
 ```js
-import { Mapping, Attribute, Relation, ClassMetadata, MANY_TO_ONE, ONE_TO_MANY } from 'rest-client-sdk';
+import { Mapping, Attribute, Relation, ClassMetadata } from 'rest-client-sdk';
 
 const mapping = new Mapping('/v1');
 
@@ -34,7 +34,7 @@ const idAttr = new Attribute(
 const name = new Attribute('name');
 productMetadata.setAttributeList([ idAttr, name ]);
 productMetadata.setRelationList([
-  new Relation('categoryList', ONE_TO_MANY),
+  new Relation('categoryList', Relation.ONE_TO_MANY),
 ]);
 
 const categoryMetadata = new ClassMetadata('categories');
@@ -43,7 +43,7 @@ categoryMetadata.setAttributeList([
     new Attribute('name'),
 ]);
 categoryMetadata.setRelationList([
-  new Relation('product', MANY_TO_ONE),
+  new Relation('product', Relation.MANY_TO_ONE),
 ]);
 
 mapping.setMapping([

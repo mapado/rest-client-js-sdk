@@ -1,6 +1,3 @@
-const ONE_TO_MANY = 'ONE_TO_MANY';
-const MANY_TO_ONE = 'MANY_TO_ONE';
-
 class Relation {
   constructor(type, relationKey, serializedKey /* , targetEntity */) {
     this.type = type;
@@ -10,13 +7,15 @@ class Relation {
   }
 
   isOneToMany() {
-    return this.type === ONE_TO_MANY;
+    return this.type === Relation.ONE_TO_MANY;
   }
 
   isManyToOne() {
-    return this.type === MANY_TO_ONE;
+    return this.type === Relation.MANY_TO_ONE;
   }
 }
 
+Relation.ONE_TO_MANY = 'ONE_TO_MANY';
+Relation.MANY_TO_ONE = 'MANY_TO_ONE';
+
 export default Relation;
-export { ONE_TO_MANY, MANY_TO_ONE };

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 2.0.0-rc.2
+
+### Changed
+  * `ONE_TO_MANY` and `MANY_TO_ONE` constant are now exported via the `Relation.ONE_TO_MANY` and `Relation.MANY_TO_ONE`, not in the main package
+
 ## 2.0.0-rc.1
 
 ### Added

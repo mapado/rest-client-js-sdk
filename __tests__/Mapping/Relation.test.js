@@ -1,13 +1,17 @@
-import Relation, { ONE_TO_MANY, MANY_TO_ONE } from '../../src/Mapping/Relation';
+import Relation from '../../src/Mapping/Relation';
 
 describe('Test Attribute', () => {
   test('test constructor', () => {
     const cartItemList = new Relation(
-      ONE_TO_MANY,
+      Relation.ONE_TO_MANY,
       'cart_items',
       'cartItemList'
     );
-    const category = new Relation(MANY_TO_ONE, 'categories', 'category');
+    const category = new Relation(
+      Relation.MANY_TO_ONE,
+      'categories',
+      'category'
+    );
 
     expect(cartItemList.serializedKey).toBe('cartItemList');
     expect(cartItemList.relationKey).toBe('cart_items');

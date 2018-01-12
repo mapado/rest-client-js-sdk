@@ -1,5 +1,5 @@
 import { AbstractClient, ClassMetadata, Attribute } from '../../src/index';
-import Relation, { MANY_TO_ONE, ONE_TO_MANY } from '../../src/Mapping/Relation';
+import Relation from '../../src/Mapping/Relation';
 
 class ProductRepository extends AbstractClient {}
 
@@ -30,8 +30,8 @@ describe('Test ClassMetadata', () => {
     ]);
 
     productMetadata.setRelationList([
-      new Relation(MANY_TO_ONE, 'categories', 'category'),
-      new Relation(ONE_TO_MANY, 'tags', 'tagList'),
+      new Relation(Relation.MANY_TO_ONE, 'categories', 'category'),
+      new Relation(Relation.ONE_TO_MANY, 'tags', 'tagList'),
     ]);
 
     // Product metadata
@@ -76,8 +76,8 @@ describe('Test ClassMetadata', () => {
     ];
     categoryMetadata.setAttributeList(attributeList);
     categoryMetadata.setRelationList([
-      new Relation(ONE_TO_MANY, 'products', 'productList'),
-      new Relation(MANY_TO_ONE, 'categories', 'parent'),
+      new Relation(Relation.ONE_TO_MANY, 'products', 'productList'),
+      new Relation(Relation.MANY_TO_ONE, 'categories', 'parent'),
     ]);
 
     expect(categoryMetadata.getAttributeList()).toEqual({
