@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 2.0.0-rc.5
+Fix bug in serializer
+
 ## 2.0.0-rc.4
 Fix issue with list denormalized oo objects
 

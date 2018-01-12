@@ -96,7 +96,7 @@ class Serializer {
    * @return {any} a list of entities
    */
   deserializeList(rawListData, classMetadata, response) {
-    const objectList = this.decodeItem(rawListData, classMetadata, response);
+    const objectList = this.decodeList(rawListData, classMetadata, response);
     return this.denormalizeList(objectList, classMetadata, response);
   }
 }
