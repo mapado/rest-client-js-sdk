@@ -10,16 +10,19 @@ describe('Test Attribute', () => {
     const category = new Relation(
       Relation.MANY_TO_ONE,
       'categories',
-      'category'
+      'category',
+      'categoryList'
     );
 
+    expect(cartItemList.targetMetadataKey).toBe('cart_items');
     expect(cartItemList.serializedKey).toBe('cartItemList');
-    expect(cartItemList.relationKey).toBe('cart_items');
+    expect(cartItemList.attributeName).toBe('cartItemList');
     expect(cartItemList.isManyToOne()).toBe(false);
     expect(cartItemList.isOneToMany()).toBe(true);
 
+    expect(category.targetMetadataKey).toBe('categories');
     expect(category.serializedKey).toBe('category');
-    expect(category.relationKey).toBe('categories');
+    expect(category.attributeName).toBe('categoryList');
     expect(category.isManyToOne()).toBe(true);
     expect(category.isOneToMany()).toBe(false);
   });

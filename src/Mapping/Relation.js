@@ -1,9 +1,9 @@
 class Relation {
-  constructor(type, relationKey, serializedKey /* , targetEntity */) {
+  constructor(type, targetMetadataKey, serializedKey, attributeName = null) {
     this.type = type;
+    this.targetMetadataKey = targetMetadataKey;
     this.serializedKey = serializedKey;
-    this.relationKey = relationKey;
-    // this.targetEntity = targetEntity;
+    this.attributeName = attributeName || this.serializedKey;
   }
 
   isOneToMany() {

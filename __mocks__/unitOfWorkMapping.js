@@ -9,7 +9,12 @@ cartMetadata.setAttributeList([
   new Attribute('data', 'data', 'object'),
 ]);
 cartMetadata.setRelationList([
-  new Relation(Relation.ONE_TO_MANY, 'cart_items', 'cartItemList'),
+  new Relation(
+    Relation.ONE_TO_MANY,
+    'cart_items',
+    'cartItemList',
+    'entityCartItemList'
+  ),
   new Relation(Relation.MANY_TO_ONE, 'orders', 'order'),
 ]);
 

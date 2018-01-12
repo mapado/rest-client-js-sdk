@@ -169,7 +169,7 @@ class UnitOfWork {
 
       const relationList = newValue;
 
-      relationList.forEach((newRelationValue, relationKey) => {
+      relationList.forEach((newRelationValue, relationAttributeName) => {
         const oldRelationValue = findOldRelation(
           newRelationValue,
           oldValue,
@@ -181,7 +181,7 @@ class UnitOfWork {
             typeof newRelationValue === 'string' ||
             typeof oldRelationValue === 'string'
           ) {
-            dirtyFields[key][relationKey] = newRelationValue;
+            dirtyFields[key][relationAttributeName] = newRelationValue;
 
             return;
           }
@@ -199,10 +199,13 @@ class UnitOfWork {
               recursiveDiff[idSerializedKey] = entityId;
             }
 
-            if (dirtyFields[key][relationKey]) {
-              Object.assign(dirtyFields[key][relationKey], recursiveDiff);
+            if (dirtyFields[key][relationAttributeName]) {
+              Object.assign(
+                dirtyFields[key][relationAttributeName],
+                recursiveDiff
+              );
             } else {
-              dirtyFields[key][relationKey] = recursiveDiff;
+              dirtyFields[key][relationAttributeName] = recursiveDiff;
             }
           }
         }
@@ -254,13 +257,13 @@ class UnitOfWork {
       }
 
       const relationMetadata = this.mapping.getClassMetadataByKey(
-        currentRelation.relationKey
+        currentRelation.targetMetadataKey
       );
 
       if (!relationMetadata) {
         throw new TypeError(
           `relation metadata is not set for relation ${classMetadata.key}.${
-            currentRelation.relationKey
+            currentRelation.targetMetadataKey
           }`
         );
       }
