@@ -787,8 +787,10 @@ describe('Test unit of work', () => {
 
     expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeTruthy();
 
-    await repo.delete(cart);
+    const response = await repo.delete(cart);
 
+    expect(response).not.toBeUndefined();
+    expect(response.status).toEqual(204);
     expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeUndefined();
   });
 });

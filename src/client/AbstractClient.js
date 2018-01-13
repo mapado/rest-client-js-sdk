@@ -108,8 +108,10 @@ class AbstractClient {
 
     return this.authorizedFetch(url, {
       method: 'DELETE',
-    }).then(() => {
+    }).then((response) => {
       this.sdk.unitOfWork.clear(identifier);
+
+      return response;
     });
   }
 
