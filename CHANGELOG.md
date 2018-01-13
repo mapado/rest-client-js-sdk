@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 2.0.0-rc.6
+Fix bug in delete call (not returning the response)
+
 ## 2.0.0-rc.5
 Fix bug in serializer
 
