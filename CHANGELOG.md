@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 2.0.0-rc.7
+Fix issue when posting a ManyToOne relation with only the id as string
+
 ## 2.0.0-rc.6
 Fix bug in delete call (not returning the response)
 

@@ -233,7 +233,7 @@ class UnitOfWork {
     Object.values(classMetadata.getAttributeList()).forEach(attribute => {
       const key = attribute.attributeName;
       const newValue = newSerializedModel[key];
-      const oldValue = oldSerializedModel[key];
+      const oldValue = oldSerializedModel ? oldSerializedModel[key] : null;
 
       const currentRelation = classMetadata.getRelation(
         attribute.serializedKey

@@ -793,4 +793,51 @@ describe('Test unit of work', () => {
     expect(response.status).toEqual(204);
     expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeUndefined();
   });
+
+  test('posting a many-to-one with only the id', async () => {
+    fetchMock.mock({
+      matcher: 'end:/v12/carts',
+      method: 'POST',
+      response: {
+        status: 201,
+        body: { '@id': '/v1/carts/3', order: '/v12/orders/1' },
+      },
+    });
+    const cartToPost = {
+      order: '/v12/orders/1',
+    };
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.create(cartToPost);
+
+    expect(cart.order).toEqual('/v12/orders/1');
+    expect(fetchMock.lastOptions().body).toEqual(
+      JSON.stringify({ order: '/v12/orders/1' })
+    );
+  });
+
+  test('posting a many-to-one with an object', async () => {
+    fetchMock.mock({
+      matcher: 'end:/v12/carts',
+      method: 'POST',
+      response: {
+        status: 201,
+        body: { '@id': '/v1/carts/3', order: '/v12/orders/1' },
+      },
+    });
+    const cartToPost = {
+      order: {
+        '@id': '/v12/orders/1',
+        status: 'waiting',
+        customerPaidAmount: null,
+      },
+    };
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.create(cartToPost);
+
+    expect(fetchMock.lastOptions().body).toEqual(
+      JSON.stringify({ order: { '@id': '/v12/orders/1', status: 'waiting' } })
+    );
+  });
 });
