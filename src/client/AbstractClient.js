@@ -67,7 +67,7 @@ class AbstractClient {
     return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'POST',
-        body: this.serializer.serializeItem(diff, this.metadata),
+        body: this.serializer.encodeItem(diff, this.metadata),
       }),
       'item'
     );
@@ -96,7 +96,7 @@ class AbstractClient {
     return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'PUT',
-        body: this.serializer.serializeItem(newSerializedModel, this.metadata),
+        body: this.serializer.encodeItem(newSerializedModel, this.metadata),
       }),
       'item'
     );

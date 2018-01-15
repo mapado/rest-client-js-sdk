@@ -840,4 +840,96 @@ describe('Test unit of work', () => {
       JSON.stringify({ order: { '@id': '/v12/orders/1', status: 'waiting' } })
     );
   });
+
+  describe('Test unit of work with entity conversion', () => {
+    class EntitySerializer extends Serializer {
+      normalizeItem(entity) {
+        return entity.toJSON();
+      }
+
+      encodeItem(entity) {
+        console.log(entity);
+        return JSON.stringify(entity);
+      }
+
+      decodeItem(rawData) {
+        return JSON.parse(rawData);
+      }
+
+      denormalizeItem(object) {
+        return new TestEntity(object);
+      }
+
+      decodeList(rawData) {
+        return JSON.parse(rawData);
+      }
+    }
+
+    class TestEntity {
+      constructor(value) {
+        this._value = value;
+        this['@id'] = value['@id'];
+      }
+
+      set(key, value) {
+        this._value[key] = value;
+      }
+
+      toJSON() {
+        return this._value;
+      }
+    }
+
+    test.only('create an entity using an entity conversion', async () => {
+      unitOfWorkSdk.serializer = new EntitySerializer();
+
+      fetchMock
+        .mock({
+          matcher: 'end:/v12/carts/1',
+          response: {
+            status: 200,
+            body: { '@id': '/v12/carts/1', status: 'payed' },
+          },
+        })
+        .mock({
+          matcher: 'end:/v12/carts',
+          method: 'POST',
+          response: {
+            status: 201,
+            body: { '@id': '/v12/carts/1', status: 'payed' },
+          },
+        });
+
+      const cartToPost = new TestEntity({
+        '@id': '/v12/carts/1',
+        status: 'payed',
+      });
+      expect(cartToPost.toJSON()['@id']).toEqual('/v12/carts/1');
+      expect(cartToPost.toJSON().status).toEqual('payed');
+
+      const cartToPut = await unitOfWorkSdk
+        .getRepository('carts')
+        .create(cartToPost);
+
+      expect(fetchMock.lastOptions().body).toEqual(
+        JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'payed',
+        })
+      );
+
+      expect(cartToPut.toJSON()['@id']).toEqual('/v12/carts/1');
+      expect(cartToPut.toJSON().status).toEqual('payed');
+
+      cartToPut.set('status', 'refunded');
+
+      const cart = await unitOfWorkSdk.getRepository('carts').update(cartToPut);
+
+      expect(fetchMock.lastOptions().body).toEqual(
+        JSON.stringify({
+          status: 'refunded',
+        })
+      );
+    });
+  });
 });
