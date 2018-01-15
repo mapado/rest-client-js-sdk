@@ -32,7 +32,7 @@ class AbstractClient {
     return `${pathBase}/${idValue}`;
   }
 
-  async find(id, queryParam = {}, pathParameters = {}) {
+  find(id, queryParam = {}, pathParameters = {}) {
     const url = this._generateUrlFromParams(queryParam, pathParameters, id);
 
     return this.deserializeResponse(this.authorizedFetch(url), 'item');
@@ -73,7 +73,7 @@ class AbstractClient {
     );
   }
 
-  async update(entity, queryParam = {}) {
+  update(entity, queryParam = {}) {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
@@ -108,7 +108,7 @@ class AbstractClient {
 
     return this.authorizedFetch(url, {
       method: 'DELETE',
-    }).then((response) => {
+    }).then(response => {
       this.sdk.unitOfWork.clear(identifier);
 
       return response;
