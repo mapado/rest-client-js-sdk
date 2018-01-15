@@ -148,14 +148,20 @@ class AbstractClient {
 
         // and register it directy without deserializing + renormalizing
         const identifier = this._getEntityIdentifier(decodedItem);
-        this.sdk.unitOfWork.registerClean(identifier, decodedItem);
 
         // and finally return the denormalized item
-        return this.serializer.denormalizeItem(
+        const item = this.serializer.denormalizeItem(
           decodedItem,
           this.metadata,
           response
         );
+
+        this.sdk.unitOfWork.registerClean(
+          identifier,
+          this.serializer.normalizeItem(item)
+        );
+
+        return item;
       });
   }
 

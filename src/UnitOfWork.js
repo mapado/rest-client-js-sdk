@@ -5,6 +5,10 @@ import diff from 'deep-diff';
  * deep comparaison between objects
  */
 function objectDiffers(left, right) {
+  if (typeof left !== 'object' || typeof right !== 'object') {
+    return false;
+  }
+
   const result = diff(left, right);
 
   return result && result.length > 0;

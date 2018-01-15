@@ -842,6 +842,21 @@ describe('Test unit of work', () => {
   });
 
   describe('Test unit of work with entity conversion', () => {
+    class TestEntity {
+      constructor(value) {
+        this._value = value;
+        this['@id'] = value['@id'];
+      }
+
+      set(key, value) {
+        this._value[key] = value;
+      }
+
+      toJSON() {
+        return this._value;
+      }
+    }
+
     class EntitySerializer extends Serializer {
       normalizeItem(entity) {
         return entity.toJSON();
@@ -864,22 +879,7 @@ describe('Test unit of work', () => {
       }
     }
 
-    class TestEntity {
-      constructor(value) {
-        this._value = value;
-        this['@id'] = value['@id'];
-      }
-
-      set(key, value) {
-        this._value[key] = value;
-      }
-
-      toJSON() {
-        return this._value;
-      }
-    }
-
-    test.only('create an entity using an entity conversion', async () => {
+    test('create an entity using an entity conversion', async () => {
       unitOfWorkSdk.serializer = new EntitySerializer();
 
       fetchMock
@@ -929,6 +929,27 @@ describe('Test unit of work', () => {
           status: 'refunded',
         })
       );
+    });
+
+    test('data not present in the API response', async () => {
+      fetchMock.mock({
+        matcher: 'end:/v12/carts/1',
+        response: {
+          status: 200,
+          body: { '@id': '/v12/carts/1', status: 'payed' },
+        },
+      });
+
+      const cart = await unitOfWorkSdk
+        .getRepository('carts')
+        .find('/v12/carts/1');
+
+      expect(cart.status).toEqual('payed');
+
+      cart.status = 'refunded';
+      cart.data = null;
+
+      unitOfWorkSdk.getRepository('carts').update(cart);
     });
   });
 });
