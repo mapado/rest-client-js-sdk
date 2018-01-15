@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 2.0.0-rc.8
+remove `async` method (that already returned a Promise object)
+
 ## 2.0.0-rc.7
 Fix issue when posting a ManyToOne relation with only the id as string
 
