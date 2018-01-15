@@ -31,6 +31,7 @@ class ClassMetadata {
 
   setAttributeList(attributeList) {
     this._attributeList = {};
+    this._identifierAttribute = null;
 
     attributeList.forEach(attribute => {
       this._attributeList[attribute.serializedKey] = attribute;
@@ -41,7 +42,11 @@ class ClassMetadata {
     });
 
     if (!this._identifierAttribute) {
-      throw new TypeError('attributeList must contain a identifier attribute');
+      throw new TypeError(
+        `"${
+          this.key
+        }" has no identifier attribute set. You must set all your attributes in one time and send an attribute with "isIdentifier=true"`
+      );
     }
   }
 
