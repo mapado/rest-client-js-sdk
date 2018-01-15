@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 2.0.0-rc.10
+deserialize + normalize item in unitofwork
+
 ## 2.0.0-rc.9
 creating or updating an "complex" entity (not a basic JS object) would throw an error
 
