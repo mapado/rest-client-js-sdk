@@ -848,7 +848,6 @@ describe('Test unit of work', () => {
       }
 
       encodeItem(entity) {
-        console.log(entity);
         return JSON.stringify(entity);
       }
 
