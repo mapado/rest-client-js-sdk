@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## 2.0.0-rc.10
+## 2.0.0-rc.10 + 2.0.0-rc.11
 deserialize + normalize item in unitofwork
 
 ## 2.0.0-rc.9

@@ -5,10 +5,6 @@ import diff from 'deep-diff';
  * deep comparaison between objects
  */
 function objectDiffers(left, right) {
-  if (typeof left !== 'object' || typeof right !== 'object') {
-    return false;
-  }
-
   const result = diff(left, right);
 
   return result && result.length > 0;
@@ -110,7 +106,7 @@ class UnitOfWork {
     const dirtyFields = dirtyFieldsParam;
 
     if (attribute.type === 'object') {
-      if (objectDiffers(oldValue, newValue)) {
+      if (oldValue === undefined || objectDiffers(oldValue, newValue)) {
         dirtyFields[key] = newValue;
       }
     } else if (oldValue !== newValue) {
