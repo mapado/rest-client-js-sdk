@@ -15,7 +15,7 @@ and it will hide the complexity for you.
 ### Declare your mapping
 
 ```js
-import { Mapping, Attribute, Relation, ClassMetadata, MANY_TO_ONE, ONE_TO_MANY } from 'rest-client-sdk';
+import { Mapping, Attribute, Relation, ClassMetadata } from 'rest-client-sdk';
 
 const mapping = new Mapping('/v1');
 
@@ -34,7 +34,12 @@ const idAttr = new Attribute(
 const name = new Attribute('name');
 productMetadata.setAttributeList([ idAttr, name ]);
 productMetadata.setRelationList([
-  new Relation('categoryList', ONE_TO_MANY),
+  new Relation(
+      Relation.ONE_TO_MANY, // type: Relation.ONE_TO_MANY or Relation.MANY_TO_ONE
+      'categories', // targetMetadataKey: must match the first argument of `ClassMetadata` constructor of the target entity
+      'category_list', // serializedKey: the key returned from your API
+      'categoryList', // attributeName: optional, the name in your entity, default to the `serializedKey` attribute
+  ),
 ]);
 
 const categoryMetadata = new ClassMetadata('categories');
@@ -43,7 +48,7 @@ categoryMetadata.setAttributeList([
     new Attribute('name'),
 ]);
 categoryMetadata.setRelationList([
-  new Relation('product', MANY_TO_ONE),
+  new Relation(Relation.MANY_TO_ONE, 'product', 'product'),
 ]);
 
 mapping.setMapping([

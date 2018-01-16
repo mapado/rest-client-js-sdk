@@ -2,42 +2,98 @@
 
 ## Unreleased
 
+## 2.0.0-rc.14
+Check relations in `isValidMapping`
+
+## 2.0.0-rc.13
+Fix issue when setting a ManyToOne relatossue when setting a ManyToOne relation to `null`n to `null`
+
+## 2.0.0-rc.12
+add a function to test mapping validity
+
+## 2.0.0-rc.10 + 2.0.0-rc.11
+deserialize + normalize item in unitofwork
+
+## 2.0.0-rc.9
+creating or updating an "complex" entity (not a basic JS object) would throw an error
+
+## 2.0.0-rc.8
+remove `async` method (that already returned a Promise object)
+
+## 2.0.0-rc.7
+Fix issue when posting a ManyToOne relation with only the id as string
+
+## 2.0.0-rc.6
+Fix bug in delete call (not returning the response)
+
+## 2.0.0-rc.5
+Fix bug in serializer
+
+## 2.0.0-rc.4
+Fix issue with list denormalized oo objects
+
+## 2.0.0-rc.3
+Cleaner relations, matches the Arguments attributes
+
+## 2.0.0-rc.2
+
 ### Changed
-  * [Breaking] Calling `restClientSdk.foo.xxx` is deprecated, you must now call `restClientSdk.getRepository('foo').xxx`
-  * [Breaking] RestClientSdk now takes a Mapping instance instead of a clientList. This instance is required
-  * [Breaking] `getName` has been removed and replaced by the classmetadata key. Its return was previously sent to the serializer, it's now the key attribute from the mapping that is sent now.
+  * `ONE_TO_MANY` and `MANY_TO_ONE` constant are now exported via the `Relation.ONE_TO_MANY` and `Relation.MANY_TO_ONE`, not in the main package
+
+## 2.0.0-rc.1
+
+### Added
+
+* [Might break] Custom serializer can:
+  * `serializeItem` has been splitted into `normalizeItem` + `encodeItem`
+  * `deserializeItem` has been splitted into `denormalizeItem` + `decodeItem`
+  * `deserializeList` has been splitted into `denormalizeList` + `decodeList`
+
+You must implement them if you have a custom serialization that do not use plain javascript objects.
+
+### Changed
+
+* [Breaking] Calling `restClientSdk.foo.xxx` is deprecated, you must now call `restClientSdk.getRepository('foo').xxx`
+* [Breaking] RestClientSdk now takes a Mapping instance instead of a clientList. This instance is required
+* [Breaking] `getName` has been removed and replaced by the classmetadata key. Its return was previously sent to the serializer, it's now the mapping that is sent now.
   Beware that now, the `key` is now used both to call the repository name, and passed to the serializer
   Before:
-  ```js
-  class SomeClient extends AbstractClient {
-      getName() {
-          return 'SomeClient';
-      }
+
+
+```js
+class SomeClient extends AbstractClient {
+  getName() {
+    return 'SomeClient';
   }
+}
 
-  new RestClientSdk(
-      // ...
-      {
-        foo: SomeClient,
-      }
-  )
-  ```
+new RestClientSdk(
+  // ...
+  {
+    foo: SomeClient,
+  }
+);
+```
 
-  Now:
-  ```js
-    const metadata = new ClassMetadata('foo', 'some_endpoint');
-    mapping = new Mapping();
-    mapping.setMapping([ metadata ]);
+Now:
 
-    const sdk = new RestClientSdk(/* ... */, mapping); // `foo` will be used in serializer too
-    sdk.foo.find();
-  ```
+```js
+  const metadata = new ClassMetadata('foo', 'some_endpoint');
+  mapping = new Mapping();
+  mapping.setMapping([ metadata ]);
 
+  const sdk = new RestClientSdk(/* ... */, mapping); // `foo` will be used in serializer too
+  sdk.foo.find();
+```
+* [Breaking] Custom Serializer: If you had a Collection entity containing the result of you entities, you will need to implement the [iterable protocol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#The_iterable_protocol) on this object, this way, we can register all entities in the unit of work.
 
 ### Removed
-  * AbstractClient does not need to specify `getPathBase` anymore: this is generated via the classmetata. You can still override it.
-  * `getEntityURI` is not mandatory anymore. it will be autogenerate by the AbstractClient. You can still override it
-  * There is no need to create an empty client extending `AbstractClient` now, the default will be `AbstractClient`
+
+* Dropped support for node 6
+* AbstractClient does not need to specify `getPathBase` anymore: this is generated via the classmetata. You can still override it.
+* `getEntityURI` is not mandatory anymore. it will be autogenerate by the AbstractClient. You can still override it
+* There is no need to create an empty client extending `AbstractClient` now, the default will be `AbstractClient`
+* config `prefix` is not used anymore, you should specify your prefix in the mapping: `new Mapping('/v1')`
 
 ## [1.3.2] - 2017-12-04
 

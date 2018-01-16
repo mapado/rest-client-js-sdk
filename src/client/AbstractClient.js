@@ -15,19 +15,11 @@ class AbstractClient {
 
   // eslint-disable-next-line no-unused-vars
   getPathBase(pathParameters) {
-    const { idPrefix } = this.sdk.mapping;
-
-    if (!idPrefix) {
-      return `/${this.metadata.pathRoot}`;
-    }
-
-    return `${idPrefix}/${this.metadata.pathRoot}`;
+    return `/${this.metadata.pathRoot}`;
   }
 
   getEntityURI(entity) {
-    const idAttr = this.metadata.getIdentifierAttribute();
-    const { attributeName } = idAttr;
-    let idValue = entity[attributeName];
+    let idValue = this._getEntityIdentifier(entity);
 
     if (Number.isFinite(idValue)) {
       idValue = idValue.toString();
@@ -60,10 +52,22 @@ class AbstractClient {
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
 
+    const oldSerializedModel = this.metadata.getDefaultSerializedModel();
+    const newSerializedModel = this.serializer.normalizeItem(
+      entity,
+      this.metadata
+    );
+
+    const diff = this.sdk.unitOfWork.getDirtyData(
+      newSerializedModel,
+      oldSerializedModel,
+      this.metadata
+    );
+
     return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'POST',
-        body: this.serializer.serializeItem(entity, this.metadata.key),
+        body: this.serializer.encodeItem(diff, this.metadata),
       }),
       'item'
     );
@@ -73,10 +77,26 @@ class AbstractClient {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
+    let newSerializedModel = this.serializer.normalizeItem(
+      entity,
+      this.metadata
+    );
+
+    const identifier = this._getEntityIdentifier(newSerializedModel);
+    const oldModel = this.sdk.unitOfWork.getDirtyEntity(identifier);
+
+    if (oldModel) {
+      newSerializedModel = this.sdk.unitOfWork.getDirtyData(
+        newSerializedModel,
+        oldModel,
+        this.metadata
+      );
+    }
+
     return this.deserializeResponse(
       this.authorizedFetch(url, {
         method: 'PUT',
-        body: this.serializer.serializeItem(entity, this.metadata.key),
+        body: this.serializer.encodeItem(newSerializedModel, this.metadata),
       }),
       'item'
     );
@@ -84,8 +104,14 @@ class AbstractClient {
 
   delete(entity) {
     const url = this.getEntityURI(entity);
+    const identifier = this._getEntityIdentifier(entity);
+
     return this.authorizedFetch(url, {
       method: 'DELETE',
+    }).then(response => {
+      this.sdk.unitOfWork.clear(identifier);
+
+      return response;
     });
   }
 
@@ -94,18 +120,48 @@ class AbstractClient {
       .then(response => response.text().then(text => [response, text]))
       .then(([response, text]) => {
         if (listOrItem === 'list') {
-          return this.serializer.deserializeList(
+          // for list, we need to deserialize the result to get an object
+          const itemList = this.serializer.deserializeList(
             text,
-            this.metadata.key,
+            this.metadata,
             response
           );
+
+          // eslint-disable-next-line no-restricted-syntax
+          for (const decodedItem of itemList) {
+            const identifier = this._getEntityIdentifier(decodedItem);
+            const normalizedItem = this.serializer.normalizeItem(decodedItem);
+
+            // then we register the re-normalized item
+            this.sdk.unitOfWork.registerClean(identifier, normalizedItem);
+          }
+
+          return itemList;
         }
 
-        return this.serializer.deserializeItem(
+        // for items, we can just decode the item (ie. transform it to JS object)
+        const decodedItem = this.serializer.decodeItem(
           text,
-          this.metadata.key,
+          this.metadata,
           response
         );
+
+        // and register it directy without deserializing + renormalizing
+        const identifier = this._getEntityIdentifier(decodedItem);
+
+        // and finally return the denormalized item
+        const item = this.serializer.denormalizeItem(
+          decodedItem,
+          this.metadata,
+          response
+        );
+
+        this.sdk.unitOfWork.registerClean(
+          identifier,
+          this.serializer.normalizeItem(item)
+        );
+
+        return item;
       });
   }
 
@@ -117,10 +173,12 @@ class AbstractClient {
       url.port(this.sdk.config.port);
     }
 
-    if (this.sdk.config.prefix) {
+    if (this.sdk.mapping.idPrefix) {
       const segments = url.segment();
-      segments.unshift(this.sdk.config.prefix);
-      url.segment(segments);
+      if (`/${segments[0]}` !== this.sdk.mapping.idPrefix) {
+        segments.unshift(this.sdk.mapping.idPrefix);
+        url.segment(segments);
+      }
     }
 
     return url;
@@ -138,11 +196,23 @@ class AbstractClient {
       Object.assign(params, this.getDefaultParameters());
     }
 
-    const url = new URI(
-      id
-        ? `${this.getPathBase(pathParameters)}/${id}`
-        : this.getPathBase(pathParameters)
-    );
+    const pathBase = this.getPathBase(pathParameters);
+
+    let url = null;
+    if (id) {
+      const testPathBase = this.sdk.mapping.idPrefix
+        ? `${this.sdk.mapping.idPrefix}${pathBase}`
+        : pathBase;
+
+      if (typeof id === 'string' && id.startsWith(testPathBase)) {
+        url = new URI(id);
+      } else {
+        url = new URI(`${pathBase}/${id}`);
+      }
+    } else {
+      url = new URI(pathBase);
+    }
+
     if (params) {
       url.addSearch(params);
     }
@@ -258,6 +328,10 @@ class AbstractClient {
     });
 
     return localHeaders;
+  }
+
+  _getEntityIdentifier(object) {
+    return object[this.metadata.getIdentifierAttribute().serializedKey];
   }
 }
 

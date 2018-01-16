@@ -10,28 +10,34 @@ import RestClientSdk, {
   ClassMetadata,
   Attribute,
   Relation,
-  ONE_TO_MANY,
-  MANY_TO_ONE,
 } from '../../src/index';
 import tokenStorageMock from '../../__mocks__/tokenStorage';
 import MockStorage from '../../__mocks__/mockStorage';
+import unitOfWorkMapping from '../../__mocks__/unitOfWorkMapping';
+import MemberSerializer from '../../__mocks__/memberSerializer';
 
 class WeirdSerializer extends Serializer {
-  deserializeItem(rawData, type) {
-    return this._serializeItem(JSON.parse(rawData));
-  }
-
-  deserializeList(rawListData, type) {
-    const input = JSON.parse(rawListData);
-
-    return input.map(this._serializeItem);
-  }
-
-  serializeItem(entity, type) {
+  encodeItem(entity) {
     return JSON.stringify(entity);
   }
 
-  _serializeItem(item) {
+  decodeItem(rawData) {
+    return JSON.parse(rawData);
+  }
+
+  denormalizeItem(object) {
+    return this._addInfoToItem(object);
+  }
+
+  decodeList(rawData) {
+    return JSON.parse(rawData);
+  }
+
+  denormalizeList(objectList) {
+    return objectList.map(this._addInfoToItem);
+  }
+
+  _addInfoToItem(item) {
     return Object.assign({}, item, { customName: `${item.name}${item.name}` });
   }
 }
@@ -42,7 +48,7 @@ class SomeTestClient extends AbstractClient {
       return pathParameters.basePath;
     }
 
-    return `${this.sdk.mapping.idPrefix}/test`;
+    return '/test';
   }
 }
 
@@ -56,6 +62,7 @@ class DefaultParametersTestClient extends AbstractClient {
 }
 
 const mapping = new Mapping('/v2');
+const mappingNoPrefix = new Mapping();
 const testMetadata = new ClassMetadata('test', 'test', SomeTestClient);
 testMetadata.setAttributeList([new Attribute('@id', '@id', 'string', true)]);
 const defParamMetadata = new ClassMetadata(
@@ -67,6 +74,7 @@ defParamMetadata.setAttributeList([new Attribute('id', 'id', 'integer', true)]);
 const noAtIdMetadata = new ClassMetadata('noAtId', 'no-at-id');
 noAtIdMetadata.setAttributeList([new Attribute('id', 'id', 'integer', true)]);
 mapping.setMapping([testMetadata, defParamMetadata, noAtIdMetadata]);
+mappingNoPrefix.setMapping([testMetadata, defParamMetadata, noAtIdMetadata]);
 
 const SomeSdk = new RestClientSdk(
   tokenStorageMock,
@@ -75,12 +83,11 @@ const SomeSdk = new RestClientSdk(
 );
 SomeSdk.tokenStorage.generateToken();
 
+afterEach(fetchMock.restore);
 describe('Test Client', () => {
-  afterEach(fetchMock.restore);
-
   test('handle find query', () => {
     fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
+      '@id': '/v2/test/8',
     });
 
     return Promise.all([
@@ -108,8 +115,15 @@ describe('Test Client', () => {
   });
 
   test('handle findBy query', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
+    fetchMock.mock({
+      matcher: '*',
+      response: {
+        body: [
+          {
+            '@id': '/v2/tests/8',
+          },
+        ],
+      },
     });
 
     return Promise.all([
@@ -127,9 +141,11 @@ describe('Test Client', () => {
   });
 
   test('handle findAll query', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
-    });
+    fetchMock.mock(() => true, [
+      {
+        '@id': '/v2/test/8',
+      },
+    ]);
 
     return Promise.all([
       SomeSdk.getRepository('test').findAll(),
@@ -147,7 +163,7 @@ describe('Test Client', () => {
 
   test('handle entityFactory', () => {
     fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
+      '@id': '/v2/test/8',
       name: 'foo',
     });
 
@@ -172,16 +188,16 @@ describe('Test Client', () => {
 
     fetchMock
       .mock('https://api.me/v2/test/8', {
-        '@id': '/v1/test/8',
+        '@id': '/v2/test/8',
         name: 'foo',
       })
       .mock('https://api.me/v2/test', [
         {
-          '@id': '/v1/test/8',
+          '@id': '/v2/test/8',
           name: 'foo',
         },
         {
-          '@id': '/v1/test/9',
+          '@id': '/v2/test/9',
           name: 'bar',
         },
       ]);
@@ -209,17 +225,49 @@ describe('Test Client', () => {
   });
 
   test('handle getPathBase with custom path parameters', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
-    });
+    fetchMock
+      .mock({
+        matcher: 'end:/foo',
+        response: {
+          body: [
+            {
+              '@id': '/v2/tests/8',
+            },
+          ],
+        },
+      })
+      .mock({
+        matcher: 'end:/foo?q=test&foo=bar',
+        response: {
+          body: [
+            {
+              '@id': '/v2/tests/8',
+            },
+          ],
+        },
+      })
+      .mock({
+        matcher: 'end:/foo/8',
+        response: {
+          body: {
+            '@id': '/v2/tests/8',
+          },
+        },
+      });
+
+    const SomeSdkNoPrefix = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https' },
+      mappingNoPrefix
+    );
 
     return Promise.all([
-      SomeSdk.getRepository('test').find(8, {}, { basePath: '/foo' }),
-      SomeSdk.getRepository('test').findBy(
+      SomeSdkNoPrefix.getRepository('test').find(8, {}, { basePath: '/foo' }),
+      SomeSdkNoPrefix.getRepository('test').findBy(
         { q: 'test', foo: 'bar' },
         { basePath: '/foo' }
       ),
-      SomeSdk.getRepository('test').findAll({}, { basePath: '/foo' }),
+      SomeSdkNoPrefix.getRepository('test').findAll({}, { basePath: '/foo' }),
     ]).then(() => {
       const url1 = fetchMock.calls().matched[0][0];
       expect(url1).toEqual('https://api.me/foo/8');
@@ -232,7 +280,7 @@ describe('Test Client', () => {
 
   test('handle Authorization header', () => {
     fetchMock.mock(() => true, {
-      '@id': '/v1/test/8',
+      '@id': '/v2/test/8',
     });
 
     const BasicAuthSdk = new RestClientSdk(
@@ -256,8 +304,6 @@ describe('Test Client', () => {
 });
 
 describe('Test errors', () => {
-  afterEach(fetchMock.restore);
-
   test('handle 401 and 403 errors', () => {
     fetchMock
       .mock(/400$/, 400)
@@ -294,8 +340,6 @@ describe('Test errors', () => {
 });
 
 describe('Update and delete function trigger the good urls', () => {
-  afterEach(fetchMock.restore);
-
   test('handle updating and deleting entities with @ids', () => {
     fetchMock.mock(() => true, {
       '@id': '/v2/test/8',
@@ -324,14 +368,10 @@ describe('Update and delete function trigger the good urls', () => {
   });
 });
 describe('Fix bugs', () => {
-  afterEach(() => {
-    fetchMock.restore();
-  });
-
   test('generate good url', () => {
     const SomeInnerSdk = new RestClientSdk(
       tokenStorageMock,
-      { path: 'api.me', scheme: 'https', prefix: '/v1' },
+      { path: 'api.me', scheme: 'https' },
       mapping
     );
     SomeInnerSdk.tokenStorage.generateToken();
@@ -340,7 +380,7 @@ describe('Fix bugs', () => {
       SomeInnerSdk.getRepository('test')
         .makeUri('foo')
         .toString()
-    ).toEqual('https://api.me/v1/foo');
+    ).toEqual('https://api.me/v2/foo');
   });
 
   test('allow base header override', () => {
@@ -475,5 +515,495 @@ describe('Fix bugs', () => {
           'Bearer a_refreshed_token'
         );
       });
+  });
+});
+
+describe('Test unit of work', () => {
+  let unitOfWorkSdk = null;
+
+  beforeEach(() => {
+    const tokenGenerator = new PasswordGenerator({
+      path: 'oauth.me',
+      scheme: 'https',
+      clientId: 'clientId',
+      clientSecret: 'clientSecret',
+    });
+    unitOfWorkSdk = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https' },
+      unitOfWorkMapping
+    );
+  });
+
+  test('posting data with unit of work', () => {
+    const cart = {
+      '@id': '/v2/carts/1',
+      status: null,
+      cartItemList: [
+        {
+          '@id': null,
+          quantity: 1,
+          cart: null,
+        },
+      ],
+    };
+
+    fetchMock.mock(() => true, {});
+
+    return unitOfWorkSdk
+      .getRepository('carts')
+      .create(cart)
+      .then(() => {
+        expect(fetchMock.lastOptions().body).toEqual(
+          JSON.stringify({
+            '@id': '/v2/carts/1',
+            cartItemList: [
+              {
+                '@id': null,
+                quantity: 1,
+              },
+            ],
+          })
+        );
+      });
+  });
+
+  test('updating data with unit of work', async () => {
+    fetchMock
+      .mock({
+        name: 'get_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'GET',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      })
+      .mock({
+        name: 'put_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'PUT',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'foo',
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.find('/v12/carts/1');
+    cart.status = 'foo';
+
+    let updatedCart = await repo.update(cart);
+    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+      JSON.stringify({ status: 'foo' })
+    );
+
+    updatedCart = await repo.update(cart);
+    expect(fetchMock.lastOptions('put_cart').body).toEqual('{}');
+  });
+
+  test('updating partial data with unit of work', async () => {
+    fetchMock
+      .mock({
+        name: 'get_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'GET',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'foo',
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      })
+      .mock({
+        name: 'put_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'PUT',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.find('/v12/carts/1');
+
+    await repo.update({ '@id': '/v12/carts/1', status: null });
+    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+      JSON.stringify({ status: null })
+    );
+  });
+
+  test('find all register', async () => {
+    fetchMock
+      .mock({
+        name: 'get_carts',
+        matcher: 'end:/v12/carts',
+        method: 'GET',
+        response: JSON.stringify([
+          {
+            '@id': '/v12/carts/1',
+            status: 'foo',
+            cartItemList: [
+              {
+                '@id': null,
+                quantity: 1,
+                cart: null,
+              },
+            ],
+          },
+        ]),
+      })
+      .mock({
+        name: 'put_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'PUT',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cartList = await repo.findAll();
+    const cart = cartList[0];
+
+    cart.status = 'bar';
+
+    await repo.update(cart);
+    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+      JSON.stringify({ status: 'bar' })
+    );
+  });
+
+  test('find all with object as response', async () => {
+    unitOfWorkSdk.serializer = new MemberSerializer();
+    fetchMock
+      .mock({
+        name: 'get_carts',
+        matcher: 'end:/v12/carts',
+        method: 'GET',
+        response: JSON.stringify({
+          members: [
+            {
+              '@id': '/v12/carts/1',
+              status: 'foo',
+              phone_number: '01234',
+              cartItemList: [
+                {
+                  '@id': null,
+                  quantity: 1,
+                  cart: null,
+                },
+              ],
+            },
+          ],
+        }),
+      })
+      .mock({
+        name: 'put_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'PUT',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          phone_number: '01234',
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cartList = await repo.findAll();
+    const cart = cartList.members[0];
+
+    cart.status = 'bar';
+
+    await repo.update(cart);
+    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+      JSON.stringify({ status: 'bar' })
+    );
+  });
+
+  test('delete entity will clear the unit of work', async () => {
+    fetchMock
+      .mock({
+        matcher: 'end:/v12/carts/1',
+        method: 'DELETE',
+        response: {
+          status: 204,
+          body: null,
+        },
+      })
+      .mock({
+        matcher: 'end:/v12/carts/1',
+        method: 'GET',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'foo',
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.find(1);
+
+    expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeTruthy();
+
+    const response = await repo.delete(cart);
+
+    expect(response).not.toBeUndefined();
+    expect(response.status).toEqual(204);
+    expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeUndefined();
+  });
+
+  test('posting a many-to-one with only the id', async () => {
+    fetchMock.mock({
+      matcher: 'end:/v12/carts',
+      method: 'POST',
+      response: {
+        status: 201,
+        body: { '@id': '/v1/carts/3', order: '/v12/orders/1' },
+      },
+    });
+    const cartToPost = {
+      order: '/v12/orders/1',
+    };
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.create(cartToPost);
+
+    expect(cart.order).toEqual('/v12/orders/1');
+    expect(fetchMock.lastOptions().body).toEqual(
+      JSON.stringify({ order: '/v12/orders/1' })
+    );
+  });
+
+  test('posting a many-to-one with an object', async () => {
+    fetchMock.mock({
+      matcher: 'end:/v12/carts',
+      method: 'POST',
+      response: {
+        status: 201,
+        body: { '@id': '/v1/carts/3', order: '/v12/orders/1' },
+      },
+    });
+    const cartToPost = {
+      order: {
+        '@id': '/v12/orders/1',
+        status: 'waiting',
+        customerPaidAmount: null,
+      },
+    };
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.create(cartToPost);
+
+    expect(fetchMock.lastOptions().body).toEqual(
+      JSON.stringify({ order: { '@id': '/v12/orders/1', status: 'waiting' } })
+    );
+  });
+
+  describe('Test unit of work with entity conversion', () => {
+    class TestEntity {
+      constructor(value) {
+        this._value = value;
+        this['@id'] = value['@id'];
+      }
+
+      set(key, value) {
+        this._value[key] = value;
+      }
+
+      toJSON() {
+        return this._value;
+      }
+    }
+
+    class EntitySerializer extends Serializer {
+      normalizeItem(entity) {
+        return entity.toJSON();
+      }
+
+      encodeItem(entity) {
+        return JSON.stringify(entity);
+      }
+
+      decodeItem(rawData) {
+        return JSON.parse(rawData);
+      }
+
+      denormalizeItem(object) {
+        return new TestEntity(object);
+      }
+
+      decodeList(rawData) {
+        return JSON.parse(rawData);
+      }
+    }
+
+    test('create an entity using an entity conversion', async () => {
+      unitOfWorkSdk.serializer = new EntitySerializer();
+
+      fetchMock
+        .mock({
+          matcher: 'end:/v12/carts/1',
+          response: {
+            status: 200,
+            body: { '@id': '/v12/carts/1', status: 'payed' },
+          },
+        })
+        .mock({
+          matcher: 'end:/v12/carts',
+          method: 'POST',
+          response: {
+            status: 201,
+            body: { '@id': '/v12/carts/1', status: 'payed' },
+          },
+        });
+
+      const cartToPost = new TestEntity({
+        '@id': '/v12/carts/1',
+        status: 'payed',
+      });
+      expect(cartToPost.toJSON()['@id']).toEqual('/v12/carts/1');
+      expect(cartToPost.toJSON().status).toEqual('payed');
+
+      const cartToPut = await unitOfWorkSdk
+        .getRepository('carts')
+        .create(cartToPost);
+
+      expect(fetchMock.lastOptions().body).toEqual(
+        JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'payed',
+        })
+      );
+
+      expect(cartToPut.toJSON()['@id']).toEqual('/v12/carts/1');
+      expect(cartToPut.toJSON().status).toEqual('payed');
+
+      cartToPut.set('status', 'refunded');
+
+      const cart = await unitOfWorkSdk.getRepository('carts').update(cartToPut);
+
+      expect(fetchMock.lastOptions().body).toEqual(
+        JSON.stringify({
+          status: 'refunded',
+        })
+      );
+    });
+
+    test('data not present in the API response', async () => {
+      fetchMock.mock({
+        matcher: 'end:/v12/carts/1',
+        response: {
+          status: 200,
+          body: { '@id': '/v12/carts/1', status: 'payed' },
+        },
+      });
+
+      const cart = await unitOfWorkSdk
+        .getRepository('carts')
+        .find('/v12/carts/1');
+
+      expect(cart.status).toEqual('payed');
+
+      cart.status = 'refunded';
+      cart.data = null;
+
+      unitOfWorkSdk.getRepository('carts').update(cart);
+    });
+
+    test('many-to-one relation with null value in newValue', async () => {
+      fetchMock.mock({
+        matcher: 'end:/v12/carts/1',
+        response: {
+          status: 200,
+          body: { '@id': '/v12/carts/1', order: { '@id': '/v12/orders/1' } },
+        },
+      });
+
+      const cart = await unitOfWorkSdk
+        .getRepository('carts')
+        .find('/v12/carts/1');
+
+      expect(cart.order['@id']).toEqual('/v12/orders/1');
+
+      cart.order = null;
+
+      await unitOfWorkSdk.getRepository('carts').update(cart);
+      expect(fetchMock.lastOptions().body).toEqual(
+        JSON.stringify({
+          order: null,
+        })
+      );
+    });
+
+    test('one-to-many with objects as old model and string as new model', async () => {
+      fetchMock.mock({
+        matcher: 'end:/v12/carts/1',
+        response: {
+          status: 200,
+          body: {
+            '@id': '/v12/carts/1',
+            cartItemList: [
+              { '@id': '/v12/cart_items/1' },
+              { '@id': '/v12/cart_items/2' },
+            ],
+          },
+        },
+      });
+
+      const cart = await unitOfWorkSdk
+        .getRepository('carts')
+        .find('/v12/carts/1');
+
+      cart.cartItemList = ['/v1/cart_items/2'];
+
+      await unitOfWorkSdk.getRepository('carts').update(cart);
+      expect(fetchMock.lastOptions().body).toEqual(
+        JSON.stringify({
+          cartItemList: ['/v1/cart_items/2'],
+        })
+      );
+    });
   });
 });

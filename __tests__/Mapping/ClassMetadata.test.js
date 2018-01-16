@@ -1,5 +1,5 @@
 import { AbstractClient, ClassMetadata, Attribute } from '../../src/index';
-import Relation, { MANY_TO_ONE, ONE_TO_MANY } from '../../src/Mapping/Relation';
+import Relation from '../../src/Mapping/Relation';
 
 class ProductRepository extends AbstractClient {}
 
@@ -30,8 +30,8 @@ describe('Test ClassMetadata', () => {
     ]);
 
     productMetadata.setRelationList([
-      new Relation(MANY_TO_ONE, 'category'),
-      new Relation(ONE_TO_MANY, 'tagList'),
+      new Relation(Relation.MANY_TO_ONE, 'categories', 'category'),
+      new Relation(Relation.ONE_TO_MANY, 'tags', 'tagList'),
     ]);
 
     // Product metadata
@@ -66,5 +66,25 @@ describe('Test ClassMetadata', () => {
 
     // Tag metadata
     expect(tagMetadata.getIdentifierAttribute().serializedKey).toEqual('id');
+  });
+
+  test('test attribute list', () => {
+    const categoryMetadata = new ClassMetadata('categories');
+    const attributeList = [
+      new Attribute('id', 'id', 'string', true),
+      new Attribute('name'),
+    ];
+    categoryMetadata.setAttributeList(attributeList);
+    categoryMetadata.setRelationList([
+      new Relation(Relation.ONE_TO_MANY, 'products', 'productList'),
+      new Relation(Relation.MANY_TO_ONE, 'categories', 'parent'),
+    ]);
+
+    expect(categoryMetadata.getAttributeList()).toEqual({
+      id: new Attribute('id', 'id', 'string', true),
+      name: new Attribute('name'),
+      productList: new Attribute('productList', 'productList', 'array'),
+      parent: new Attribute('parent', 'parent', 'object'),
+    });
   });
 });

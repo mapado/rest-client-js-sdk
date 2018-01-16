@@ -1,4 +1,5 @@
 import JsSerializer from './serializer/JsSerializer';
+import UnitOfWork from './UnitOfWork';
 import Mapping from './Mapping';
 
 class RestClientSdk {
@@ -13,6 +14,8 @@ class RestClientSdk {
     this.tokenStorage = tokenStorage;
     this.serializer = serializer;
     this.mapping = mapping;
+
+    this.unitOfWork = new UnitOfWork(this.mapping);
 
     this._repositoryList = {};
   }
