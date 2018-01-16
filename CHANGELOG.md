@@ -2,46 +2,7 @@
 
 ## Unreleased
 
-## 2.0.0-rc.14
-Check relations in `isValidMapping`
-
-## 2.0.0-rc.13
-Fix issue when setting a ManyToOne relatossue when setting a ManyToOne relation to `null`n to `null`
-
-## 2.0.0-rc.12
-add a function to test mapping validity
-
-## 2.0.0-rc.10 + 2.0.0-rc.11
-deserialize + normalize item in unitofwork
-
-## 2.0.0-rc.9
-creating or updating an "complex" entity (not a basic JS object) would throw an error
-
-## 2.0.0-rc.8
-remove `async` method (that already returned a Promise object)
-
-## 2.0.0-rc.7
-Fix issue when posting a ManyToOne relation with only the id as string
-
-## 2.0.0-rc.6
-Fix bug in delete call (not returning the response)
-
-## 2.0.0-rc.5
-Fix bug in serializer
-
-## 2.0.0-rc.4
-Fix issue with list denormalized oo objects
-
-## 2.0.0-rc.3
-Cleaner relations, matches the Arguments attributes
-
-## 2.0.0-rc.2
-
-### Changed
-  * `ONE_TO_MANY` and `MANY_TO_ONE` constant are now exported via the `Relation.ONE_TO_MANY` and `Relation.MANY_TO_ONE`, not in the main package
-
-## 2.0.0-rc.1
-
+## 2.0.0
 ### Added
 
 * [Might break] Custom serializer can:
@@ -94,6 +55,48 @@ Now:
 * `getEntityURI` is not mandatory anymore. it will be autogenerate by the AbstractClient. You can still override it
 * There is no need to create an empty client extending `AbstractClient` now, the default will be `AbstractClient`
 * config `prefix` is not used anymore, you should specify your prefix in the mapping: `new Mapping('/v1')`
+
+## 2.0.0-rc.14
+Check relations in `isValidMapping`
+
+## 2.0.0-rc.13
+Fix issue when setting a ManyToOne relatossue when setting a ManyToOne relation to `null`n to `null`
+
+## 2.0.0-rc.12
+add a function to test mapping validity
+
+## 2.0.0-rc.10 + 2.0.0-rc.11
+deserialize + normalize item in unitofwork
+
+## 2.0.0-rc.9
+creating or updating an "complex" entity (not a basic JS object) would throw an error
+
+## 2.0.0-rc.8
+remove `async` method (that already returned a Promise object)
+
+## 2.0.0-rc.7
+Fix issue when posting a ManyToOne relation with only the id as string
+
+## 2.0.0-rc.6
+Fix bug in delete call (not returning the response)
+
+## 2.0.0-rc.5
+Fix bug in serializer
+
+## 2.0.0-rc.4
+Fix issue with list denormalized oo objects
+
+## 2.0.0-rc.3
+Cleaner relations, matches the Arguments attributes
+
+## 2.0.0-rc.2
+
+### Changed
+  * `ONE_TO_MANY` and `MANY_TO_ONE` constant are now exported via the `Relation.ONE_TO_MANY` and `Relation.MANY_TO_ONE`, not in the main package
+
+## 2.0.0-rc.1
+
+See release note for 2.0.0
 
 ## [1.3.2] - 2017-12-04
 
