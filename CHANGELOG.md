@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 2.0.0-rc.12
+Fix issue when setting a ManyToOne relation to `null`
+
 ## 2.0.0-rc.10 + 2.0.0-rc.11
 deserialize + normalize item in unitofwork
 

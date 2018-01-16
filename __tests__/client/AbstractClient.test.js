@@ -951,5 +951,30 @@ describe('Test unit of work', () => {
 
       unitOfWorkSdk.getRepository('carts').update(cart);
     });
+
+    test('many-to-one relation with null value in newValue', async () => {
+      fetchMock.mock({
+        matcher: 'end:/v12/carts/1',
+        response: {
+          status: 200,
+          body: { '@id': '/v12/carts/1', order: { '@id': '/v12/orders/1' } },
+        },
+      });
+
+      const cart = await unitOfWorkSdk
+        .getRepository('carts')
+        .find('/v12/carts/1');
+
+      expect(cart.order['@id']).toEqual('/v12/orders/1');
+
+      cart.order = null;
+
+      await unitOfWorkSdk.getRepository('carts').update(cart);
+      expect(fetchMock.lastOptions().body).toEqual(
+        JSON.stringify({
+          order: null,
+        })
+      );
+    });
   });
 });

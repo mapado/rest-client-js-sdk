@@ -126,6 +126,12 @@ class UnitOfWork {
   ) {
     const dirtyFields = dirtyFieldsParam;
     if (oldValue !== newValue) {
+      if (newValue === null) {
+        dirtyFields[key] = null;
+
+        return dirtyFields;
+      }
+
       if (typeof oldValue === 'string' || typeof newValue === 'string') {
         dirtyFields[key] = newValue;
       }
