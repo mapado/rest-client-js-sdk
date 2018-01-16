@@ -40,12 +40,16 @@
     "husky": "^0.14.3",
     "jest": "^22.0.4",
     "lint-staged": "^6.0.0",
+    "pluralize": "^7.0.0",
     "prettier": "^1.9.2",
     "rimraf": "^2.6.2",
     "rollup": "^0.53.3",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-node-resolve": "^3.0.0"
+  },
+  "optionalDependencies": {
+    "pluralize": "^7.0.0"
   },
   "repository": {
     "type": "git",

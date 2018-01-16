@@ -976,5 +976,34 @@ describe('Test unit of work', () => {
         })
       );
     });
+
+    test('one-to-many with objects as old model and string as new model', async () => {
+      fetchMock.mock({
+        matcher: 'end:/v12/carts/1',
+        response: {
+          status: 200,
+          body: {
+            '@id': '/v12/carts/1',
+            cartItemList: [
+              { '@id': '/v12/cart_items/1' },
+              { '@id': '/v12/cart_items/2' },
+            ],
+          },
+        },
+      });
+
+      const cart = await unitOfWorkSdk
+        .getRepository('carts')
+        .find('/v12/carts/1');
+
+      cart.cartItemList = ['/v1/cart_items/2'];
+
+      await unitOfWorkSdk.getRepository('carts').update(cart);
+      expect(fetchMock.lastOptions().body).toEqual(
+        JSON.stringify({
+          cartItemList: ['/v1/cart_items/2'],
+        })
+      );
+    });
   });
 });

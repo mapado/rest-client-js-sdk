@@ -21,46 +21,73 @@ describe('test mapping', () => {
     expect(mapping.getClassMetadataByKey('foo')).toBeInstanceOf(ClassMetadata);
   });
 
-  test('mapping checker', () => {
+  describe('mapping checker', () => {
     const mapping = new Mapping();
-
     const customerMetadata = new ClassMetadata('customer', 'customers');
-    customerMetadata.setAttributeList([
-      new Attribute('@id', '@id', 'string', true),
-      new Attribute('name'),
-    ]);
-    customerMetadata.setRelationList([
-      new Relation(Relation.ONE_TO_MANY, 'cart', 'cartList'),
-    ]);
-
     const cartMetadata = new ClassMetadata('cart', 'carts');
-    cartMetadata.setAttributeList([
-      new Attribute('@id', '@id', 'string', true),
-      new Attribute('status'),
-    ]);
-    cartMetadata.setRelationList([
-      new Relation(Relation.MANY_TO_ONE, 'customer', 'myCustomer'),
-    ]);
 
-    mapping.setMapping([customerMetadata, cartMetadata]);
+    beforeEach(() => {
+      customerMetadata.setAttributeList([
+        new Attribute('@id', '@id', 'string', true),
+        new Attribute('name'),
+      ]);
+      customerMetadata.setRelationList([
+        new Relation(Relation.ONE_TO_MANY, 'cart', 'cartList'),
+      ]);
 
-    expect(mapping.isMappingValid()).toBe(true);
+      cartMetadata.setAttributeList([
+        new Attribute('@id', '@id', 'string', true),
+        new Attribute('status'),
+      ]);
+      cartMetadata.setRelationList([
+        new Relation(Relation.MANY_TO_ONE, 'customer', 'myCustomer'),
+      ]);
 
-    cartMetadata.setRelationList([
-      new Relation(Relation.MANY_TO_ONE, 'customerrrr', 'myCustomer'),
-    ]);
+      mapping.setMapping([customerMetadata, cartMetadata]);
+    });
 
-    expect(mapping.isMappingValid()).toBe(false);
-    cartMetadata.setRelationList([
-      new Relation(Relation.MANY_TO_ONE, 'customer', 'myCustomer'),
-    ]);
+    test('valid mapping', () => {
+      expect(mapping.isMappingValid()).toBe(true);
+    });
 
-    try {
-      cartMetadata.setAttributeList([]);
-    } catch (e) {
-      expect(e.message).toMatch(/no identifier/);
-    }
+    test('invalid mapping name', () => {
+      cartMetadata.setRelationList([
+        new Relation(Relation.MANY_TO_ONE, 'customerrrr', 'myCustomer'),
+      ]);
 
-    expect(mapping.isMappingValid()).toBe(false);
+      expect(mapping.isMappingValid()).toBe(false);
+    });
+
+    test('mapping without id attribute', () => {
+      try {
+        cartMetadata.setAttributeList([]);
+      } catch (e) {
+        expect(e.message).toMatch(/no identifier/);
+      }
+
+      expect(mapping.isMappingValid()).toBe(false);
+    });
+
+    test('many-to-one relation with attribute name ending with `List`', () => {
+      customerMetadata.setRelationList([
+        new Relation(Relation.MANY_TO_ONE, 'cart', 'cartList'),
+      ]);
+
+      expect(mapping.isMappingValid()).toBe(false);
+    });
+
+    test('one-to-many relation with attribute name nor plural nor ending with `List`', () => {
+      customerMetadata.setRelationList([
+        new Relation(Relation.ONE_TO_MANY, 'cart', 'cart'),
+      ]);
+
+      expect(mapping.isMappingValid()).toBe(false);
+
+      customerMetadata.setRelationList([
+        new Relation(Relation.ONE_TO_MANY, 'cart', 'carts'),
+      ]);
+
+      expect(mapping.isMappingValid()).toBe(true);
+    });
   });
 });

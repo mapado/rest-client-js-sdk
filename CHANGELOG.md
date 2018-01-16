@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 2.0.0-rc.14
+Check relations in `isValidMapping`
+
 ## 2.0.0-rc.13
 Fix issue when setting a ManyToOne relatossue when setting a ManyToOne relation to `null`n to `null`
 
