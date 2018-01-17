@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "deep-diff": "^0.3.8",
-    "immutable": "^4.0.0-rc.9",
     "urijs": "^1.19.0"
   },
   "devDependencies": {
@@ -35,6 +34,7 @@
     "fetch-mock": "^5.13.1",
     "form-data": "^2.1.2",
     "husky": "^0.14.3",
+    "immutable": "^4.0.0-rc.9",
     "jest": "^22.1.1",
     "lint-staged": "^6.0.0",
     "pluralize": "^7.0.0",
@@ -65,7 +65,7 @@
   "bundlesize": [
     {
       "path": "./dist/index.es.js",
-      "maxSize": "31 Kb"
+      "maxSize": "11 Kb"
     }
   ],
   "lint-staged": {

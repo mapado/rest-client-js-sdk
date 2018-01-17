@@ -1,5 +1,5 @@
-import { isImmutable } from 'immutable';
 import diff from 'deep-diff';
+import { isImmutable } from './isImmutable';
 
 /**
  * deep comparaison between objects
