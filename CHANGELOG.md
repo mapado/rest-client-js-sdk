@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 2.0.1
+### Changed
+  * Better packaging system [#48](https://github.com/mapado/rest-client-js-sdk/pull/48)
+
+
 ## 2.0.0
 ### Added
 
