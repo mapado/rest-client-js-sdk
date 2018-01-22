@@ -1,10 +1,13 @@
 {
   "name": "rest-client-sdk",
-  "version": "2.0.0",
+  "version": "v2.0.1-rc.1",
   "description": "Rest Client SDK for API",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "test": "jest",
@@ -15,7 +18,6 @@
   },
   "dependencies": {
     "deep-diff": "^0.3.8",
-    "immutable": "^4.0.0-rc.9",
     "urijs": "^1.19.0"
   },
   "devDependencies": {
@@ -35,6 +37,7 @@
     "fetch-mock": "^5.13.1",
     "form-data": "^2.1.2",
     "husky": "^0.14.3",
+    "immutable": "^4.0.0-rc.9",
     "jest": "^22.1.1",
     "lint-staged": "^6.0.0",
     "pluralize": "^7.0.0",
@@ -52,7 +55,11 @@
     "type": "git",
     "url": "git+https://github.com/mapado/rest-client-js-sdk.git"
   },
-  "keywords": ["Rest", "SDK", "API"],
+  "keywords": [
+    "Rest",
+    "SDK",
+    "API"
+  ],
   "author": "Mapado",
   "license": "MIT",
   "bugs": {
@@ -65,13 +72,18 @@
   "bundlesize": [
     {
       "path": "./dist/index.es.js",
-      "maxSize": "31 Kb"
+      "maxSize": "11 Kb"
     }
   ],
   "lint-staged": {
-    "*.{js,jsx,json,md}": ["prettier --write", "git add"]
+    "*.{js,jsx,json,md}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "jest": {
-    "setupFiles": ["./setupJest.js"]
+    "setupFiles": [
+      "./setupJest.js"
+    ]
   }
 }
