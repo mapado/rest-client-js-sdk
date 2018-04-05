@@ -40,9 +40,9 @@
     "pluralize": "^7.0.0",
     "prettier": "^1.10.2",
     "rimraf": "^2.6.2",
-    "rollup": "^0.55.0",
+    "rollup": "^0.57.1",
     "rollup-plugin-babel": "^3.0.3",
-    "rollup-plugin-commonjs": "^9.0.0",
+    "rollup-plugin-commonjs": "^9.1.0",
     "rollup-plugin-node-resolve": "^3.0.0"
   },
   "optionalDependencies": {
@@ -69,7 +69,7 @@
     }
   ],
   "lint-staged": {
-    "*.{js,jsx,json,md}": ["prettier --write", "git add"]
+    "*.{js,jsx,json,md}": ["yarn run prettier --write", "git add"]
   },
   "jest": {
     "setupFiles": ["./setupJest.js"]
