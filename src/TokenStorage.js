@@ -37,7 +37,7 @@ class TokenStorage {
           !this._hasATokenBeenGenerated &&
           this._tokenGenerator.canAutogenerateToken
         ) {
-          return this.generateToken().then(generatedToken => generatedToken);
+          return this.generateToken();
         }
       }
 
