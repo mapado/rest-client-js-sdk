@@ -18,6 +18,12 @@ class TokenStorage {
   }
 
   getAccessToken() {
+    return this.getAccessTokenObject().then(
+      token => token && token.access_token
+    );
+  }
+
+  getAccessTokenObject() {
     return this._asyncStorage.getItem(ACCESS_TOKEN_KEY).then(token => {
       if (!token) {
         if (
@@ -31,13 +37,11 @@ class TokenStorage {
           !this._hasATokenBeenGenerated &&
           this._tokenGenerator.canAutogenerateToken
         ) {
-          return this.generateToken().then(
-            generatedToken => generatedToken && generatedToken.access_token
-          );
+          return this.generateToken();
         }
       }
 
-      return token && JSON.parse(token).access_token;
+      return token && JSON.parse(token);
     });
   }
 

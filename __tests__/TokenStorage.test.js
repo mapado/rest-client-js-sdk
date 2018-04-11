@@ -75,6 +75,9 @@ describe('Token storage tests', () => {
           expect(oauth.getAccessToken()).resolves.toEqual(
             oauthClientCredentialsMock.access_token
           ),
+          expect(oauth.getAccessTokenObject()).resolves.toEqual(
+            oauthClientCredentialsMock
+          ),
         ])
       )
       .then(() =>
@@ -89,6 +92,9 @@ describe('Token storage tests', () => {
           expect(oauth.hasAccessToken()).resolves.toBe(true),
           expect(oauth.getAccessToken()).resolves.toEqual(
             refreshedCredentials.access_token
+          ),
+          expect(oauth.getAccessTokenObject()).resolves.toEqual(
+            refreshedCredentials
           ),
         ])
       );
