@@ -301,6 +301,23 @@ describe('Test Client', () => {
       expect(basicAuthHeader).toContain('Basic ');
     });
   });
+
+  test('Sdk with no tokenStorage should not add Authorization header', () => {
+    fetchMock.mock(() => true, {
+      '@id': '/v2/test/8',
+    });
+
+    const NoAuthSdk = new RestClientSdk(
+      null,
+      { path: 'api.me', scheme: 'https', authorizationType: 'Basic' },
+      mapping
+    );
+
+    return Promise.all([NoAuthSdk.getRepository('test').find(8)]).then(() => {
+      const authHeader = fetchMock.calls().matched[0][1].headers.Authorization;
+      expect(authHeader).toBe(undefined);
+    });
+  });
 });
 
 describe('Test errors', () => {

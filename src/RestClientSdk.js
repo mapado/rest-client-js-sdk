@@ -3,7 +3,12 @@ import UnitOfWork from './UnitOfWork';
 import Mapping from './Mapping';
 
 class RestClientSdk {
-  constructor(tokenStorage, config, mapping, serializer = new JsSerializer()) {
+  constructor(
+    tokenStorage = null,
+    config,
+    mapping,
+    serializer = new JsSerializer()
+  ) {
     this._checkConfigValidity(config);
 
     if (!(mapping instanceof Mapping)) {
