@@ -313,10 +313,14 @@ describe('Test Client', () => {
       mapping
     );
 
-    return Promise.all([NoAuthSdk.getRepository('test').find(8)]).then(() => {
-      const authHeader = fetchMock.calls().matched[0][1].headers.Authorization;
-      expect(authHeader).toBe(undefined);
-    });
+    return NoAuthSdk.getRepository('test')
+      .find(8)
+      .then(json => {
+        const authHeader = fetchMock.calls().matched[0][1].headers
+          .Authorization;
+        expect(authHeader).toBe(undefined);
+        expect(json).toEqual({ '@id': '/v2/test/8' });
+      });
   });
 });
 

@@ -280,7 +280,7 @@ class AbstractClient {
       });
   }
 
-  _doFetch(accessToken = null, input, init) {
+  _doFetch(accessToken, input, init) {
     let params = init;
 
     const baseHeaders = {
