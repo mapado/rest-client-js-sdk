@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 2.2.0
+
+### Changed
+
 * Add possibility to pass null as tokenStorage argument of the sdk
 * switch method names \_doFetch and \_fetchWithToken in AbstractClient for coherence
 
