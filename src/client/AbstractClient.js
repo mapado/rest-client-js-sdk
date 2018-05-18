@@ -187,7 +187,7 @@ class AbstractClient {
   authorizedFetch(input, init) {
     const url = this.makeUri(input);
 
-    return this._doFetch(url.toString(), init);
+    return this._fetchWithToken(url.toString(), init);
   }
 
   _generateUrlFromParams(queryParam, pathParameters = {}, id = null) {
@@ -220,14 +220,18 @@ class AbstractClient {
     return url;
   }
 
-  _doFetch(input, init) {
+  _fetchWithToken(input, init) {
     if (!input) {
       throw new Error('input is empty');
     }
 
-    return this._tokenStorage
-      .getAccessToken()
-      .then(token => this._fetchWithToken(token, input, init));
+    if (this._tokenStorage) {
+      return this._tokenStorage
+        .getAccessToken()
+        .then(token => this._doFetch(token, input, init));
+    }
+
+    return this._doFetch(null, input, init);
   }
 
   _manageAccessDenied(response, input, init) {
@@ -246,7 +250,7 @@ class AbstractClient {
                     });
                     delete params.headers.Authorization;
 
-                    return this._doFetch(input, params);
+                    return this._fetchWithToken(input, params);
                   })
                   .catch(() => {
                     throw new AccessDeniedError(
@@ -276,13 +280,18 @@ class AbstractClient {
       });
   }
 
-  _fetchWithToken(accessToken, input, init) {
+  _doFetch(accessToken, input, init) {
     let params = init;
 
     const baseHeaders = {
-      Authorization: `${this.sdk.config.authorizationType} ${accessToken}`,
       'Content-Type': 'application/json',
     };
+
+    if (accessToken) {
+      baseHeaders.Authorization = `${
+        this.sdk.config.authorizationType
+      } ${accessToken}`;
+    }
 
     const currentUri =
       typeof window === 'object' && window.location && window.location.href;
