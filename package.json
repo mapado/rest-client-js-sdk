@@ -1,6 +1,6 @@
 {
   "name": "rest-client-sdk",
-  "version": "v2.2.0",
+  "version": "v2.2.1",
   "description": "Rest Client SDK for API",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
