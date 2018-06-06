@@ -25,23 +25,25 @@ class TokenStorage {
 
   getAccessTokenObject() {
     return this._asyncStorage.getItem(ACCESS_TOKEN_KEY).then(token => {
-      if (!token) {
-        if (
-          !this._hasATokenBeenGenerated &&
-          !this._tokenGenerator.canAutogenerateToken
-        ) {
-          throw new Error('No token has been generated yet.');
+      if (token) {
+        const tokenObject = JSON.parse(token);
+
+        if (typeof tokenObject !== 'object') {
+          return null;
         }
 
-        if (
-          !this._hasATokenBeenGenerated &&
-          this._tokenGenerator.canAutogenerateToken
-        ) {
-          return this.generateToken();
-        }
+        return tokenObject;
       }
 
-      return token && JSON.parse(token);
+      if (this._hasATokenBeenGenerated) {
+        return null;
+      }
+
+      if (!this._tokenGenerator.canAutogenerateToken) {
+        throw new Error('No token has been generated yet.');
+      }
+
+      return this.generateToken();
     });
   }
 

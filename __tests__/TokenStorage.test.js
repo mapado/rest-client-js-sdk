@@ -27,7 +27,7 @@ describe('Token storage tests', () => {
 
         return Promise.all([
           expect(hasAccessToken).resolves.toBe(false),
-          expect(accessToken).resolves.toBeUndefined(),
+          expect(accessToken).resolves.toBeNull(),
         ]);
       });
   });
@@ -98,5 +98,13 @@ describe('Token storage tests', () => {
           ),
         ])
       );
+  });
+
+  test('getAccessTokenObject should not return something that is not an object', async () => {
+    const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
+
+    await oauth._storeAccessToken('coucou');
+    const actual = await oauth.getAccessTokenObject();
+    expect(actual).toBeNull();
   });
 });
