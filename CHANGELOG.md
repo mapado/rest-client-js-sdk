@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 2.2.1
+
+### Changed
+
+* `TokenStorage.getAccessTokenObject()` returns an object and null if the stored token is not an object
+* [Might Break] `TokenStorage.getAccessTokenObject()` does not return `undefined` anymore but `null` if no token object is found
+
 ## 2.2.0
 
 ### Changed
