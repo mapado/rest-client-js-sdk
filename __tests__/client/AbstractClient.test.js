@@ -6,6 +6,7 @@ import RestClientSdk, {
   Serializer,
   TokenStorage,
   PasswordGenerator,
+  ProvidedTokenGenerator,
   Mapping,
   ClassMetadata,
   Attribute,
@@ -111,6 +112,42 @@ describe('Test Client', () => {
       expect(url4).toEqual(
         'https://api.me/v2/def_param/8?q=test&foo=bar&_groups=test_read%2Ctest_write&dp=df'
       );
+    });
+  });
+
+  test.only('have multiple SDKs with different token keys', () => {
+    const someStorage = new MockStorage();
+    const someOtherStorage = new MockStorage();
+
+    const tokenGenerator1 = new ProvidedTokenGenerator();
+    const tokenGenerator2 = new ProvidedTokenGenerator();
+
+    const someTokenStorage = new TokenStorage(tokenGenerator1, someStorage);
+    const someOtherTokenStorage = new TokenStorage(
+      tokenGenerator2,
+      someOtherStorage,
+      'my-custom-token-key'
+    );
+
+    const storeTokensPromiseList = [
+      someTokenStorage._storeAccessToken({ access_token: 'my-token' }),
+      someOtherTokenStorage._storeAccessToken({
+        access_token: 'my-other-token',
+      }),
+    ];
+
+    const getTokenPromiseList = [
+      someStorage.getItem('rest_client_sdk.api.access_token'),
+      someOtherStorage.getItem('my-custom-token-key'),
+    ];
+
+    return Promise.all(storeTokensPromiseList).then(() => {
+      return Promise.all(getTokenPromiseList).then(values => {
+        expect(JSON.parse(values[0])).toEqual({ access_token: 'my-token' });
+        expect(JSON.parse(values[1])).toEqual({
+          access_token: 'my-other-token',
+        });
+      });
     });
   });
 
@@ -449,6 +486,10 @@ describe('Fix bugs', () => {
   });
 
   test('check that the request done after refreshing a token contains the refreshed token', () => {
+    const oauthHeaders = {
+      'www-authenticate':
+        'Bearer realm="Service", error="invalid_grant", error_description="The access token provided has expired."',
+    };
     fetchMock
       .mock({
         name: 'generate_token',
@@ -492,6 +533,7 @@ describe('Fix bugs', () => {
             error: 'invalid_grant',
             error_description: 'The access token provided has expired.',
           },
+          headers: oauthHeaders,
         },
       })
       .mock({

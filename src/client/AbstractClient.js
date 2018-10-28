@@ -234,50 +234,48 @@ class AbstractClient {
     return this._doFetch(null, input, init);
   }
 
-  _manageAccessDenied(response, input, init) {
-    return response
-      .json()
-      .then(body => {
-        if (body.error === 'invalid_grant') {
-          switch (body.error_description) {
-            case 'The access token provided has expired.':
-              if (this._tokenStorage) {
-                return this._tokenStorage
-                  .refreshToken()
-                  .then(() => {
-                    const params = Object.assign({}, init, {
-                      headers: Object.assign({}, init.headers),
-                    });
-                    delete params.headers.Authorization;
+  _refreshTokenAndRefetch(response, input, init) {
+    return this._tokenStorage
+      .refreshToken()
+      .then(() => {
+        const params = Object.assign({}, init, {
+          headers: Object.assign({}, init.headers),
+        });
+        delete params.headers.Authorization;
 
-                    return this._fetchWithToken(input, params);
-                  })
-                  .catch(() => {
-                    throw new AccessDeniedError(
-                      'Unable to renew access_token',
-                      response
-                    );
-                  });
-              }
-
-              break;
-
-            default:
-              throw new AccessDeniedError(body.error_description, response);
-          }
-        }
-
-        throw new AccessDeniedError(
-          'Unable to access ressource: 401 found !',
-          response
-        );
+        return this._fetchWithToken(input, params);
       })
       .catch(() => {
-        throw new AccessDeniedError(
-          'Unable to access ressource: 401 found !',
-          response
-        );
+        throw new AccessDeniedError('Unable to renew access_token', response);
       });
+  }
+
+  _manageAccessDenied(response, input, init) {
+    // https://tools.ietf.org/html/rfc2617#section-1.2
+    const authorizationHeader = response.headers.get('www-authenticate');
+    if (authorizationHeader) {
+      const invalidGrant = authorizationHeader.indexOf(
+        'error = "invalid_grant"'
+      );
+      if (invalidGrant) {
+        const expired = authorizationHeader.indexOf(
+          'error_description="The access token provided has expired."'
+        );
+        switch (true) {
+          case !!expired:
+            if (this._tokenStorage) {
+              return this._refreshTokenAndRefetch(response, input, init);
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+    throw new AccessDeniedError(
+      'Unable to access ressource: 401 found !',
+      response
+    );
   }
 
   _doFetch(accessToken, input, init) {
