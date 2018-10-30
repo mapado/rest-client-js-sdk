@@ -1,10 +1,9 @@
-const ACCESS_TOKEN_KEY = 'rest_client_sdk.api.access_token';
-
 class TokenStorage {
-  constructor(tokenGenerator, asyncStorage) {
+  constructor(tokenGenerator, asyncStorage, accessTokenKey = 'rest_client_sdk.api.access_token') {
     this._tokenGenerator = tokenGenerator;
     this._hasATokenBeenGenerated = false;
     this.setAsyncStorage(asyncStorage);
+    this.accessTokenKey = accessTokenKey;
   }
 
   setAsyncStorage(asyncStorage) {
@@ -13,7 +12,7 @@ class TokenStorage {
 
   hasAccessToken() {
     return this._asyncStorage
-      .getItem(ACCESS_TOKEN_KEY)
+      .getItem(this.accessTokenKey)
       .then(accessToken => !!accessToken);
   }
 
@@ -24,7 +23,7 @@ class TokenStorage {
   }
 
   getAccessTokenObject() {
-    return this._asyncStorage.getItem(ACCESS_TOKEN_KEY).then(token => {
+    return this._asyncStorage.getItem(this.accessTokenKey).then(token => {
       if (token) {
         const tokenObject = JSON.parse(token);
 
@@ -48,7 +47,7 @@ class TokenStorage {
   }
 
   logout() {
-    return this._asyncStorage.removeItem(ACCESS_TOKEN_KEY);
+    return this._asyncStorage.removeItem(this.accessTokenKey);
   }
 
   generateToken(parameters) {
@@ -62,7 +61,7 @@ class TokenStorage {
 
   refreshToken(parameters) {
     return this._asyncStorage
-      .getItem(ACCESS_TOKEN_KEY)
+      .getItem(this.accessTokenKey)
       .then(token =>
         this._tokenGenerator
           .refreshToken(JSON.parse(token), parameters)
@@ -74,7 +73,7 @@ class TokenStorage {
 
   _storeAccessToken(responseData) {
     return this._asyncStorage.setItem(
-      ACCESS_TOKEN_KEY,
+      this.accessTokenKey,
       JSON.stringify(responseData)
     );
   }
