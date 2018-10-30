@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 2.3.0
+
+### Changed
+
+* `TokenStorage` add possibility to pass access_token async storage key as constructor param
+* `AbstractClient._manageAccessDenied` checks headers instead of json to ensure refreshing the token is required
+
 ## 2.2.1
 
 ### Changed
