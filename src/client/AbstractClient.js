@@ -1,5 +1,5 @@
 import URI from 'urijs';
-import { AccessDeniedError, handleBadResponse } from '../Error';
+import { UnauthorizedError, handleBadResponse } from '../Error';
 
 class AbstractClient {
   constructor(sdk, metadata) {
@@ -246,33 +246,22 @@ class AbstractClient {
         return this._fetchWithToken(input, params);
       })
       .catch(() => {
-        throw new AccessDeniedError('Unable to renew access_token', response);
+        throw new UnauthorizedError('Unable to renew access_token', response);
       });
   }
 
-  _manageAccessDenied(response, input, init) {
+  _manageUnauthorized(response, input, init) {
     // https://tools.ietf.org/html/rfc2617#section-1.2
     const authorizationHeader = response.headers.get('www-authenticate');
     if (authorizationHeader) {
       const invalidGrant = authorizationHeader.indexOf(
         'error = "invalid_grant"'
       );
-      if (invalidGrant) {
-        const expired = authorizationHeader.indexOf(
-          'error_description="The access token provided has expired."'
-        );
-        switch (true) {
-          case !!expired:
-            if (this._tokenStorage) {
-              return this._refreshTokenAndRefetch(response, input, init);
-            }
-            break;
-          default:
-            break;
-        }
+      if (invalidGrant && this._tokenStorage) {
+        return this._refreshTokenAndRefetch(response, input, init);
       }
     }
-    throw new AccessDeniedError(
+    throw new UnauthorizedError(
       'Unable to access ressource: 401 found !',
       response
     );
@@ -316,7 +305,7 @@ class AbstractClient {
       }
 
       if (response.status === 401) {
-        return this._manageAccessDenied(response, input, params);
+        return this._manageUnauthorized(response, input, params);
       }
 
       if (response.status !== 401) {

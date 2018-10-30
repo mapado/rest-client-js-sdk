@@ -39,7 +39,7 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator {
       method: 'POST',
       body: this.convertMapToFormData(parameters),
     }).then(response => {
-      if (response.status !== 200) {
+      if (response.status >= 400) {
         return handleBadResponse(response);
       }
 
