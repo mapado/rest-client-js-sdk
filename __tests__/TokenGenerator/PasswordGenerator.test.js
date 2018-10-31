@@ -6,7 +6,7 @@ import {
   ForbiddenError,
   InternalServerError,
   ResourceNotFoundError,
-  AccessDeniedError,
+  UnauthorizedError,
 } from '../../src/Error';
 
 global.FormData = require('form-data');
@@ -88,7 +88,7 @@ describe('PasswordGenerator tests', () => {
     ]);
   });
 
-  test('test that refreshToken throws AccessDeniedError on 400', () => {
+  test('test that refreshToken throws UnauthorizedError on 400', () => {
     const tokenGenerator = new PasswordGenerator(tokenConfig);
 
     fetchMock.mock(() => true, oauthClientCredentialsMock);
@@ -102,7 +102,7 @@ describe('PasswordGenerator tests', () => {
 
     return generateTokenPromise.then(accessToken =>
       tokenGenerator.refreshToken(accessToken).catch(err => {
-        expect(err instanceof AccessDeniedError).toEqual(true);
+        expect(err instanceof UnauthorizedError).toEqual(true);
       })
     );
   });

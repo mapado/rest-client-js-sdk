@@ -2,7 +2,7 @@ import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
 import {
-  AccessDeniedError,
+  UnauthorizedError,
   handleBadResponse,
   BadRequestError,
 } from '../Error';
@@ -59,8 +59,11 @@ class PasswordGenerator extends AbstractTokenGenerator {
     return this._doFetch(parameters)
       .then(response => response.clone().json())
       .catch(err => {
+        // bad params like wrong scopes sent to oauth server
+        // will generate a 400, we want final clients to consider it
+        // like 401 in order to take proper action
         if (err instanceof BadRequestError) {
-          throw new AccessDeniedError(err.message, err.baseResponse);
+          throw new UnauthorizedError(err.message, err.baseResponse);
         }
         throw err;
       });

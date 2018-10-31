@@ -4,8 +4,8 @@
  */
 
 function HttpError(message, baseResponse) {
-  this.name = 'BadRequestError';
-  this.message = message || 'Bad request';
+  this.name = 'HttpError';
+  this.message = message || 'Http errort';
   this.baseResponse = baseResponse;
   this.stack = new Error().stack;
 }
@@ -23,14 +23,14 @@ BadRequestError.prototype = Object.create(HttpError.prototype);
 BadRequestError.prototype.constructor = BadRequestError;
 
 // 401
-function AccessDeniedError(message, baseResponse) {
-  this.name = 'AccessDeniedError';
-  this.message = message || 'Access denied';
+function UnauthorizedError(message, baseResponse) {
+  this.name = 'UnauthorizedError';
+  this.message = message || 'Unauthorized';
   this.baseResponse = baseResponse;
   this.stack = new Error().stack;
 }
-AccessDeniedError.prototype = Object.create(BadRequestError.prototype);
-AccessDeniedError.prototype.constructor = AccessDeniedError;
+UnauthorizedError.prototype = Object.create(BadRequestError.prototype);
+UnauthorizedError.prototype.constructor = UnauthorizedError;
 
 // 403
 function ForbiddenError(message, baseResponse) {
@@ -52,6 +52,16 @@ function ResourceNotFoundError(message, baseResponse) {
 ResourceNotFoundError.prototype = Object.create(BadRequestError.prototype);
 ResourceNotFoundError.prototype.constructor = ResourceNotFoundError;
 
+// 409
+function ConflictError(message, baseResponse) {
+  this.name = 'ConflictError';
+  this.message = message || 'Conflict detected';
+  this.baseResponse = baseResponse;
+  this.stack = new Error().stack;
+}
+ConflictError.prototype = Object.create(BadRequestError.prototype);
+ConflictError.prototype.constructor = ConflictError;
+
 // 500
 function InternalServerError(message, baseResponse) {
   this.name = 'InternalServerError';
@@ -64,11 +74,17 @@ InternalServerError.prototype.constructor = InternalServerError;
 
 function handleBadResponse(response) {
   switch (true) {
+    case response.status === 401:
+      throw new UnauthorizedError(null, response);
+
     case response.status === 403:
       throw new ForbiddenError(null, response);
 
     case response.status === 404:
       throw new ResourceNotFoundError(null, response);
+
+    case response.status === 409:
+      throw new ConflictError(null, response);
 
     case response.status >= 400 && response.status < 500:
       throw new BadRequestError(null, response);
@@ -77,13 +93,14 @@ function handleBadResponse(response) {
       throw new InternalServerError(null, response);
 
     default:
-      return new Error(`Unexpected error, status code is ${response.status}`);
+      return new HttpError(null, response);
   }
 }
 
 export {
-  AccessDeniedError,
+  UnauthorizedError,
   BadRequestError,
+  ConflictError,
   ForbiddenError,
   HttpError,
   InternalServerError,

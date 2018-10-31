@@ -376,7 +376,7 @@ describe('Test errors', () => {
         errors.BadRequestError
       ),
       expect(SomeSdk.getRepository('test').find(401)).rejects.toBeInstanceOf(
-        errors.AccessDeniedError
+        errors.UnauthorizedError
       ),
       expect(SomeSdk.getRepository('test').find(403)).rejects.toBeInstanceOf(
         errors.ForbiddenError

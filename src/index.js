@@ -1,11 +1,12 @@
 import RestClientSdk from './RestClientSdk';
 import {
-  AccessDeniedError,
   BadRequestError,
+  ConflictError,
   ForbiddenError,
   HttpError,
   InternalServerError,
   ResourceNotFoundError,
+  UnauthorizedError,
 } from './Error';
 import AbstractClient from './client/AbstractClient';
 import TokenStorage from './TokenStorage';
@@ -28,8 +29,9 @@ export {
   ProvidedTokenGenerator,
   Serializer,
   TokenStorage,
-  AccessDeniedError,
+  UnauthorizedError,
   BadRequestError,
+  ConflictError,
   ForbiddenError,
   HttpError,
   InternalServerError,
