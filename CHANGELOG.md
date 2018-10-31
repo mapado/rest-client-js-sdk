@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 3.0.0
+
+### Changed
+
+* [Breaking] `AccessDeniedError` is now `UnauthorizedError`
+* [Breaking] Default error is now `HttpError`
+* Add `ConflictError` to react to 409
+
 ## 2.3.0
 
 ### Changed
