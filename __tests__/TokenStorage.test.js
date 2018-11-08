@@ -109,22 +109,16 @@ describe('Token storage tests', () => {
     expect(actual).toBeNull();
   });
 
-  test('We can have the expiration date of the current token', async () => {
+  test('We can have the remaining validity time for a given token', async () => {
     const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
-    expect(oauth.getCurrentTokenExpiresAt()).toBeNull();
-
     fetchMock.once(() => true, oauthClientCredentialsMock);
 
     const generatedToken = await oauth.generateToken({
       grant_type: 'client_credentials',
     });
 
-    const expectedExpiresAt = NOW_TIMESTAMP_MOCK + oauthClientCredentialsMock.expires_in;
-    expect(oauth.getCurrentTokenExpiresAt()).toEqual(expectedExpiresAt);
-
+    expect(oauth.getTokenExpiresIn(oauthClientCredentialsMock)).toEqual(3600);
     await oauth.refreshToken();
-
-    const expectedRefreshedExpiresAt = NOW_TIMESTAMP_MOCK + refreshedCredentials.expires_in;
-    expect(oauth.getCurrentTokenExpiresAt()).toEqual(expectedRefreshedExpiresAt);
+    expect(oauth.getTokenExpiresIn(refreshedCredentials)).toEqual(12800);
   });
 });

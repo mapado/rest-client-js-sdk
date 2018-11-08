@@ -2,7 +2,7 @@ class TokenStorage {
   constructor(tokenGenerator, asyncStorage, accessTokenKey = 'rest_client_sdk.api.access_token') {
     this._tokenGenerator = tokenGenerator;
     this._hasATokenBeenGenerated = false;
-    this._currentTokenExpiresAt = null;
+    this._tokenExpiresAtMap = {};
     this.setAsyncStorage(asyncStorage);
     this.accessTokenKey = accessTokenKey;
   }
@@ -75,15 +75,19 @@ class TokenStorage {
       );
   }
 
-  getCurrentTokenExpiresAt() {
-    return this._currentTokenExpiresAt;
+  /**
+   * Return the number of second when the token will expire
+   * return value can be negative if the token is already expired
+  */
+  getTokenExpiresIn(token) {
+    return this._tokenExpiresAtMap[token.access_token] - Date.now();
   }
 
   _storeAccessToken(responseData, callTimestamp) {
     if (typeof responseData === 'object') {
-      this._currentTokenExpiresAt = null;
+      this._tokenExpiresAtMap[responseData.access_token] = null;
       if (typeof responseData.expires_in !== 'undefined' && responseData.expires_in >= 0) {
-        this._currentTokenExpiresAt = callTimestamp + responseData.expires_in;
+        this._tokenExpiresAtMap[responseData.access_token] = Date.now() + responseData.expires_in;
       }
     }
 

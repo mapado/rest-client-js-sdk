@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* Add `TokenStorage.getCurrentTokenExpiresAt` function to known the expiration timestamp of the current token
+* Add `TokenStorage.getTokenExpiresIn` function to known how many seconds are remaining for a given access token
 
 ## 3.0.0
 
