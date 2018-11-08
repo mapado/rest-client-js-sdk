@@ -80,14 +80,14 @@ class TokenStorage {
    * return value can be negative if the token is already expired
   */
   getTokenExpiresIn(token) {
-    return this._tokenExpiresAtMap[token.access_token] - Date.now();
+    return this._tokenExpiresAtMap[token.access_token] - (Date.now() / 1000);
   }
 
   _storeAccessToken(responseData, callTimestamp) {
     if (typeof responseData === 'object') {
       this._tokenExpiresAtMap[responseData.access_token] = null;
       if (typeof responseData.expires_in !== 'undefined' && responseData.expires_in >= 0) {
-        this._tokenExpiresAtMap[responseData.access_token] = Date.now() + responseData.expires_in;
+        this._tokenExpiresAtMap[responseData.access_token] = (Date.now() / 1000) + responseData.expires_in;
       }
     }
 
