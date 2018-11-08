@@ -4,6 +4,7 @@ import TokenGeneratorMock from '../__mocks__/TokenGeneratorMock';
 import oauthClientCredentialsMock from '../__mocks__/oauthClientCredentials.json';
 import refreshedCredentials from '../__mocks__/refreshedCredentials.json';
 import Storage from '../__mocks__/mockStorage';
+import { NOW_TIMESTAMP_MOCK } from '../setupJest';
 
 global.FormData = require('form-data');
 
@@ -106,5 +107,24 @@ describe('Token storage tests', () => {
     await oauth._storeAccessToken('coucou');
     const actual = await oauth.getAccessTokenObject();
     expect(actual).toBeNull();
+  });
+
+  test('We can have the expiration date of the current token', async () => {
+    const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
+    expect(oauth.getCurrentTokenExpiresAt()).toBeNull();
+
+    fetchMock.once(() => true, oauthClientCredentialsMock);
+
+    const generatedToken = await oauth.generateToken({
+      grant_type: 'client_credentials',
+    });
+
+    const expectedExpiresAt = NOW_TIMESTAMP_MOCK + oauthClientCredentialsMock.expires_in;
+    expect(oauth.getCurrentTokenExpiresAt()).toEqual(expectedExpiresAt);
+
+    await oauth.refreshToken();
+
+    const expectedRefreshedExpiresAt = NOW_TIMESTAMP_MOCK + refreshedCredentials.expires_in;
+    expect(oauth.getCurrentTokenExpiresAt()).toEqual(expectedRefreshedExpiresAt);
   });
 });

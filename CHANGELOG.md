@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Add `TokenStorage.getCurrentTokenExpiresAt` function to known the expiration timestamp of the current token
+
 ## 3.0.0
 
 ### Changed

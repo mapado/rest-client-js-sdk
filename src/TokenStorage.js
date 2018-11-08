@@ -2,6 +2,7 @@ class TokenStorage {
   constructor(tokenGenerator, asyncStorage, accessTokenKey = 'rest_client_sdk.api.access_token') {
     this._tokenGenerator = tokenGenerator;
     this._hasATokenBeenGenerated = false;
+    this._currentTokenExpiresAt = null;
     this.setAsyncStorage(asyncStorage);
     this.accessTokenKey = accessTokenKey;
   }
@@ -52,26 +53,40 @@ class TokenStorage {
 
   generateToken(parameters) {
     this._hasATokenBeenGenerated = true;
+    const callTimestamp = Date.now();
     return this._tokenGenerator
       .generateToken(parameters)
       .then(responseData =>
-        this._storeAccessToken(responseData).then(() => responseData)
+        this._storeAccessToken(responseData, callTimestamp).then(() => responseData)
       );
   }
 
   refreshToken(parameters) {
     return this._asyncStorage
       .getItem(this.accessTokenKey)
-      .then(token =>
-        this._tokenGenerator
+      .then(token => {
+        const callTimestamp = Date.now();
+        return this._tokenGenerator
           .refreshToken(JSON.parse(token), parameters)
           .then(responseData =>
-            this._storeAccessToken(responseData).then(() => responseData)
+            this._storeAccessToken(responseData, callTimestamp).then(() => responseData)
           )
+      }
       );
   }
 
-  _storeAccessToken(responseData) {
+  getCurrentTokenExpiresAt() {
+    return this._currentTokenExpiresAt;
+  }
+
+  _storeAccessToken(responseData, callTimestamp) {
+    if (typeof responseData === 'object') {
+      this._currentTokenExpiresAt = null;
+      if (typeof responseData.expires_in !== 'undefined' && responseData.expires_in >= 0) {
+        this._currentTokenExpiresAt = callTimestamp + responseData.expires_in;
+      }
+    }
+
     return this._asyncStorage.setItem(
       this.accessTokenKey,
       JSON.stringify(responseData)
