@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-* Add `TokenStorage.getTokenExpiresIn` function to known how many seconds are remaining for a given access token
+* Store a new key `expires_at` in the access token (which is accessible with `TokenStorage.getAccessTokenObject`) to have the timestamp after which the access token will be invalid, based on the `expires_in`
+* Add `TokenStorage.getCurrentTokenExpiresIn` function to known how many seconds are remaining for the access token currently stored
 
 ## 3.0.0
 

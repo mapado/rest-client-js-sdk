@@ -64,20 +64,36 @@ describe('Token storage tests', () => {
 
     expect(generatedToken).toBeInstanceOf(Promise);
 
+    const expectedStoredAccessTokenObject=  Object.assign(
+      {},
+      oauthClientCredentialsMock,
+      {
+        expires_at: 1487080308,
+      }
+    );
+
+    const expectedStoredRefreshTokenObject=  Object.assign(
+      {},
+      refreshedCredentials,
+      {
+        expires_at: 1487089508,
+      }
+    );
+
     return Promise.all([
       expect(typeof generatedToken).toBe('object'),
       expect(generatedToken.then(a => a.access_token)).resolves.toEqual(
-        oauthClientCredentialsMock.access_token
+        expectedStoredAccessTokenObject.access_token
       ),
     ])
       .then(() =>
         Promise.all([
           expect(oauth.hasAccessToken()).resolves.toBe(true),
           expect(oauth.getAccessToken()).resolves.toEqual(
-            oauthClientCredentialsMock.access_token
+            expectedStoredAccessTokenObject.access_token
           ),
           expect(oauth.getAccessTokenObject()).resolves.toEqual(
-            oauthClientCredentialsMock
+            expectedStoredAccessTokenObject
           ),
         ])
       )
@@ -85,17 +101,17 @@ describe('Token storage tests', () => {
         Promise.all([
           expect(
             oauth.refreshToken().then(a => a.access_token)
-          ).resolves.toEqual(refreshedCredentials.access_token),
+          ).resolves.toEqual(expectedStoredRefreshTokenObject.access_token),
         ])
       )
       .then(() =>
         Promise.all([
           expect(oauth.hasAccessToken()).resolves.toBe(true),
           expect(oauth.getAccessToken()).resolves.toEqual(
-            refreshedCredentials.access_token
+            expectedStoredRefreshTokenObject.access_token
           ),
           expect(oauth.getAccessTokenObject()).resolves.toEqual(
-            refreshedCredentials
+            expectedStoredRefreshTokenObject
           ),
         ])
       );
@@ -113,12 +129,12 @@ describe('Token storage tests', () => {
     const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
     fetchMock.once(() => true, oauthClientCredentialsMock);
 
-    const generatedToken = await oauth.generateToken({
+    await oauth.generateToken({
       grant_type: 'client_credentials',
     });
 
-    expect(oauth.getTokenExpiresIn(oauthClientCredentialsMock)).toEqual(3600);
+    expect(oauth.getCurrentTokenExpiresIn()).resolves.toEqual(3600);
     await oauth.refreshToken();
-    expect(oauth.getTokenExpiresIn(refreshedCredentials)).toEqual(12800);
+    expect(oauth.getCurrentTokenExpiresIn()).resolves.toEqual(12800);
   });
 });
