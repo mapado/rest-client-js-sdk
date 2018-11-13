@@ -52,29 +52,58 @@ class TokenStorage {
 
   generateToken(parameters) {
     this._hasATokenBeenGenerated = true;
+    const callTimestamp = Date.now() / 1000;
     return this._tokenGenerator
       .generateToken(parameters)
       .then(responseData =>
-        this._storeAccessToken(responseData).then(() => responseData)
+        this._storeAccessToken(responseData, callTimestamp).then(() => responseData)
       );
   }
 
   refreshToken(parameters) {
     return this._asyncStorage
       .getItem(this.accessTokenKey)
-      .then(token =>
-        this._tokenGenerator
+      .then(token => {
+        const callTimestamp = Date.now() / 1000;
+        return this._tokenGenerator
           .refreshToken(JSON.parse(token), parameters)
           .then(responseData =>
-            this._storeAccessToken(responseData).then(() => responseData)
+            this._storeAccessToken(responseData, callTimestamp).then(() => responseData)
           )
+      }
       );
   }
 
-  _storeAccessToken(responseData) {
+  /**
+   * Return the number of second when the token will expire
+   * return value can be negative if the token is already expired
+  */
+  getCurrentTokenExpiresIn() {
+    return this.getAccessTokenObject()
+    .then(accessTokenObject => {
+      if (accessTokenObject === null || typeof accessTokenObject.expires_at === 'undefined') {
+        throw new Error('No token has been stored.');
+      }
+
+      const now = Date.now() / 1000;
+
+      return accessTokenObject.expires_at - now;
+    });
+  }
+
+  _storeAccessToken(responseData, callTimestamp) {
+    let responseDataToStore = responseData;
+    if (typeof responseData === 'object') {
+      responseDataToStore = Object.assign({}, responseData);
+      responseDataToStore.expires_at = null;
+      if (typeof responseData.expires_in !== 'undefined' && responseData.expires_in >= 0) {
+        responseDataToStore.expires_at = callTimestamp + responseData.expires_in;
+      }
+    }
+
     return this._asyncStorage.setItem(
       this.accessTokenKey,
-      JSON.stringify(responseData)
+      JSON.stringify(responseDataToStore)
     );
   }
 }

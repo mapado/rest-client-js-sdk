@@ -72,6 +72,6 @@
     "*.{js,jsx,json,md}": ["yarn run prettier --write", "git add"]
   },
   "jest": {
-    "setupFiles": ["./setupJest.js"]
+    "setupTestFrameworkScriptFile": "./setupJest.js"
   }
 }

@@ -130,7 +130,7 @@ describe('Test Client', () => {
     );
 
     const storeTokensPromiseList = [
-      someTokenStorage._storeAccessToken({ access_token: 'my-token' }),
+      someTokenStorage._storeAccessToken({ access_token: 'my-token', expires_at: null }),
       someOtherTokenStorage._storeAccessToken({
         access_token: 'my-other-token',
       }),
@@ -143,9 +143,10 @@ describe('Test Client', () => {
 
     return Promise.all(storeTokensPromiseList).then(() => {
       return Promise.all(getTokenPromiseList).then(values => {
-        expect(JSON.parse(values[0])).toEqual({ access_token: 'my-token' });
+        expect(JSON.parse(values[0])).toEqual({ access_token: 'my-token', expires_at: null });
         expect(JSON.parse(values[1])).toEqual({
           access_token: 'my-other-token',
+          expires_at: null
         });
       });
     });
