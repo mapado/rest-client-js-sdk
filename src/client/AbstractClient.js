@@ -1,6 +1,8 @@
 import URI from 'urijs';
 import { UnauthorizedError, handleBadResponse } from '../Error';
 
+const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
+
 class AbstractClient {
   constructor(sdk, metadata) {
     this.sdk = sdk;
@@ -226,9 +228,21 @@ class AbstractClient {
     }
 
     if (this._tokenStorage) {
-      return this._tokenStorage
-        .getAccessToken()
-        .then(token => this._doFetch(token, input, init));
+      return Promise.all([
+        this._tokenStorage.getCurrentTokenExpiresIn(),
+        this._tokenStorage.getAccessToken()
+      ]).then(([accessTokenExpiresIn, accessToken]) => {
+        if (accessTokenExpiresIn !== null && accessTokenExpiresIn <= EXPIRE_LIMIT_SECONDS) {
+          return this._tokenStorage
+            .refreshToken()
+            .then(refreshedTokenObject => refreshedTokenObject.access_token)
+          ;
+        }
+
+        return accessToken;
+      })
+      .then(token => this._doFetch(token, input, init))
+      ;
     }
 
     return this._doFetch(null, input, init);
