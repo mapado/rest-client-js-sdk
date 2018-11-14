@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.1
+
+### Changed
+
+* Read json response in \_manageUnauthorized when www-authenticate header is not available
+
 ## 3.1.0
 
 ### Changed
