@@ -260,11 +260,30 @@ class AbstractClient {
       if (invalidGrant && this._tokenStorage) {
         return this._refreshTokenAndRefetch(response, input, init);
       }
+      throw new UnauthorizedError(
+        'Unable to access ressource: 401 found !',
+        response
+      );
+    } else {
+      // if www-authenticate header is missing, try and read json response
+      return response
+        .json()
+        .then(body => {
+          if (this._tokenStorage && body.error === 'invalid_grant') {
+            return this._refreshTokenAndRefetch(response, input, init);
+          }
+          throw new UnauthorizedError(
+            'Unable to access ressource: 401 found !',
+            response
+          );
+        })
+        .catch(() => {
+          throw new UnauthorizedError(
+            'Unable to access ressource: 401 found !',
+            response
+          );
+        });
     }
-    throw new UnauthorizedError(
-      'Unable to access ressource: 401 found !',
-      response
-    );
   }
 
   _doFetch(accessToken, input, init) {
