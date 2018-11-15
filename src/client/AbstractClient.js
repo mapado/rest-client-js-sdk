@@ -230,38 +230,35 @@ class AbstractClient {
     if (this._tokenStorage) {
       return Promise.all([
         this._tokenStorage.getCurrentTokenExpiresIn(),
-        this._tokenStorage.getAccessToken()
-      ]).then(([accessTokenExpiresIn, accessToken]) => {
-        if (accessTokenExpiresIn !== null && accessTokenExpiresIn <= EXPIRE_LIMIT_SECONDS) {
-          return this._tokenStorage
-            .refreshToken()
-            .then(refreshedTokenObject => refreshedTokenObject.access_token)
-          ;
-        }
+        this._tokenStorage.getAccessToken(),
+      ])
+        .then(([accessTokenExpiresIn, accessToken]) => {
+          if (
+            accessTokenExpiresIn !== null &&
+            accessTokenExpiresIn <= EXPIRE_LIMIT_SECONDS
+          ) {
+            return this._tokenStorage
+              .refreshToken()
+              .then(refreshedTokenObject => refreshedTokenObject.access_token);
+          }
 
-        return accessToken;
-      })
-      .then(token => this._doFetch(token, input, init))
-      ;
+          return accessToken;
+        })
+        .then(token => this._doFetch(token, input, init));
     }
 
     return this._doFetch(null, input, init);
   }
 
   _refreshTokenAndRefetch(response, input, init) {
-    return this._tokenStorage
-      .refreshToken()
-      .then(() => {
-        const params = Object.assign({}, init, {
-          headers: Object.assign({}, init.headers),
-        });
-        delete params.headers.Authorization;
-
-        return this._fetchWithToken(input, params);
-      })
-      .catch(() => {
-        throw new UnauthorizedError('Unable to renew access_token', response);
+    return this._tokenStorage.refreshToken().then(() => {
+      const params = Object.assign({}, init, {
+        headers: Object.assign({}, init.headers),
       });
+      delete params.headers.Authorization;
+
+      return this._fetchWithToken(input, params);
+    });
   }
 
   _manageUnauthorized(response, input, init) {
