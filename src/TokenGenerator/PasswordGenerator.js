@@ -21,6 +21,7 @@ class PasswordGenerator extends AbstractTokenGenerator {
   constructor(props) {
     super(props);
     this._doFetch = memoizePromise(this._doFetch);
+    this._manageBadRequest = this._manageBadRequest.bind(this);
   }
 
   generateToken(baseParameters) {
@@ -36,6 +37,26 @@ class PasswordGenerator extends AbstractTokenGenerator {
     }
 
     return this._doFetch(parameters).then(response => response.json());
+  }
+
+  _manageBadRequest(response) {
+    return response
+      .json()
+      .then(body => {
+        if (body.error === 'invalid_grant') {
+          // bad params like wrong scopes sent to oauth server
+          // will generate a 400, we want final clients to consider it
+          // like 401 in order to take proper action
+          throw new UnauthorizedError(body.error, response);
+        }
+        return handleBadResponse(response);
+      })
+      .catch(err => {
+        if (err.type === 'invalid-json') {
+          return handleBadResponse(response);
+        }
+        throw err;
+      });
   }
 
   refreshToken(accessToken, baseParameters = {}) {
@@ -56,17 +77,7 @@ class PasswordGenerator extends AbstractTokenGenerator {
 
     parameters.refresh_token = accessToken.refresh_token;
 
-    return this._doFetch(parameters)
-      .then(response => response.clone().json())
-      .catch(err => {
-        // bad params like wrong scopes sent to oauth server
-        // will generate a 400, we want final clients to consider it
-        // like 401 in order to take proper action
-        if (err instanceof BadRequestError) {
-          throw new UnauthorizedError(err.message, err.baseResponse);
-        }
-        throw err;
-      });
+    return this._doFetch(parameters).then(response => response.clone().json());
   }
 
   checkTokenGeneratorConfig(config) {
@@ -97,11 +108,17 @@ class PasswordGenerator extends AbstractTokenGenerator {
       method: 'POST',
       body: this.convertMapToFormData(parameters),
     }).then(response => {
-      if (response.status >= 400) {
-        handleBadResponse(response);
+      if (response.status < 400) {
+        return response;
       }
 
-      return response;
+      if (response.status === 400) {
+        return this._manageBadRequest(response);
+      }
+
+      if (response.status !== 400) {
+        return handleBadResponse(response);
+      }
     });
   }
 
