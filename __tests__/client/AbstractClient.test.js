@@ -682,7 +682,7 @@ describe('Fix bugs', () => {
         response: {
           body: {
             access_token: 'an_access_token',
-            expires_in: 1,
+            expires_in: -1,
             token_type: 'bearer',
             scope: 'scope1 scope2',
             refresh_token: 'refresh_token',
