@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.2.0
+
+### Changed
+
+* Pre-emptively refresh the access token if it is close to expiration before doing any request
+
 ## 3.1.1
 
 ### Changed
