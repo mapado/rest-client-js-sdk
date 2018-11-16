@@ -72,30 +72,30 @@ function InternalServerError(message, baseResponse) {
 InternalServerError.prototype = Object.create(HttpError.prototype);
 InternalServerError.prototype.constructor = InternalServerError;
 
-function handleBadResponse(response) {
+const getHttpErrorFromResponse = response => {
   switch (true) {
     case response.status === 401:
-      throw new UnauthorizedError(null, response);
+      return new UnauthorizedError(null, response);
 
     case response.status === 403:
-      throw new ForbiddenError(null, response);
+      return new ForbiddenError(null, response);
 
     case response.status === 404:
-      throw new ResourceNotFoundError(null, response);
+      return new ResourceNotFoundError(null, response);
 
     case response.status === 409:
-      throw new ConflictError(null, response);
+      return new ConflictError(null, response);
 
     case response.status >= 400 && response.status < 500:
-      throw new BadRequestError(null, response);
+      return new BadRequestError(null, response);
 
     case response.status >= 500 && response.status < 600:
-      throw new InternalServerError(null, response);
+      return new InternalServerError(null, response);
 
     default:
       return new HttpError(null, response);
   }
-}
+};
 
 export {
   UnauthorizedError,
@@ -105,5 +105,5 @@ export {
   HttpError,
   InternalServerError,
   ResourceNotFoundError,
-  handleBadResponse,
+  getHttpErrorFromResponse,
 };

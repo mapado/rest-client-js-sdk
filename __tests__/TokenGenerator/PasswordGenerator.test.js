@@ -1,4 +1,3 @@
-import fetchMock from 'fetch-mock';
 import oauthClientCredentialsMock from '../../__mocks__/passwordCredentials.json';
 import { PasswordGenerator } from '../../src/index';
 import {
@@ -7,8 +6,9 @@ import {
   InternalServerError,
   ResourceNotFoundError,
   UnauthorizedError,
-} from '../../src/Error';
+} from '../../src/ErrorFactory';
 
+global.fetch = require('jest-fetch-mock');
 global.FormData = require('form-data');
 
 const tokenConfig = {
@@ -19,7 +19,7 @@ const tokenConfig = {
 };
 
 describe('PasswordGenerator tests', () => {
-  afterEach(fetchMock.restore);
+  beforeEach(fetch.resetMocks);
 
   test('test that config is properly checked', () => {
     function createTokenGenerator(config) {
@@ -35,7 +35,7 @@ describe('PasswordGenerator tests', () => {
   });
 
   test('test generateToken method', () => {
-    fetchMock.post(() => true, oauthClientCredentialsMock);
+    fetch.mockResponse(JSON.stringify(oauthClientCredentialsMock));
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
 
@@ -61,13 +61,11 @@ describe('PasswordGenerator tests', () => {
   });
 
   test('test that refreshToken refresh the token ;)', () => {
-    fetchMock.mock(() => true, oauthClientCredentialsMock);
+    fetch.mockResponse(JSON.stringify(oauthClientCredentialsMock));
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
 
     expect(() => tokenGenerator.refreshToken()).toThrowError(Error);
-
-    fetchMock.mock(() => true, oauthClientCredentialsMock);
 
     const generateTokenPromise = tokenGenerator.generateToken({
       username: 'foo',
@@ -88,27 +86,48 @@ describe('PasswordGenerator tests', () => {
     ]);
   });
 
-  test('test that refreshToken throws UnauthorizedError on 400', () => {
+  test('test that refreshToken throws BadRequest on 400 with no json body', () => {
     const tokenGenerator = new PasswordGenerator(tokenConfig);
 
-    fetchMock.mock(() => true, oauthClientCredentialsMock);
+    fetch.mockResponseOnce(JSON.stringify(oauthClientCredentialsMock));
 
     const generateTokenPromise = tokenGenerator.generateToken({
       username: 'foo',
       password: 'bar',
     });
 
-    fetchMock.mock(() => true, 400);
+    fetch.mockResponseOnce(null, { status: 400 });
 
     return generateTokenPromise.then(accessToken =>
       tokenGenerator.refreshToken(accessToken).catch(err => {
-        expect(err instanceof UnauthorizedError).toEqual(true);
+        expect(err instanceof BadRequestError).toEqual(true);
+      })
+    );
+  });
+
+  test('test that refreshToken throws BadRequest on 400 with no oauth error', () => {
+    const tokenGenerator = new PasswordGenerator(tokenConfig);
+
+    fetch.mockResponseOnce(JSON.stringify(oauthClientCredentialsMock));
+
+    const generateTokenPromise = tokenGenerator.generateToken({
+      username: 'foo',
+      password: 'bar',
+    });
+
+    fetch.mockResponseOnce(JSON.stringify({ error: 'dummy error' }), {
+      status: 400,
+    });
+
+    return generateTokenPromise.then(accessToken =>
+      tokenGenerator.refreshToken(accessToken).catch(err => {
+        expect(err instanceof BadRequestError).toEqual(true);
       })
     );
   });
 
   test('test that ForbiddenError is thrown', () => {
-    fetchMock.mock(() => true, 403);
+    fetch.mockResponseOnce(null, { status: 403 });
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
     return tokenGenerator
@@ -119,7 +138,7 @@ describe('PasswordGenerator tests', () => {
   });
 
   test('test that ResourceNotFoundError is thrown', () => {
-    fetchMock.mock(() => true, 404);
+    fetch.mockResponseOnce(null, { status: 404 });
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
     return tokenGenerator
@@ -130,7 +149,7 @@ describe('PasswordGenerator tests', () => {
   });
 
   test('test that BadRequestError is thrown', () => {
-    fetchMock.mock(() => true, 400);
+    fetch.mockResponseOnce(null, { status: 400 });
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
     return tokenGenerator
@@ -140,8 +159,22 @@ describe('PasswordGenerator tests', () => {
       });
   });
 
+  test('test that UnauthorizedError is thrown when getting a 400 with body error "invalid_grant"', () => {
+    fetch.mockResponse(JSON.stringify({ error: 'invalid_grant' }), {
+      status: 400,
+    });
+
+    const tokenGenerator = new PasswordGenerator(tokenConfig);
+
+    return tokenGenerator
+      .refreshToken(oauthClientCredentialsMock)
+      .catch(err => {
+        expect(err instanceof UnauthorizedError).toEqual(true);
+      });
+  });
+
   test('test that InternalServerError is thrown', () => {
-    fetchMock.mock(() => true, 500);
+    fetch.mockResponseOnce(null, { status: 500 });
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
     return tokenGenerator
@@ -152,7 +185,7 @@ describe('PasswordGenerator tests', () => {
   });
 
   test('test that unexpected error is thrown', () => {
-    fetchMock.mock(() => true, 401);
+    fetch.mockResponseOnce(null, { status: 401 });
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
     return tokenGenerator

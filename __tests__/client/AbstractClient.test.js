@@ -1,6 +1,6 @@
 /* eslint no-unused-vars: 0, no-underscore-dangle: 0 */
 import fetchMock from 'fetch-mock';
-import * as errors from '../../src/Error';
+import * as errors from '../../src/ErrorFactory';
 import RestClientSdk, {
   AbstractClient,
   Serializer,
