@@ -7,7 +7,7 @@ import {
   InternalServerError,
   ResourceNotFoundError,
   UnauthorizedError,
-} from './Error';
+} from './ErrorFactory';
 import AbstractClient from './client/AbstractClient';
 import TokenStorage from './TokenStorage';
 import AbstractTokenGenerator from './TokenGenerator/AbstractTokenGenerator';

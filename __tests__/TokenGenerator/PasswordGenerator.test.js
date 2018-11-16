@@ -6,7 +6,7 @@ import {
   InternalServerError,
   ResourceNotFoundError,
   UnauthorizedError,
-} from '../../src/Error';
+} from '../../src/ErrorFactory';
 
 global.fetch = require('jest-fetch-mock');
 global.FormData = require('form-data');

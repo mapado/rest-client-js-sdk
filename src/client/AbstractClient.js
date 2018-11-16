@@ -1,5 +1,5 @@
 import URI from 'urijs';
-import { UnauthorizedError, handleBadResponse } from '../Error';
+import { UnauthorizedError, getHttpErrorFromResponse } from '../ErrorFactory';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
@@ -339,7 +339,8 @@ class AbstractClient {
       }
 
       if (response.status !== 401) {
-        return handleBadResponse(response);
+        const httpError = getHttpErrorFromResponse(response);
+        throw httpError;
       }
     });
   }

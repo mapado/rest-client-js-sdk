@@ -6,7 +6,7 @@ import {
   ForbiddenError,
   InternalServerError,
   ResourceNotFoundError,
-} from '../../src/Error';
+} from '../../src/ErrorFactory';
 
 global.FormData = require('form-data');
 

@@ -1,11 +1,7 @@
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
-import {
-  UnauthorizedError,
-  handleBadResponse,
-  BadRequestError,
-} from '../Error';
+import { UnauthorizedError, getHttpErrorFromResponse } from '../ErrorFactory';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -49,13 +45,15 @@ class PasswordGenerator extends AbstractTokenGenerator {
           // like 401 in order to take proper action
           throw new UnauthorizedError(body.error, response);
         }
-        return handleBadResponse(response);
+        const httpError = getHttpErrorFromResponse(response);
+        throw httpError;
       })
       .catch(err => {
         if (err instanceof UnauthorizedError) {
           throw err;
         }
-        return handleBadResponse(response);
+        const httpError = getHttpErrorFromResponse(response);
+        throw httpError;
       });
   }
 
@@ -117,7 +115,8 @@ class PasswordGenerator extends AbstractTokenGenerator {
       }
 
       if (response.status !== 400) {
-        return handleBadResponse(response);
+        const httpError = getHttpErrorFromResponse(response);
+        throw httpError;
       }
     });
   }
