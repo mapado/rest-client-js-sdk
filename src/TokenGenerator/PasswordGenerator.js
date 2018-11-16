@@ -52,10 +52,10 @@ class PasswordGenerator extends AbstractTokenGenerator {
         return handleBadResponse(response);
       })
       .catch(err => {
-        if (err.type === 'invalid-json') {
-          return handleBadResponse(response);
+        if (err instanceof UnauthorizedError) {
+          throw err;
         }
-        throw err;
+        return handleBadResponse(response);
       });
   }
 
