@@ -54,7 +54,7 @@ class TokenStorage {
     const updatedResponseData = Object.assign({}, responseData);
     updatedResponseData.expires_at = null;
 
-    if (typeof updatedResponseData.expires_in !== 'undefined' && updatedResponseData.expires_in >= 0) {
+    if (typeof updatedResponseData.expires_in !== 'undefined' && updatedResponseData.expires_in !== null && updatedResponseData.expires_in >= 0) {
       updatedResponseData.expires_at = Math.round(callTimestamp / 1000) + updatedResponseData.expires_in;
     }
 
