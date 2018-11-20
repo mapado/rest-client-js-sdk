@@ -3,6 +3,24 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
  */
 
+function OauthError(message, previousError) {
+  this.name = 'OauthError';
+  this.message = message || 'Oauth error';
+  this.previousError = previousError;
+  this.stack = new Error().stack;
+}
+OauthError.prototype = Object.create(Error.prototype);
+OauthError.prototype.constructor = OauthError;
+
+function InvalidGrantError(message, previousError) {
+  this.name = 'InvalidGrantError';
+  this.message = message || 'Invalid grant error';
+  this.previousError = previousError;
+  this.stack = new Error().stack;
+}
+InvalidGrantError.prototype = Object.create(OauthError.prototype);
+InvalidGrantError.prototype.constructor = InvalidGrantError;
+
 function HttpError(message, baseResponse) {
   this.name = 'HttpError';
   this.message = message || 'Http errort';
@@ -106,4 +124,6 @@ export {
   InternalServerError,
   ResourceNotFoundError,
   getHttpErrorFromResponse,
+  OauthError,
+  InvalidGrantError,
 };

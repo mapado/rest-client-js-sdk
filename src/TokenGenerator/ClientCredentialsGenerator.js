@@ -1,5 +1,5 @@
 import URI from 'urijs';
-import { getHttpErrorFromResponse } from '../ErrorFactory';
+import { getHttpErrorFromResponse, OauthError } from '../ErrorFactory';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
 
@@ -40,8 +40,7 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator {
       body: this.convertMapToFormData(parameters),
     }).then(response => {
       if (response.status >= 400) {
-        const httpError = getHttpErrorFromResponse(response);
-        throw httpError;
+        throw new OauthError(null, getHttpErrorFromResponse(response));
       }
 
       return response.json();
