@@ -159,7 +159,7 @@ describe('PasswordGenerator tests', () => {
       });
   });
 
-  test('test that UnauthorizedError is thrown when getting a 400 with body error "invalid_grant"', () => {
+  test('test that BadRequest is thrown when getting a 400', () => {
     fetch.mockResponse(JSON.stringify({ error: 'invalid_grant' }), {
       status: 400,
     });
@@ -169,7 +169,7 @@ describe('PasswordGenerator tests', () => {
     return tokenGenerator
       .refreshToken(oauthClientCredentialsMock)
       .catch(err => {
-        expect(err instanceof UnauthorizedError).toEqual(true);
+        expect(err instanceof BadRequestError).toEqual(true);
       });
   });
 
