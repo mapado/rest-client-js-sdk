@@ -93,8 +93,12 @@ class TokenStorage {
   getCurrentTokenExpiresIn() {
     return this.getAccessTokenObject()
     .then(accessTokenObject => {
-      if (accessTokenObject === null || typeof accessTokenObject.expires_at === 'undefined') {
+      if (accessTokenObject === null) {
         throw new Error('No token has been stored.');
+      }
+
+      if (typeof accessTokenObject.expires_at === 'undefined') {
+        return null;
       }
 
       const now = Math.round(Date.now() / 1000);
