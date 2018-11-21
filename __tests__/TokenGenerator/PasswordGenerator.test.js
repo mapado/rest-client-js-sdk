@@ -3,6 +3,7 @@ import { PasswordGenerator } from '../../src/index';
 import {
   InternalServerError,
   InvalidGrantError,
+  InvalidScopeError,
   OauthError,
   ForbiddenError,
   BadRequestError,
@@ -177,6 +178,22 @@ describe('PasswordGenerator tests', () => {
       .refreshToken(oauthClientCredentialsMock)
       .catch(err => {
         expect(err instanceof InvalidGrantError).toEqual(true);
+        expect(err instanceof OauthError).toEqual(true);
+        expect(err.previousError instanceof BadRequestError).toEqual(true);
+      });
+  });
+
+  test('test that InvalidScopeError is thrown when getting a 400 with body error "invalid_scope"', () => {
+    fetch.mockResponse(JSON.stringify({ error: 'invalid_scope' }), {
+      status: 400,
+    });
+
+    const tokenGenerator = new PasswordGenerator(tokenConfig);
+
+    return tokenGenerator
+      .refreshToken(oauthClientCredentialsMock)
+      .catch(err => {
+        expect(err instanceof InvalidScopeError).toEqual(true);
         expect(err instanceof OauthError).toEqual(true);
         expect(err.previousError instanceof BadRequestError).toEqual(true);
       });
