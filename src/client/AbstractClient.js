@@ -1,5 +1,5 @@
 import URI from 'urijs';
-import { UnauthorizedError, getHttpErrorFromResponse } from '../ErrorFactory';
+import { OauthError, getHttpErrorFromResponse } from '../ErrorFactory';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
@@ -285,7 +285,10 @@ class AbstractClient {
           }
           throw error;
         })
-        .catch(() => {
+        .catch((err) => {
+          if (err instanceof OauthError) {
+            throw err;
+          }
           throw error;
         });
     }

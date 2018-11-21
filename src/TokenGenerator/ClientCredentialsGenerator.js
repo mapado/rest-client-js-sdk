@@ -39,11 +39,11 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator {
       method: 'POST',
       body: this.convertMapToFormData(parameters),
     }).then(response => {
-      if (response.status >= 400) {
-        throw new OauthError(null, getHttpErrorFromResponse(response));
+      if (response.status < 400) {
+        return response.json();
       }
 
-      return response.json();
+      return this._manageOauthError(response);
     });
   }
 

@@ -7,6 +7,7 @@ import {
   InternalServerError,
   ResourceNotFoundError,
   UnauthorizedError,
+  InvalidScopeError,
   OauthError,
   InvalidGrantError,
 } from './ErrorFactory';
@@ -37,6 +38,7 @@ export {
   ForbiddenError,
   OauthError,
   InvalidGrantError,
+  InvalidScopeError,
   HttpError,
   InternalServerError,
   ResourceNotFoundError,

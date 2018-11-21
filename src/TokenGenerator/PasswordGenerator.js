@@ -1,11 +1,6 @@
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
-import {
-  getHttpErrorFromResponse,
-  InvalidGrantError,
-  OauthError,
-} from '../ErrorFactory';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -71,23 +66,6 @@ class PasswordGenerator extends AbstractTokenGenerator {
     if (!(config.clientId && config.clientSecret)) {
       throw new RangeError(ERROR_CONFIG_CLIENT_INFORMATIONS);
     }
-  }
-
-  _manageOauthError(response) {
-    return response
-      .json()
-      .then(body => {
-        if (body.error === 'invalid_grant') {
-          throw new InvalidGrantError(body.error, getHttpErrorFromResponse(response));
-        }
-        throw new OauthError(body.error, getHttpErrorFromResponse(response));
-      })
-      .catch((err) => {
-        if (!(err instanceof OauthError)) {
-          throw new OauthError(err.type, getHttpErrorFromResponse(response));
-        }
-        throw err;
-      });
   }
 
   _doFetch(parameters) {

@@ -1,4 +1,10 @@
 /* eslint no-unused-vars: 0 */
+import {
+  getHttpErrorFromResponse,
+  InvalidGrantError,
+  InvalidScopeError,
+  OauthError,
+} from '../ErrorFactory';
 
 class AbstractTokenGenerator {
   constructor(tokenGeneratorConfig = {}) {
@@ -19,6 +25,27 @@ class AbstractTokenGenerator {
 
   checkTokenGeneratorConfig(config) {
     return true;
+  }
+
+  _manageOauthError(response) {
+    return response
+      .json()
+      .then(body => {
+        if (body.error === 'invalid_grant') {
+          throw new InvalidGrantError(body.error, getHttpErrorFromResponse(response));
+        }
+        if (body.error === 'invalid_scope') {
+          throw new InvalidScopeError(body.error, getHttpErrorFromResponse(response));
+        }
+        throw new OauthError(body.error, getHttpErrorFromResponse(response));
+      })
+      .catch((err) => {
+        if (!(err instanceof OauthError)) {
+          throw new OauthError(err.type, getHttpErrorFromResponse(response));
+        }
+
+        throw err;
+      });
   }
 
   convertMapToFormData(parameters) {

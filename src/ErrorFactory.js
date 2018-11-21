@@ -21,6 +21,15 @@ function InvalidGrantError(message, previousError) {
 InvalidGrantError.prototype = Object.create(OauthError.prototype);
 InvalidGrantError.prototype.constructor = InvalidGrantError;
 
+function InvalidScopeError(message, previousError) {
+  this.name = 'InvalidScopeError';
+  this.message = message || 'Invalid scope error';
+  this.previousError = previousError;
+  this.stack = new Error().stack;
+}
+InvalidScopeError.prototype = Object.create(OauthError.prototype);
+InvalidScopeError.prototype.constructor = InvalidScopeError;
+
 function HttpError(message, baseResponse) {
   this.name = 'HttpError';
   this.message = message || 'Http errort';
@@ -126,4 +135,5 @@ export {
   getHttpErrorFromResponse,
   OauthError,
   InvalidGrantError,
+  InvalidScopeError,
 };
