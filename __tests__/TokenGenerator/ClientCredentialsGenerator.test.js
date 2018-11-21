@@ -6,6 +6,8 @@ import {
   ForbiddenError,
   InternalServerError,
   ResourceNotFoundError,
+  OauthError,
+  UnauthorizedError,
 } from '../../src/ErrorFactory';
 
 global.FormData = require('form-data');
@@ -72,7 +74,8 @@ describe('ClientCredentialsGenerator tests', () => {
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
     return tokenGenerator.generateToken().catch(err => {
-      expect(err instanceof ForbiddenError).toEqual(true);
+      expect(err instanceof OauthError).toEqual(true);
+      expect(err.previousError instanceof ForbiddenError).toEqual(true);
     });
   });
 
@@ -81,7 +84,8 @@ describe('ClientCredentialsGenerator tests', () => {
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
     return tokenGenerator.generateToken().catch(err => {
-      expect(err instanceof ResourceNotFoundError).toEqual(true);
+      expect(err instanceof OauthError).toEqual(true);
+      expect(err.previousError instanceof ResourceNotFoundError).toEqual(true);
     });
   });
 
@@ -90,7 +94,8 @@ describe('ClientCredentialsGenerator tests', () => {
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
     return tokenGenerator.generateToken().catch(err => {
-      expect(err instanceof BadRequestError).toEqual(true);
+      expect(err instanceof OauthError).toEqual(true);
+      expect(err.previousError instanceof BadRequestError).toEqual(true);
     });
   });
 
@@ -99,7 +104,8 @@ describe('ClientCredentialsGenerator tests', () => {
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
     return tokenGenerator.generateToken().catch(err => {
-      expect(err instanceof InternalServerError).toEqual(true);
+      expect(err instanceof OauthError).toEqual(true);
+      expect(err.previousError instanceof InternalServerError).toEqual(true);
     });
   });
 
@@ -108,7 +114,8 @@ describe('ClientCredentialsGenerator tests', () => {
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
     return tokenGenerator.generateToken().catch(err => {
-      expect(err instanceof Error).toEqual(true);
+      expect(err instanceof OauthError).toEqual(true);
+      expect(err.previousError instanceof UnauthorizedError).toEqual(true);
     });
   });
 });

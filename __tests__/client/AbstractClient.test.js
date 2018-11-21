@@ -136,6 +136,7 @@ describe('Test Client', () => {
       }),
       someOtherTokenStorage._storeAccessToken({
         access_token: 'my-other-token',
+        expires_at: null,
       }),
     ];
 

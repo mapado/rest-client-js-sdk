@@ -1,5 +1,5 @@
 import URI from 'urijs';
-import { UnauthorizedError, getHttpErrorFromResponse } from '../ErrorFactory';
+import { OauthError, getHttpErrorFromResponse } from '../ErrorFactory';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
@@ -262,6 +262,8 @@ class AbstractClient {
   }
 
   _manageUnauthorized(response, input, init) {
+    const error = getHttpErrorFromResponse(response);
+
     // https://tools.ietf.org/html/rfc2617#section-1.2
     const authorizationHeader = response.headers.get('www-authenticate');
     if (authorizationHeader) {
@@ -271,10 +273,8 @@ class AbstractClient {
       if (invalidGrant && this._tokenStorage) {
         return this._refreshTokenAndRefetch(response, input, init);
       }
-      throw new UnauthorizedError(
-        'Unable to access ressource: 401 found !',
-        response
-      );
+
+      throw error;
     } else {
       // if www-authenticate header is missing, try and read json response
       return response
@@ -283,16 +283,13 @@ class AbstractClient {
           if (this._tokenStorage && body.error === 'invalid_grant') {
             return this._refreshTokenAndRefetch(response, input, init);
           }
-          throw new UnauthorizedError(
-            'Unable to access ressource: 401 found !',
-            response
-          );
+          throw error;
         })
-        .catch(() => {
-          throw new UnauthorizedError(
-            'Unable to access ressource: 401 found !',
-            response
-          );
+        .catch((err) => {
+          if (err instanceof OauthError) {
+            throw err;
+          }
+          throw error;
         });
     }
   }

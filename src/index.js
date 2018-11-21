@@ -7,6 +7,9 @@ import {
   InternalServerError,
   ResourceNotFoundError,
   UnauthorizedError,
+  InvalidScopeError,
+  OauthError,
+  InvalidGrantError,
 } from './ErrorFactory';
 import AbstractClient from './client/AbstractClient';
 import TokenStorage from './TokenStorage';
@@ -33,6 +36,9 @@ export {
   BadRequestError,
   ConflictError,
   ForbiddenError,
+  OauthError,
+  InvalidGrantError,
+  InvalidScopeError,
   HttpError,
   InternalServerError,
   ResourceNotFoundError,

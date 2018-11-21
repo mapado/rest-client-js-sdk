@@ -4,7 +4,6 @@ import TokenGeneratorMock from '../__mocks__/TokenGeneratorMock';
 import oauthClientCredentialsMock from '../__mocks__/oauthClientCredentials.json';
 import refreshedCredentials from '../__mocks__/refreshedCredentials.json';
 import Storage from '../__mocks__/mockStorage';
-import { NOW_TIMESTAMP_MOCK } from '../setupJest';
 
 global.FormData = require('form-data');
 
@@ -133,8 +132,35 @@ describe('Token storage tests', () => {
       grant_type: 'client_credentials',
     });
 
-    expect(oauth.getCurrentTokenExpiresIn()).resolves.toEqual(3600);
-    await oauth.refreshToken();
-    expect(oauth.getCurrentTokenExpiresIn()).resolves.toEqual(12800);
+    return oauth.getCurrentTokenExpiresIn().then((value) => {
+      expect(value).toEqual(3600);
+      return oauth.refreshToken().then(() => {
+        return oauth.getCurrentTokenExpiresIn().then((val) => {
+          expect(val).toEqual(12800);
+        })
+      });
+    })
+  });
+
+  test('remaining validity time is null for a token with no expiresAt', async () => {
+    const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
+    fetchMock.once(() => true, oauthClientCredentialsMock);
+
+    await oauth._storeAccessToken({
+      "access_token": "MzM2ZDY4MSNjYTcwZjg0YTYyMWMxZmY5ZWMwMNAyZjIxMDc5dDZjODI4YjkyZDUbMzU0NTFjVGI1MGMzMzAzMQ",
+      "expires_in": 3600,
+      "token_type": "bearer",
+      "scope": "ticketing:events:read ticketing:tickets:read ticketing:tickets:update",
+      "refresh_token": "NjEwYTlke2I2NTBkNzkzNEI3N8Q5OWVhNDhjYTMmMTJhMNE0NTE2Yzk4oDlkM2Y2MDVjXjBlMjFlN9MwYTNkOA"
+    });
+
+    return oauth.getCurrentTokenExpiresIn().then((value) => {
+      expect(value).toEqual(null);
+      return oauth.refreshToken().then(() => {
+        return oauth.getCurrentTokenExpiresIn().then((val) => {
+          expect(val).toEqual(12800);
+        })
+      });
+    })
   });
 });

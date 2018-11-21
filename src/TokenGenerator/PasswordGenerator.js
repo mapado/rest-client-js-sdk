@@ -1,7 +1,6 @@
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
-import { UnauthorizedError, getHttpErrorFromResponse } from '../ErrorFactory';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -17,7 +16,6 @@ class PasswordGenerator extends AbstractTokenGenerator {
   constructor(props) {
     super(props);
     this._doFetch = memoizePromise(this._doFetch);
-    this._manageBadRequest = this._manageBadRequest.bind(this);
   }
 
   generateToken(baseParameters) {
@@ -33,28 +31,6 @@ class PasswordGenerator extends AbstractTokenGenerator {
     }
 
     return this._doFetch(parameters).then(response => response.json());
-  }
-
-  _manageBadRequest(response) {
-    return response
-      .json()
-      .then(body => {
-        if (body.error === 'invalid_grant') {
-          // bad params like wrong scopes sent to oauth server
-          // will generate a 400, we want final clients to consider it
-          // like 401 in order to take proper action
-          throw new UnauthorizedError(body.error, response);
-        }
-        const httpError = getHttpErrorFromResponse(response);
-        throw httpError;
-      })
-      .catch(err => {
-        if (err instanceof UnauthorizedError) {
-          throw err;
-        }
-        const httpError = getHttpErrorFromResponse(response);
-        throw httpError;
-      });
   }
 
   refreshToken(accessToken, baseParameters = {}) {
@@ -109,15 +85,7 @@ class PasswordGenerator extends AbstractTokenGenerator {
       if (response.status < 400) {
         return response;
       }
-
-      if (response.status === 400) {
-        return this._manageBadRequest(response);
-      }
-
-      if (response.status !== 400) {
-        const httpError = getHttpErrorFromResponse(response);
-        throw httpError;
-      }
+      return this._manageOauthError(response);
     });
   }
 
