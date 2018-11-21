@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.0.0
+
+### Changed
+
+- Do not generate token expires_at in _storeAccessToken since it is sometimes used from outside, in tests for instance (even though it is supposed to be private)
+- [Breaking] throw new error types when oauth calls fail, they all wrap the originalError => InvalidGrantError, InvalidScopeError which both extend OauthError. Original error can be found at error.previousError. If it was an HttpError the response is at error.previousError.baseResponse
+
 ## 3.2.1
 
 ### Changed
