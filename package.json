@@ -1,13 +1,10 @@
 {
   "name": "rest-client-sdk",
-  "version": "v4.0.1",
+  "version": "4.0.1",
   "description": "Rest Client SDK for API",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist", "src"],
   "scripts": {
     "clean": "rimraf dist",
     "test": "jest",
@@ -56,11 +53,7 @@
     "type": "git",
     "url": "git+https://github.com/mapado/rest-client-js-sdk.git"
   },
-  "keywords": [
-    "Rest",
-    "SDK",
-    "API"
-  ],
+  "keywords": ["Rest", "SDK", "API"],
   "author": "Mapado",
   "license": "MIT",
   "bugs": {
@@ -77,10 +70,7 @@
     }
   ],
   "lint-staged": {
-    "*.{js,jsx,json,md}": [
-      "yarn run prettier --write",
-      "git add"
-    ]
+    "*.{js,jsx,json,md}": ["yarn run prettier --write", "git add"]
   },
   "jest": {
     "automock": false,
