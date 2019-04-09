@@ -37,7 +37,7 @@
     "fetch-mock": "^5.13.1",
     "form-data": "^2.3.3",
     "husky": "^1.1.4",
-    "immutable": "^4.0.1-rc.12",
+    "immutable": "^4.0.0-rc.12",
     "jest": "^23.6.0",
     "jest-fetch-mock": "^1.7.4",
     "lint-staged": "^8.0.4",
@@ -47,7 +47,7 @@
     "rollup": "^0.67.1",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-commonjs": "^9.1.0",
-    "rollup-plugin-node-resolve": "^4.0.1"
+    "rollup-plugin-node-resolve": "^4.0.0"
   },
   "optionalDependencies": {
     "pluralize": "^7.0.0"
