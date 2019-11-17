@@ -493,6 +493,36 @@ describe('Fix bugs', () => {
       });
   });
 
+  test('allow global client header override', () => {
+    fetchMock.mock(() => true, {
+      '@id': '/v2/test/8',
+      foo: 'bar',
+    });
+
+    SomeSdk.getRepository('test').setHeaders({ foo: 'bar' });
+
+    return SomeSdk.getRepository('test')
+      .find('/v2/test/8')
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
+
+  test('allow resetting global client header override', () => {
+    fetchMock.mock(() => true, {
+      '@id': '/v2/test/8',
+      foo: 'bar',
+    });
+
+    SomeSdk.getRepository('test').setHeaders({});
+
+    return SomeSdk.getRepository('test')
+      .find('/v2/test/8')
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toBeUndefined();
+      });
+  });
+
   test('check that the request done after refreshing a token contains the refreshed token', () => {
     fetchMock
       .mock({
