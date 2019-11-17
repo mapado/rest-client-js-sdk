@@ -9,6 +9,11 @@ class AbstractClient {
     this._tokenStorage = sdk.tokenStorage;
     this.serializer = sdk.serializer;
     this.metadata = metadata;
+    this.headers = {};
+  }
+
+  setHeaders(headers = {}) {
+    this.headers = headers;
   }
 
   getDefaultParameters() {
@@ -285,7 +290,7 @@ class AbstractClient {
           }
           throw error;
         })
-        .catch((err) => {
+        .catch(err => {
           if (err instanceof OauthError) {
             throw err;
           }
@@ -322,6 +327,8 @@ class AbstractClient {
     } else {
       params = { headers: baseHeaders };
     }
+
+    params.headers = Object.assign(params.headers, this.headers);
 
     params.headers = this._removeUndefinedHeaders(params.headers);
 
