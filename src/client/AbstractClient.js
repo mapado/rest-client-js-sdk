@@ -9,11 +9,6 @@ class AbstractClient {
     this._tokenStorage = sdk.tokenStorage;
     this.serializer = sdk.serializer;
     this.metadata = metadata;
-    this.headers = {};
-  }
-
-  setHeaders(headers = {}) {
-    this.headers = headers;
   }
 
   getDefaultParameters() {
@@ -39,23 +34,29 @@ class AbstractClient {
     return `${pathBase}/${idValue}`;
   }
 
-  find(id, queryParam = {}, pathParameters = {}) {
+  find(id, queryParam = {}, pathParameters = {}, requestParams = {}) {
     const url = this._generateUrlFromParams(queryParam, pathParameters, id);
 
-    return this.deserializeResponse(this.authorizedFetch(url), 'item');
+    return this.deserializeResponse(
+      this.authorizedFetch(url, requestParams),
+      'item'
+    );
   }
 
-  findBy(queryParam, pathParameters = {}) {
+  findBy(queryParam, pathParameters = {}, requestParams = {}) {
     const url = this._generateUrlFromParams(queryParam, pathParameters);
 
-    return this.deserializeResponse(this.authorizedFetch(url), 'list');
+    return this.deserializeResponse(
+      this.authorizedFetch(url, requestParams),
+      'list'
+    );
   }
 
-  findAll(queryParam = {}, pathParameters = {}) {
-    return this.findBy(queryParam, pathParameters);
+  findAll(queryParam = {}, pathParameters = {}, requestParams = {}) {
+    return this.findBy(queryParam, pathParameters, requestParams);
   }
 
-  create(entity, queryParam = {}, pathParameters = {}) {
+  create(entity, queryParam = {}, pathParameters = {}, requestParams = {}) {
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
 
@@ -75,12 +76,13 @@ class AbstractClient {
       this.authorizedFetch(url, {
         method: 'POST',
         body: this.serializer.encodeItem(diff, this.metadata),
+        ...requestParams,
       }),
       'item'
     );
   }
 
-  update(entity, queryParam = {}) {
+  update(entity, queryParam = {}, requestParams = {}) {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
@@ -104,17 +106,19 @@ class AbstractClient {
       this.authorizedFetch(url, {
         method: 'PUT',
         body: this.serializer.encodeItem(newSerializedModel, this.metadata),
+        ...requestParams,
       }),
       'item'
     );
   }
 
-  delete(entity) {
+  delete(entity, requestParams = {}) {
     const url = this.getEntityURI(entity);
     const identifier = this._getEntityIdentifier(entity);
 
     return this.authorizedFetch(url, {
       method: 'DELETE',
+      ...requestParams,
     }).then(response => {
       this.sdk.unitOfWork.clear(identifier);
 
@@ -191,10 +195,10 @@ class AbstractClient {
     return url;
   }
 
-  authorizedFetch(input, init) {
+  authorizedFetch(input, requestParams = {}) {
     const url = this.makeUri(input);
 
-    return this._fetchWithToken(url.toString(), init);
+    return this._fetchWithToken(url.toString(), requestParams);
   }
 
   _generateUrlFromParams(queryParam, pathParameters = {}, id = null) {
@@ -227,7 +231,7 @@ class AbstractClient {
     return url;
   }
 
-  _fetchWithToken(input, init) {
+  _fetchWithToken(input, requestParams = {}) {
     if (!input) {
       throw new Error('input is empty');
     }
@@ -249,24 +253,24 @@ class AbstractClient {
 
           return accessToken;
         })
-        .then(token => this._doFetch(token, input, init));
+        .then(token => this._doFetch(token, input, requestParams));
     }
 
-    return this._doFetch(null, input, init);
+    return this._doFetch(null, input, requestParams);
   }
 
-  _refreshTokenAndRefetch(response, input, init) {
+  _refreshTokenAndRefetch(response, input, requestParams = {}) {
     return this._tokenStorage.refreshToken().then(() => {
-      const params = Object.assign({}, init, {
-        headers: Object.assign({}, init.headers),
+      const updatedRequestParams = Object.assign({}, requestParams, {
+        headers: Object.assign({}, requestParams.headers),
       });
-      delete params.headers.Authorization;
+      delete updatedRequestParams.headers.Authorization;
 
-      return this._fetchWithToken(input, params);
+      return this._fetchWithToken(input, updatedRequestParams);
     });
   }
 
-  _manageUnauthorized(response, input, init) {
+  _manageUnauthorized(response, input, requestParams = {}) {
     const error = getHttpErrorFromResponse(response);
 
     // https://tools.ietf.org/html/rfc2617#section-1.2
@@ -276,7 +280,7 @@ class AbstractClient {
         'error = "invalid_grant"'
       );
       if (invalidGrant && this._tokenStorage) {
-        return this._refreshTokenAndRefetch(response, input, init);
+        return this._refreshTokenAndRefetch(response, input, requestParams);
       }
 
       throw error;
@@ -286,7 +290,7 @@ class AbstractClient {
         .json()
         .then(body => {
           if (this._tokenStorage && body.error === 'invalid_grant') {
-            return this._refreshTokenAndRefetch(response, input, init);
+            return this._refreshTokenAndRefetch(response, input, requestParams);
           }
           throw error;
         })
@@ -299,8 +303,8 @@ class AbstractClient {
     }
   }
 
-  _doFetch(accessToken, input, init) {
-    let params = init;
+  _doFetch(accessToken, input, requestParams) {
+    let params = requestParams;
 
     const baseHeaders = {
       'Content-Type': 'application/json',
@@ -327,8 +331,6 @@ class AbstractClient {
     } else {
       params = { headers: baseHeaders };
     }
-
-    params.headers = Object.assign(params.headers, this.headers);
 
     params.headers = this._removeUndefinedHeaders(params.headers);
 

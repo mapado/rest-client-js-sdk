@@ -493,33 +493,98 @@ describe('Fix bugs', () => {
       });
   });
 
-  test('allow global client header override', () => {
+  test('allow passing request params in find', () => {
     fetchMock.mock(() => true, {
       '@id': '/v2/test/8',
       foo: 'bar',
     });
 
-    SomeSdk.getRepository('test').setHeaders({ foo: 'bar' });
-
     return SomeSdk.getRepository('test')
-      .find('/v2/test/8')
+      .find('/v2/test/8', {}, {}, { headers: { foo: 'bar' } })
       .then(() => {
         expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
       });
   });
 
-  test('allow resetting global client header override', () => {
+  test('allow passing request params in findBy', () => {
+    fetchMock.mock(() => true, [
+      {
+        '@id': '/v2/test/8',
+        foo: 'bar',
+      },
+    ]);
+
+    return SomeSdk.getRepository('test')
+      .findBy({ id: '/v2/test/8' }, {}, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
+
+  test('allow passing request params in findAll', () => {
+    fetchMock.mock(() => true, [
+      {
+        '@id': '/v2/test/8',
+        foo: 'bar',
+      },
+    ]);
+
+    return SomeSdk.getRepository('test')
+      .findAll({ id: '/v2/test/8' }, {}, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
+
+  test('allow passing request params in create', () => {
     fetchMock.mock(() => true, {
       '@id': '/v2/test/8',
       foo: 'bar',
     });
 
-    SomeSdk.getRepository('test').setHeaders({});
+    return SomeSdk.getRepository('test')
+      .create({}, {}, {}, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
+
+  // test('allow passing request params in update', () => {
+  //   fetchMock.mock(() => true, {
+  //     '@id': '/v2/test/8',
+  //     foo: 'bar',
+  //   });
+
+  //   return SomeSdk.getRepository('test')
+  //     .update({'@type': 'test'}, {}, { headers: { foo: 'bar' }})
+  //     .then(() => {
+  //       expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+  //     });
+  // });
+
+  // test('allow passing request params in delete', () => {
+  //   fetchMock.mock(() => true, {
+  //     '@id': '/v2/test/8',
+  //     foo: 'bar',
+  //   });
+
+  //   return SomeSdk.getRepository('test')
+  //     .find('/v2/test/8', {}, {}, { headers: { foo: 'bar' }})
+  //     .then(() => {
+  //       expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+  //     });
+  // });
+
+  test('allow overriding request params', () => {
+    fetchMock.mock(() => true, {
+      '@id': '/v2/test/8',
+      foo: 'bar',
+    });
 
     return SomeSdk.getRepository('test')
-      .find('/v2/test/8')
+      .find('/v2/test/8', {}, {}, { method: 'POST' })
       .then(() => {
-        expect(fetchMock.lastOptions().headers.foo).toBeUndefined();
+        expect(fetchMock.lastOptions().method).toEqual('POST');
       });
   });
 
