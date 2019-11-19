@@ -537,43 +537,45 @@ describe('Fix bugs', () => {
   });
 
   test('allow passing request params in create', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-      foo: 'bar',
-    });
+    const test = {
+      '@id': '/v2/tests/1',
+    };
+
+    fetchMock.mock(() => true, {});
 
     return SomeSdk.getRepository('test')
-      .create({}, {}, {}, { headers: { foo: 'bar' } })
+      .create(test, {}, {}, { headers: { foo: 'bar' } })
       .then(() => {
         expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
       });
   });
 
-  // test('allow passing request params in update', () => {
-  //   fetchMock.mock(() => true, {
-  //     '@id': '/v2/test/8',
-  //     foo: 'bar',
-  //   });
+  test('allow passing request params in update', () => {
+    const test = {
+      '@id': '/v2/tests/1',
+    };
 
-  //   return SomeSdk.getRepository('test')
-  //     .update({'@type': 'test'}, {}, { headers: { foo: 'bar' }})
-  //     .then(() => {
-  //       expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
-  //     });
-  // });
+    fetchMock.mock(() => true, {});
 
-  // test('allow passing request params in delete', () => {
-  //   fetchMock.mock(() => true, {
-  //     '@id': '/v2/test/8',
-  //     foo: 'bar',
-  //   });
+    return SomeSdk.getRepository('test')
+      .update(test, {}, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
 
-  //   return SomeSdk.getRepository('test')
-  //     .find('/v2/test/8', {}, {}, { headers: { foo: 'bar' }})
-  //     .then(() => {
-  //       expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
-  //     });
-  // });
+  test('allow passing request params in delete', () => {
+    fetchMock.mock(() => true, {});
+    const test = {
+      '@id': '/v2/tests/1',
+    };
+
+    return SomeSdk.getRepository('test')
+      .delete(test, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
 
   test('allow overriding request params', () => {
     fetchMock.mock(() => true, {
