@@ -73,11 +73,16 @@ class AbstractClient {
     );
 
     return this.deserializeResponse(
-      this.authorizedFetch(url, {
-        method: 'POST',
-        body: this.serializer.encodeItem(diff, this.metadata),
-        ...requestParams,
-      }),
+      this.authorizedFetch(
+        url,
+        Object.assign(
+          {
+            method: 'POST',
+            body: this.serializer.encodeItem(diff, this.metadata),
+          },
+          requestParams
+        )
+      ),
       'item'
     );
   }
@@ -103,11 +108,16 @@ class AbstractClient {
     }
 
     return this.deserializeResponse(
-      this.authorizedFetch(url, {
-        method: 'PUT',
-        body: this.serializer.encodeItem(newSerializedModel, this.metadata),
-        ...requestParams,
-      }),
+      this.authorizedFetch(
+        url,
+        Object.assign(
+          {
+            method: 'PUT',
+            body: this.serializer.encodeItem(newSerializedModel, this.metadata),
+          },
+          requestParams
+        )
+      ),
       'item'
     );
   }
@@ -116,10 +126,15 @@ class AbstractClient {
     const url = this.getEntityURI(entity);
     const identifier = this._getEntityIdentifier(entity);
 
-    return this.authorizedFetch(url, {
-      method: 'DELETE',
-      ...requestParams,
-    }).then(response => {
+    return this.authorizedFetch(
+      url,
+      Object.assign(
+        {
+          method: 'DELETE',
+        },
+        requestParams
+      )
+    ).then(response => {
       this.sdk.unitOfWork.clear(identifier);
 
       return response;
