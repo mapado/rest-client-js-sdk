@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.0
+
+### Changed
+
+- main AbstractClient CRUD methods accept additional requestParams for overriding fetch params like method, headers, etc.
+
 ## 4.0.1
 
 ### Changed
