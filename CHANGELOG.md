@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.1
+
+### Changed
+
+- replace object spread with Object.assign for build to work
+
 ## 4.1.0
 
 ### Changed
