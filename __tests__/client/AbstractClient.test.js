@@ -493,6 +493,103 @@ describe('Fix bugs', () => {
       });
   });
 
+  test('allow passing request params in find', () => {
+    fetchMock.mock(() => true, {
+      '@id': '/v2/test/8',
+      foo: 'bar',
+    });
+
+    return SomeSdk.getRepository('test')
+      .find('/v2/test/8', {}, {}, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
+
+  test('allow passing request params in findBy', () => {
+    fetchMock.mock(() => true, [
+      {
+        '@id': '/v2/test/8',
+        foo: 'bar',
+      },
+    ]);
+
+    return SomeSdk.getRepository('test')
+      .findBy({ id: '/v2/test/8' }, {}, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
+
+  test('allow passing request params in findAll', () => {
+    fetchMock.mock(() => true, [
+      {
+        '@id': '/v2/test/8',
+        foo: 'bar',
+      },
+    ]);
+
+    return SomeSdk.getRepository('test')
+      .findAll({ id: '/v2/test/8' }, {}, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
+
+  test('allow passing request params in create', () => {
+    const test = {
+      '@id': '/v2/tests/1',
+    };
+
+    fetchMock.mock(() => true, {});
+
+    return SomeSdk.getRepository('test')
+      .create(test, {}, {}, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
+
+  test('allow passing request params in update', () => {
+    const test = {
+      '@id': '/v2/tests/1',
+    };
+
+    fetchMock.mock(() => true, {});
+
+    return SomeSdk.getRepository('test')
+      .update(test, {}, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
+
+  test('allow passing request params in delete', () => {
+    fetchMock.mock(() => true, {});
+    const test = {
+      '@id': '/v2/tests/1',
+    };
+
+    return SomeSdk.getRepository('test')
+      .delete(test, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+      });
+  });
+
+  test('allow overriding request params', () => {
+    fetchMock.mock(() => true, {
+      '@id': '/v2/test/8',
+      foo: 'bar',
+    });
+
+    return SomeSdk.getRepository('test')
+      .find('/v2/test/8', {}, {}, { method: 'POST' })
+      .then(() => {
+        expect(fetchMock.lastOptions().method).toEqual('POST');
+      });
+  });
+
   test('check that the request done after refreshing a token contains the refreshed token', () => {
     fetchMock
       .mock({
