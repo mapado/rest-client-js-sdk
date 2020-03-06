@@ -595,7 +595,7 @@ describe('Fix bugs', () => {
       .mock({
         name: 'generate_token',
         matcher: (url, opts) =>
-          url === 'https://oauth.me' && opts.body._streams[7] === 'password',
+          url === 'https://oauth.me/' && opts.body._streams[7] === 'password',
         response: {
           body: {
             access_token: 'an_access_token',
@@ -610,7 +610,7 @@ describe('Fix bugs', () => {
       .mock({
         name: 'refresh_token',
         matcher: (url, opts) =>
-          url === 'https://oauth.me' &&
+          url === 'https://oauth.me/' &&
           opts.body._streams[1].match('refresh_token'),
         response: {
           body: {
@@ -689,7 +689,7 @@ describe('Fix bugs', () => {
       .mock({
         name: 'generate_token',
         matcher: (url, opts) =>
-          url === 'https://oauth.me' && opts.body._streams[7] === 'password',
+          url === 'https://oauth.me/' && opts.body._streams[7] === 'password',
         response: {
           body: {
             access_token: 'an_access_token',
@@ -704,7 +704,7 @@ describe('Fix bugs', () => {
       .mock({
         name: 'refresh_token',
         matcher: (url, opts) =>
-          url === 'https://oauth.me' &&
+          url === 'https://oauth.me/' &&
           opts.body._streams[1].match('refresh_token'),
         response: {
           body: {
@@ -776,7 +776,7 @@ describe('Fix bugs', () => {
       .mock({
         name: 'generate_token',
         matcher: (url, opts) =>
-          url === 'https://oauth.me' && opts.body._streams[7] === 'password',
+          url === 'https://oauth.me/' && opts.body._streams[7] === 'password',
         response: {
           body: {
             access_token: 'an_access_token',
@@ -791,7 +791,7 @@ describe('Fix bugs', () => {
       .mock({
         name: 'refresh_token',
         matcher: (url, opts) =>
-          url === 'https://oauth.me' &&
+          url === 'https://oauth.me/' &&
           opts.body._streams[1].match('refresh_token'),
         response: {
           body: {

@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "deep-diff": "^1.0.2",
-    "urijs": "^1.19.0"
+    "urijs": "^1.19.2"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -26,7 +26,7 @@
     "babel-jest": "^23.6.0",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.7.0",
-    "bundlesize": "^0.17.0",
+    "bundlesize": "^0.18.0",
     "eslint": "^5.9.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-prettier": "^3.0.0",

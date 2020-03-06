@@ -60,6 +60,7 @@ describe('PasswordGenerator tests', () => {
       expect(token.then(a => a.refresh_token)).resolves.toEqual(
         oauthClientCredentialsMock.refresh_token
       ),
+      expect(fetch.mock.calls[0][0]).toEqual('https://oauth.me/'),
     ]);
   });
 
@@ -151,7 +152,9 @@ describe('PasswordGenerator tests', () => {
       .generateToken({ password: 'foo', username: 'bar' })
       .catch(err => {
         expect(err instanceof OauthError).toEqual(true);
-        expect(err.previousError instanceof ResourceNotFoundError).toEqual(true);
+        expect(err.previousError instanceof ResourceNotFoundError).toEqual(
+          true
+        );
       });
   });
 

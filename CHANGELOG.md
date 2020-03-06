@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.2
+
+### Fixed
+
+- Fix issue with urijs 1.19.2
+
 ## 4.1.1
 
 ### Changed
