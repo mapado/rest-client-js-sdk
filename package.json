@@ -13,8 +13,7 @@
     "test": "jest",
     "build": "rollup -c",
     "check:src": "npm run test",
-    "prepublishOnly": "npm run clean && npm run check:src && npm run build",
-    "precommit": "lint-staged"
+    "prepublishOnly": "npm run clean && npm run check:src && npm run build"
   },
   "dependencies": {
     "deep-diff": "^1.0.2",
@@ -85,5 +84,10 @@
   "jest": {
     "automock": false,
     "setupTestFrameworkScriptFile": "./setupJest.js"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
