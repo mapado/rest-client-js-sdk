@@ -18,6 +18,13 @@ import MockStorage from '../../__mocks__/mockStorage';
 import unitOfWorkMapping from '../../__mocks__/unitOfWorkMapping';
 import MemberSerializer from '../../__mocks__/memberSerializer';
 
+// next function is required as the name matcher does not seems to work
+const findLastOptions = (name) =>
+  fetchMock
+    .calls()
+    .reverse()
+    .find((item) => item.identifier === name)[1];
+
 class WeirdSerializer extends Serializer {
   encodeItem(entity) {
     return JSON.stringify(entity);
@@ -668,10 +675,10 @@ describe('Fix bugs', () => {
       })
       .then(() => SomeInnerSdk.getRepository('test').find(1))
       .then(() => {
-        expect(
-          fetchMock.lastOptions('access_denied').headers.Authorization
-        ).toEqual('Bearer an_access_token');
-        expect(fetchMock.lastOptions('success').headers.Authorization).toEqual(
+        expect(findLastOptions('access_denied').headers.Authorization).toEqual(
+          'Bearer an_access_token'
+        );
+        expect(findLastOptions('success').headers.Authorization).toEqual(
           'Bearer a_refreshed_token'
         );
       });
@@ -759,10 +766,10 @@ describe('Fix bugs', () => {
       })
       .then(() => SomeInnerSdk.getRepository('test').find(1))
       .then(() => {
-        expect(
-          fetchMock.lastOptions('access_denied').headers.Authorization
-        ).toEqual('Bearer an_access_token');
-        expect(fetchMock.lastOptions('success').headers.Authorization).toEqual(
+        expect(findLastOptions('access_denied').headers.Authorization).toEqual(
+          'Bearer an_access_token'
+        );
+        expect(findLastOptions('success').headers.Authorization).toEqual(
           'Bearer a_refreshed_token'
         );
       });
@@ -836,7 +843,7 @@ describe('Fix bugs', () => {
       })
       .then(() => SomeInnerSdk.getRepository('test').find(1))
       .then(() => {
-        expect(fetchMock.lastOptions('success').headers.Authorization).toEqual(
+        expect(findLastOptions('success').headers.Authorization).toEqual(
           'Bearer a_refreshed_token'
         );
       });
@@ -933,12 +940,12 @@ describe('Test unit of work', () => {
     cart.status = 'foo';
 
     let updatedCart = await repo.update(cart);
-    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+    expect(findLastOptions('put_cart').body).toEqual(
       JSON.stringify({ status: 'foo' })
     );
 
     updatedCart = await repo.update(cart);
-    expect(fetchMock.lastOptions('put_cart').body).toEqual('{}');
+    expect(findLastOptions('put_cart').body).toEqual('{}');
   });
 
   test('updating partial data with unit of work', async () => {
@@ -980,7 +987,7 @@ describe('Test unit of work', () => {
     const cart = await repo.find('/v12/carts/1');
 
     await repo.update({ '@id': '/v12/carts/1', status: null });
-    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+    expect(findLastOptions('put_cart').body).toEqual(
       JSON.stringify({ status: null })
     );
   });
@@ -1029,7 +1036,7 @@ describe('Test unit of work', () => {
     cart.status = 'bar';
 
     await repo.update(cart);
-    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+    expect(findLastOptions('put_cart').body).toEqual(
       JSON.stringify({ status: 'bar' })
     );
   });
@@ -1083,7 +1090,7 @@ describe('Test unit of work', () => {
     cart.status = 'bar';
 
     await repo.update(cart);
-    expect(fetchMock.lastOptions('put_cart').body).toEqual(
+    expect(findLastOptions('put_cart').body).toEqual(
       JSON.stringify({ status: 'bar' })
     );
   });
