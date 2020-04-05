@@ -4,17 +4,22 @@
   "description": "Rest Client SDK for API",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
+  "types": "dist/types/index.d.ts",
   "files": [
     "dist",
     "src"
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "test": "yarn lint && jest",
-    "build": "rollup -c",
+    "test": "yarn lint --quiet && jest",
+    "build": "yarn clean && yarn build:types && yarn build:js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:js": "rollup -c",
     "check:src": "npm run test",
     "prepublishOnly": "npm run clean && npm run check:src && npm run build",
-    "lint": "eslint src/"
+    "lint": "yarn lint:types && yarn lint:eslint",
+    "lint:eslint": "eslint --ext js,jsx,jsx,ts,tsx src/",
+    "lint:types": "tsc --noEmit"
   },
   "dependencies": {
     "deep-diff": "^1.0.2",
@@ -22,7 +27,12 @@
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.9.0",
     "@babel/preset-env": "^7.0.0",
+    "@babel/preset-typescript": "^7.9.0",
+    "@typescript-eslint/eslint-plugin": "^2.26.0",
+    "@typescript-eslint/parser": "^2.26.0",
     "babel-jest": "^25.2.6",
     "bundlesize": "^0.18.0",
     "core-js": "^3.6.4",
@@ -48,7 +58,8 @@
     "rollup": "^2.3.3",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-resolve": "^5.2.0"
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "typescript": "^3.8.3"
   },
   "optionalDependencies": {
     "pluralize": "^8.0.0"
