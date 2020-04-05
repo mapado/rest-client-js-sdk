@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /* eslint no-unused-vars: 0, no-underscore-dangle: 0 */
 import fetchMock from 'fetch-mock';
 import * as errors from '../../src/ErrorFactory';
@@ -97,18 +98,18 @@ describe('Test Client', () => {
       SomeSdk.getRepository('defParam').find(8),
       SomeSdk.getRepository('defParam').find(8, { q: 'test', foo: 'bar' }),
     ]).then(() => {
-      const url1 = fetchMock.calls().matched[0][0];
+      const url1 = fetchMock.calls()[0][0];
       expect(url1).toEqual('https://api.me/v2/test/8');
 
-      const url2 = fetchMock.calls().matched[1][0];
+      const url2 = fetchMock.calls()[1][0];
       expect(url2).toEqual('https://api.me/v2/test/8?q=test&foo=bar');
 
-      const url3 = fetchMock.calls().matched[2][0];
+      const url3 = fetchMock.calls()[2][0];
       expect(url3).toEqual(
         'https://api.me/v2/def_param/8?_groups=test_read%2Ctest_write&dp=df'
       );
 
-      const url4 = fetchMock.calls().matched[3][0];
+      const url4 = fetchMock.calls()[3][0];
       expect(url4).toEqual(
         'https://api.me/v2/def_param/8?q=test&foo=bar&_groups=test_read%2Ctest_write&dp=df'
       );
@@ -175,10 +176,10 @@ describe('Test Client', () => {
       SomeSdk.getRepository('test').findBy({ q: 'test', foo: 'bar' }),
       SomeSdk.getRepository('defParam').findBy({ q: 'test', foo: 'bar' }),
     ]).then(() => {
-      const url1 = fetchMock.calls().matched[0][0];
+      const url1 = fetchMock.calls()[0][0];
       expect(url1).toEqual('https://api.me/v2/test?q=test&foo=bar');
 
-      const url2 = fetchMock.calls().matched[1][0];
+      const url2 = fetchMock.calls()[1][0];
       expect(url2).toEqual(
         'https://api.me/v2/def_param?q=test&foo=bar&_groups=test_read%2Ctest_write&dp=df'
       );
@@ -196,10 +197,10 @@ describe('Test Client', () => {
       SomeSdk.getRepository('test').findAll(),
       SomeSdk.getRepository('defParam').findAll(),
     ]).then(() => {
-      const url1 = fetchMock.calls().matched[0][0];
+      const url1 = fetchMock.calls()[0][0];
       expect(url1).toEqual('https://api.me/v2/test');
 
-      const url2 = fetchMock.calls().matched[1][0];
+      const url2 = fetchMock.calls()[1][0];
       expect(url2).toEqual(
         'https://api.me/v2/def_param?_groups=test_read%2Ctest_write&dp=df'
       );
@@ -314,11 +315,11 @@ describe('Test Client', () => {
       ),
       SomeSdkNoPrefix.getRepository('test').findAll({}, { basePath: '/foo' }),
     ]).then(() => {
-      const url1 = fetchMock.calls().matched[0][0];
+      const url1 = fetchMock.calls()[0][0];
       expect(url1).toEqual('https://api.me/foo/8');
-      const url2 = fetchMock.calls().matched[1][0];
+      const url2 = fetchMock.calls()[1][0];
       expect(url2).toEqual('https://api.me/foo?q=test&foo=bar');
-      const url3 = fetchMock.calls().matched[2][0];
+      const url3 = fetchMock.calls()[2][0];
       expect(url3).toEqual('https://api.me/foo');
     });
   });
@@ -339,10 +340,9 @@ describe('Test Client', () => {
       SomeSdk.getRepository('test').find(8),
       BasicAuthSdk.getRepository('test').find(8),
     ]).then(() => {
-      const authHeader = fetchMock.calls().matched[0][1].headers.Authorization;
+      const authHeader = fetchMock.calls()[0][1].headers.Authorization;
       expect(authHeader).toContain('Bearer ');
-      const basicAuthHeader = fetchMock.calls().matched[1][1].headers
-        .Authorization;
+      const basicAuthHeader = fetchMock.calls()[1][1].headers.Authorization;
       expect(basicAuthHeader).toContain('Basic ');
     });
   });
@@ -361,8 +361,7 @@ describe('Test Client', () => {
     return NoAuthSdk.getRepository('test')
       .find(8)
       .then((json) => {
-        const authHeader = fetchMock.calls().matched[0][1].headers
-          .Authorization;
+        const authHeader = fetchMock.calls()[0][1].headers.Authorization;
         expect(authHeader).toBe(undefined);
         expect(json).toEqual({ '@id': '/v2/test/8' });
       });
@@ -426,9 +425,9 @@ describe('Update and delete function trigger the good urls', () => {
       SomeSdk.getRepository('test').update(data),
       SomeSdk.getRepository('noAtId').update(dataNoArobase),
     ]).then(() => {
-      const url1 = fetchMock.calls().matched[0][0];
+      const url1 = fetchMock.calls()[0][0];
       expect(url1).toEqual('https://api.me/v2/test/8');
-      const url2 = fetchMock.calls().matched[1][0];
+      const url2 = fetchMock.calls()[1][0];
       expect(url2).toEqual('https://api.me/v2/no-at-id/9');
     });
   });

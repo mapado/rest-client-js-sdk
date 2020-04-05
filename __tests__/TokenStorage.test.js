@@ -9,6 +9,8 @@ global.FormData = require('form-data');
 
 const tokenGeneratorMock = new TokenGeneratorMock();
 
+afterEach(fetchMock.reset);
+
 describe('Token storage tests', () => {
   test('handle empty token', () => {
     const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
