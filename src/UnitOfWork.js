@@ -55,7 +55,9 @@ function getIdentifierForList(newValue, idSerializedKey) {
       return {
         [idSerializedKey]: value[idSerializedKey],
       };
-    } else if (typeof value === 'string') {
+    }
+
+    if (typeof value === 'string') {
       return value;
     }
 
@@ -76,7 +78,7 @@ class UnitOfWork {
     if (isImmutable(entity)) {
       this._storage[id] = entity;
     } else {
-      this._storage[id] = Object.assign({}, entity);
+      this._storage[id] = { ...entity };
     }
   }
 

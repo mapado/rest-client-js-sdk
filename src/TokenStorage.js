@@ -55,7 +55,7 @@ class TokenStorage {
   }
 
   _addExpiresAtToResponseData(responseData, callTimestamp) {
-    const updatedResponseData = Object.assign({}, responseData);
+    const updatedResponseData = { ...responseData };
     updatedResponseData.expires_at = null;
 
     if (

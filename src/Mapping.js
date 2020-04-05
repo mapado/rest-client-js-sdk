@@ -17,7 +17,7 @@ class Mapping {
   }
 
   setConfig(config) {
-    this._config = Object.assign({}, DEFAULT_CONFIG, config);
+    this._config = { ...DEFAULT_CONFIG, ...config };
   }
 
   setMapping(classMetadataList = []) {

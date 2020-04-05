@@ -1,5 +1,4 @@
 import URI from 'urijs';
-import { getHttpErrorFromResponse, OauthError } from '../ErrorFactory';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
 

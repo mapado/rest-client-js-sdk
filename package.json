@@ -10,10 +10,11 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "test": "jest",
+    "test": "yarn lint && jest",
     "build": "rollup -c",
     "check:src": "npm run test",
-    "prepublishOnly": "npm run clean && npm run check:src && npm run build"
+    "prepublishOnly": "npm run clean && npm run check:src && npm run build",
+    "lint": "eslint src/"
   },
   "dependencies": {
     "deep-diff": "^1.0.2",

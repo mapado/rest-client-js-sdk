@@ -1,3 +1,4 @@
+/* eslint-disable */
 // "fork" of https://github.com/facebook/immutable-js/blob/v4.0.0-rc.9/src/Predicates.js
 // because tree-shaking does not seems to work as expected
 
