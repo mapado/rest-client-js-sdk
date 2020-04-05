@@ -15,13 +15,12 @@ export default {
       babelrc: false,
       presets: [
         [
-          'env',
+          '@babel/preset-env',
           {
             modules: false,
           },
         ],
       ],
-      plugins: ['external-helpers'],
     }),
   ],
   output: [
