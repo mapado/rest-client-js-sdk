@@ -25,22 +25,22 @@ class Mapping {
   }
 
   getMappingKeys() {
-    return this._classMetadataList.map(classMetadata => classMetadata.key);
+    return this._classMetadataList.map((classMetadata) => classMetadata.key);
   }
 
   getClassMetadataByKey(key) {
     const filterList = this._classMetadataList.filter(
-      classMetadata => classMetadata.key === key
+      (classMetadata) => classMetadata.key === key
     );
 
     return filterList.length > 0 ? filterList[0] : null;
   }
 
   isMappingValid() {
-    return !this._classMetadataList.some(classMetadata => {
+    return !this._classMetadataList.some((classMetadata) => {
       // check that the relations exists
       const errorList = Object.values(classMetadata.getAttributeList()).map(
-        attribute => {
+        (attribute) => {
           const relation = classMetadata.getRelation(attribute.serializedKey);
 
           if (!relation) {
@@ -57,15 +57,11 @@ class Mapping {
             relation.isManyToOne() &&
             attribute.attributeName.endsWith('List')
           ) {
-            return `"${classMetadata.key}.${
-              attribute.serializedKey
-            } is defined as a MANY_TO_ONE relation, but the attribute name ends with "List".`;
+            return `"${classMetadata.key}.${attribute.serializedKey} is defined as a MANY_TO_ONE relation, but the attribute name ends with "List".`;
           }
 
           if (relation.isOneToMany()) {
-            const message = `"${classMetadata.key}.${
-              attribute.serializedKey
-            } is defined as a ONE_TO_MANY relation, but the attribute name is nor plural not ends with "List".`;
+            const message = `"${classMetadata.key}.${attribute.serializedKey} is defined as a ONE_TO_MANY relation, but the attribute name is nor plural not ends with "List".`;
 
             const endsWithList = attribute.attributeName.endsWith('List');
 
@@ -80,18 +76,14 @@ class Mapping {
               }
             } catch (e) {
               if (!endsWithList) {
-                return message;
+                return `${message}.\nIf your keys does not ends with "List", then you should install the "pluralize" package.`;
               }
             }
           }
 
           // no error if there is metadata linked
           if (!relationMetadata) {
-            return `"${classMetadata.key}.${
-              attribute.serializedKey
-            }" defined a relation to the metadata named "${
-              relation.targetMetadataKey
-            }" but this metadata is not knowned by the mapping`;
+            return `"${classMetadata.key}.${attribute.serializedKey}" defined a relation to the metadata named "${relation.targetMetadataKey}" but this metadata is not knowned by the mapping`;
           }
 
           return false;
@@ -104,7 +96,7 @@ class Mapping {
         );
       }
 
-      const nbError = errorList.filter(error => {
+      const nbError = errorList.filter((error) => {
         if (error) {
           // eslint-disable-next-line no-console
           console.warn(error);
