@@ -20,12 +20,11 @@
     "urijs": "^1.19.2"
   },
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-core": "^6.24.1",
-    "babel-jest": "^23.6.0",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-env": "^1.7.0",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "babel-jest": "^25.2.6",
     "bundlesize": "^0.18.0",
+    "core-js": "^3.6.4",
     "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.1.0",
     "eslint-config-prettier": "^6.10.1",
@@ -38,11 +37,12 @@
     "form-data": "^2.3.3",
     "husky": "^4.2.3",
     "immutable": "^4.0.0-rc.12",
-    "jest": "^23.6.0",
+    "jest": "^25.2.7",
     "jest-fetch-mock": "^1.7.4",
     "lint-staged": "^10.1.2",
     "pluralize": "^8.0.0",
     "prettier": "^2.0.2",
+    "regenerator-runtime": "^0.13.5",
     "rimraf": "^3.0.0",
     "rollup": "^2.3.3",
     "rollup-plugin-babel": "^4.4.0",
@@ -83,7 +83,9 @@
   },
   "jest": {
     "automock": false,
-    "setupTestFrameworkScriptFile": "./setupJest.js"
+    "setupFilesAfterEnv": [
+      "./setupJest.js"
+    ]
   },
   "husky": {
     "hooks": {
