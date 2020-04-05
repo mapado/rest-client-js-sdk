@@ -54,10 +54,10 @@ describe('PasswordGenerator tests', () => {
 
     return Promise.all([
       expect(typeof token).toBe('object'),
-      expect(token.then(a => a.access_token)).resolves.toEqual(
+      expect(token.then((a) => a.access_token)).resolves.toEqual(
         oauthClientCredentialsMock.access_token
       ),
-      expect(token.then(a => a.refresh_token)).resolves.toEqual(
+      expect(token.then((a) => a.refresh_token)).resolves.toEqual(
         oauthClientCredentialsMock.refresh_token
       ),
       expect(fetch.mock.calls[0][0]).toEqual('https://oauth.me/'),
@@ -77,14 +77,14 @@ describe('PasswordGenerator tests', () => {
     });
 
     return Promise.all([
-      generateTokenPromise.then(accessToken => {
+      generateTokenPromise.then((accessToken) => {
         expect(() => tokenGenerator.refreshToken(accessToken)).not.toThrowError(
           Error
         );
         expect(
           tokenGenerator
             .refreshToken(accessToken)
-            .then(token => token.access_token)
+            .then((token) => token.access_token)
         ).resolves.toEqual(oauthClientCredentialsMock.access_token);
       }),
     ]);
@@ -102,8 +102,8 @@ describe('PasswordGenerator tests', () => {
 
     fetch.mockResponseOnce(null, { status: 400 });
 
-    return generateTokenPromise.then(accessToken =>
-      tokenGenerator.refreshToken(accessToken).catch(err => {
+    return generateTokenPromise.then((accessToken) =>
+      tokenGenerator.refreshToken(accessToken).catch((err) => {
         expect(err instanceof OauthError).toEqual(true);
         expect(err.previousError instanceof BadRequestError).toEqual(true);
       })
@@ -124,8 +124,8 @@ describe('PasswordGenerator tests', () => {
       status: 400,
     });
 
-    return generateTokenPromise.then(accessToken =>
-      tokenGenerator.refreshToken(accessToken).catch(err => {
+    return generateTokenPromise.then((accessToken) =>
+      tokenGenerator.refreshToken(accessToken).catch((err) => {
         expect(err instanceof OauthError).toEqual(true);
         expect(err.previousError instanceof BadRequestError).toEqual(true);
       })
@@ -138,7 +138,7 @@ describe('PasswordGenerator tests', () => {
     const tokenGenerator = new PasswordGenerator(tokenConfig);
     return tokenGenerator
       .generateToken({ password: 'foo', username: 'bar' })
-      .catch(err => {
+      .catch((err) => {
         expect(err instanceof OauthError).toEqual(true);
         expect(err.previousError instanceof ForbiddenError).toEqual(true);
       });
@@ -150,7 +150,7 @@ describe('PasswordGenerator tests', () => {
     const tokenGenerator = new PasswordGenerator(tokenConfig);
     return tokenGenerator
       .generateToken({ password: 'foo', username: 'bar' })
-      .catch(err => {
+      .catch((err) => {
         expect(err instanceof OauthError).toEqual(true);
         expect(err.previousError instanceof ResourceNotFoundError).toEqual(
           true
@@ -164,7 +164,7 @@ describe('PasswordGenerator tests', () => {
     const tokenGenerator = new PasswordGenerator(tokenConfig);
     return tokenGenerator
       .generateToken({ password: 'foo', username: 'bar' })
-      .catch(err => {
+      .catch((err) => {
         expect(err instanceof OauthError).toEqual(true);
         expect(err.previousError instanceof BadRequestError).toEqual(true);
       });
@@ -179,7 +179,7 @@ describe('PasswordGenerator tests', () => {
 
     return tokenGenerator
       .refreshToken(oauthClientCredentialsMock)
-      .catch(err => {
+      .catch((err) => {
         expect(err instanceof InvalidGrantError).toEqual(true);
         expect(err instanceof OauthError).toEqual(true);
         expect(err.previousError instanceof BadRequestError).toEqual(true);
@@ -195,7 +195,7 @@ describe('PasswordGenerator tests', () => {
 
     return tokenGenerator
       .refreshToken(oauthClientCredentialsMock)
-      .catch(err => {
+      .catch((err) => {
         expect(err instanceof InvalidScopeError).toEqual(true);
         expect(err instanceof OauthError).toEqual(true);
         expect(err.previousError instanceof BadRequestError).toEqual(true);
@@ -208,7 +208,7 @@ describe('PasswordGenerator tests', () => {
     const tokenGenerator = new PasswordGenerator(tokenConfig);
     return tokenGenerator
       .generateToken({ password: 'foo', username: 'bar' })
-      .catch(err => {
+      .catch((err) => {
         expect(err instanceof OauthError).toEqual(true);
         expect(err.previousError instanceof InternalServerError).toEqual(true);
       });
@@ -220,7 +220,7 @@ describe('PasswordGenerator tests', () => {
     const tokenGenerator = new PasswordGenerator(tokenConfig);
     return tokenGenerator
       .generateToken({ password: 'foo', username: 'bar' })
-      .catch(err => {
+      .catch((err) => {
         expect(err instanceof OauthError).toEqual(true);
         expect(err.previousError instanceof UnauthorizedError).toEqual(true);
       });

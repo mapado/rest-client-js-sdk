@@ -146,7 +146,7 @@ describe('Test Client', () => {
     ];
 
     return Promise.all(storeTokensPromiseList).then(() => {
-      return Promise.all(getTokenPromiseList).then(values => {
+      return Promise.all(getTokenPromiseList).then((values) => {
         expect(JSON.parse(values[0])).toEqual({
           access_token: 'my-token',
           expires_at: null,
@@ -214,7 +214,7 @@ describe('Test Client', () => {
 
     return SomeSdk.getRepository('test')
       .find(8)
-      .then(item =>
+      .then((item) =>
         Promise.all([
           expect(typeof item).toBe('object'),
           expect(item.name).toBe('foo'),
@@ -250,7 +250,7 @@ describe('Test Client', () => {
     return Promise.all([
       EntityFactorySdk.getRepository('test')
         .find(8)
-        .then(item =>
+        .then((item) =>
           Promise.all([
             expect(typeof item).toBe('object'),
             expect(item.name).toBe('foo'),
@@ -259,7 +259,7 @@ describe('Test Client', () => {
         ),
       EntityFactorySdk.getRepository('test')
         .findAll()
-        .then(itemList =>
+        .then((itemList) =>
           Promise.all([
             expect(Array.isArray(itemList)).toBe(true),
             expect(itemList[0].name).toBe('foo'),
@@ -360,7 +360,7 @@ describe('Test Client', () => {
 
     return NoAuthSdk.getRepository('test')
       .find(8)
-      .then(json => {
+      .then((json) => {
         const authHeader = fetchMock.calls().matched[0][1].headers
           .Authorization;
         expect(authHeader).toBe(undefined);
@@ -443,9 +443,7 @@ describe('Fix bugs', () => {
     SomeInnerSdk.tokenStorage.generateToken();
 
     expect(
-      SomeInnerSdk.getRepository('test')
-        .makeUri('foo')
-        .toString()
+      SomeInnerSdk.getRepository('test').makeUri('foo').toString()
     ).toEqual('https://api.me/v2/foo');
   });
 

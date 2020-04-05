@@ -134,7 +134,7 @@ class AbstractClient {
         },
         requestParams
       )
-    ).then(response => {
+    ).then((response) => {
       this.sdk.unitOfWork.clear(identifier);
 
       return response;
@@ -143,7 +143,7 @@ class AbstractClient {
 
   deserializeResponse(requestPromise, listOrItem) {
     return requestPromise
-      .then(response => response.text().then(text => [response, text]))
+      .then((response) => response.text().then((text) => [response, text]))
       .then(([response, text]) => {
         if (listOrItem === 'list') {
           // for list, we need to deserialize the result to get an object
@@ -263,12 +263,14 @@ class AbstractClient {
           ) {
             return this._tokenStorage
               .refreshToken()
-              .then(refreshedTokenObject => refreshedTokenObject.access_token);
+              .then(
+                (refreshedTokenObject) => refreshedTokenObject.access_token
+              );
           }
 
           return accessToken;
         })
-        .then(token => this._doFetch(token, input, requestParams));
+        .then((token) => this._doFetch(token, input, requestParams));
     }
 
     return this._doFetch(null, input, requestParams);
@@ -303,13 +305,13 @@ class AbstractClient {
       // if www-authenticate header is missing, try and read json response
       return response
         .json()
-        .then(body => {
+        .then((body) => {
           if (this._tokenStorage && body.error === 'invalid_grant') {
             return this._refreshTokenAndRefetch(response, input, requestParams);
           }
           throw error;
         })
-        .catch(err => {
+        .catch((err) => {
           if (err instanceof OauthError) {
             throw err;
           }
@@ -326,9 +328,7 @@ class AbstractClient {
     };
 
     if (accessToken) {
-      baseHeaders.Authorization = `${
-        this.sdk.config.authorizationType
-      } ${accessToken}`;
+      baseHeaders.Authorization = `${this.sdk.config.authorizationType} ${accessToken}`;
     }
 
     const currentUri =
@@ -350,7 +350,7 @@ class AbstractClient {
     params.headers = this._removeUndefinedHeaders(params.headers);
 
     // eslint-disable-next-line consistent-return
-    return fetch(input, params).then(response => {
+    return fetch(input, params).then((response) => {
       if (response.status < 400) {
         return response;
       }
@@ -369,7 +369,7 @@ class AbstractClient {
   _removeUndefinedHeaders(headers) {
     // remove undefined key, usefull to remove Content-Type for example
     const localHeaders = headers;
-    Object.keys(localHeaders).forEach(key => {
+    Object.keys(localHeaders).forEach((key) => {
       if (localHeaders[key] === undefined) {
         delete localHeaders[key];
       }

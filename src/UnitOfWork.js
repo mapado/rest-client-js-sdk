@@ -30,7 +30,7 @@ function findOldRelation(newRelationValue, oldRelationValue, classMetadata) {
 
   const foundValue =
     oldRelationValue &&
-    oldRelationValue.find(innerOldRelationValue => {
+    oldRelationValue.find((innerOldRelationValue) => {
       const oldRelationValueId = getEntityId(
         innerOldRelationValue,
         idSerializedKey
@@ -50,7 +50,7 @@ function findOldRelation(newRelationValue, oldRelationValue, classMetadata) {
  * add all identifier from one to many relation list
  */
 function getIdentifierForList(newValue, idSerializedKey) {
-  return newValue.map(value => {
+  return newValue.map((value) => {
     if (Object.keys(value).includes(idSerializedKey)) {
       return {
         [idSerializedKey]: value[idSerializedKey],
@@ -236,7 +236,7 @@ class UnitOfWork {
   _getDirtyFields(newSerializedModel, oldSerializedModel, classMetadata) {
     let dirtyFields = {};
 
-    Object.values(classMetadata.getAttributeList()).forEach(attribute => {
+    Object.values(classMetadata.getAttributeList()).forEach((attribute) => {
       const key = attribute.attributeName;
       const newValue = newSerializedModel[key];
       const oldValue = oldSerializedModel ? oldSerializedModel[key] : null;
@@ -268,9 +268,7 @@ class UnitOfWork {
 
       if (!relationMetadata) {
         throw new TypeError(
-          `relation metadata is not set for relation ${classMetadata.key}.${
-            currentRelation.targetMetadataKey
-          }`
+          `relation metadata is not set for relation ${classMetadata.key}.${currentRelation.targetMetadataKey}`
         );
       }
 

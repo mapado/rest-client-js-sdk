@@ -18,7 +18,7 @@ describe('ProvidedTokenGenerator tests', () => {
 
     return Promise.all([
       expect(typeof token).toBe('object'),
-      expect(token.then(a => a.access_token)).resolves.toEqual(
+      expect(token.then((a) => a.access_token)).resolves.toEqual(
         oauthClientCredentialsMock.access_token
       ),
     ]);
@@ -32,7 +32,7 @@ describe('ProvidedTokenGenerator tests', () => {
 
     return Promise.all([
       expect(typeof refreshedToken).toBe('object'),
-      expect(refreshedToken.then(a => a.access_token)).resolves.toEqual(
+      expect(refreshedToken.then((a) => a.access_token)).resolves.toEqual(
         oauthClientCredentialsMock.access_token
       ),
     ]);
@@ -57,7 +57,7 @@ describe('ProvidedTokenGenerator tests', () => {
     const tokenPromise = oauth.generateToken();
     expect(tokenPromise).toBeInstanceOf(Promise);
 
-    return tokenPromise.then(token => {
+    return tokenPromise.then((token) => {
       expect(token).toEqual({
         access_token: oauthClientCredentialsMock.access_token,
         expires_at: null,
@@ -78,11 +78,11 @@ describe('ProvidedTokenGenerator tests', () => {
     const refreshFunc = () =>
       fetch('http://foo.bar', {
         method: 'POST',
-      }).then(response => {
+      }).then((response) => {
         if (response.status !== 200) {
           return response
             .json()
-            .then(responseData => Promise.reject(responseData));
+            .then((responseData) => Promise.reject(responseData));
         }
 
         return response.json();

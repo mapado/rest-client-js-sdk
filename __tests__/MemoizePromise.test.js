@@ -2,7 +2,7 @@ import { memoizePromise } from '../src/decorator';
 
 let count;
 function someFunctionReturningAPromise() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     count++; // eslint-disable-line no-plusplus
     return resolve(count);
   });

@@ -33,7 +33,7 @@ class ClassMetadata {
     this._attributeList = {};
     this._identifierAttribute = null;
 
-    attributeList.forEach(attribute => {
+    attributeList.forEach((attribute) => {
       this._attributeList[attribute.serializedKey] = attribute;
 
       if (attribute.isIdentifier) {
@@ -43,9 +43,7 @@ class ClassMetadata {
 
     if (!this._identifierAttribute) {
       throw new TypeError(
-        `"${
-          this.key
-        }" has no identifier attribute set. You must set all your attributes in one time and send an attribute with "isIdentifier=true"`
+        `"${this.key}" has no identifier attribute set. You must set all your attributes in one time and send an attribute with "isIdentifier=true"`
       );
     }
   }
@@ -53,7 +51,7 @@ class ClassMetadata {
   setRelationList(relationList) {
     this._relationList = {};
 
-    relationList.forEach(relation => {
+    relationList.forEach((relation) => {
       this._relationList[relation.serializedKey] = relation;
       this._attributeList[relation.serializedKey] = new Attribute(
         relation.serializedKey,
@@ -70,11 +68,11 @@ class ClassMetadata {
   getDefaultSerializedModel() {
     const out = {};
 
-    Object.keys(this._attributeList).forEach(serializedKey => {
+    Object.keys(this._attributeList).forEach((serializedKey) => {
       out[serializedKey] = null;
     });
 
-    Object.keys(this._relationList).forEach(serializedKey => {
+    Object.keys(this._relationList).forEach((serializedKey) => {
       const relation = this._relationList[serializedKey];
 
       if (relation.isOneToMany()) {

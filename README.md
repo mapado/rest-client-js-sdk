@@ -20,41 +20,38 @@ import { Mapping, Attribute, Relation, ClassMetadata } from 'rest-client-sdk';
 const mapping = new Mapping('/v1');
 
 const productMetadata = new ClassMetadata(
-    'products', // key: mandatory, will be passed in your serializer
-    'my_products', // pathRoot: optional, the endpoint of your API: will be added to the mapping prefix ('/v1' here)
-    SomeRepositoryClass, // repositoryClass: optional, See "Overriding repository" for more detail
+  'products', // key: mandatory, will be passed in your serializer
+  'my_products', // pathRoot: optional, the endpoint of your API: will be added to the mapping prefix ('/v1' here)
+  SomeRepositoryClass // repositoryClass: optional, See "Overriding repository" for more detail
 );
 
 const idAttr = new Attribute(
-    '@id', // serializedKey: mandatory, the key returned from your API
-    'id', // attributeName: optional, the name in your entity, default to the `serializedKey` attribute
-    'string', // type: optional, default to `string`
-    true // isIdentifier: optional, default to `false`
+  '@id', // serializedKey: mandatory, the key returned from your API
+  'id', // attributeName: optional, the name in your entity, default to the `serializedKey` attribute
+  'string', // type: optional, default to `string`
+  true // isIdentifier: optional, default to `false`
 );
 const name = new Attribute('name');
-productMetadata.setAttributeList([ idAttr, name ]);
+productMetadata.setAttributeList([idAttr, name]);
 productMetadata.setRelationList([
   new Relation(
-      Relation.ONE_TO_MANY, // type: Relation.ONE_TO_MANY or Relation.MANY_TO_ONE
-      'categories', // targetMetadataKey: must match the first argument of `ClassMetadata` constructor of the target entity
-      'category_list', // serializedKey: the key returned from your API
-      'categoryList', // attributeName: optional, the name in your entity, default to the `serializedKey` attribute
+    Relation.ONE_TO_MANY, // type: Relation.ONE_TO_MANY or Relation.MANY_TO_ONE
+    'categories', // targetMetadataKey: must match the first argument of `ClassMetadata` constructor of the target entity
+    'category_list', // serializedKey: the key returned from your API
+    'categoryList' // attributeName: optional, the name in your entity, default to the `serializedKey` attribute
   ),
 ]);
 
 const categoryMetadata = new ClassMetadata('categories');
 categoryMetadata.setAttributeList([
-    new Attribute('id', 'id', 'string', true),
-    new Attribute('name'),
+  new Attribute('id', 'id', 'string', true),
+  new Attribute('name'),
 ]);
 categoryMetadata.setRelationList([
   new Relation(Relation.MANY_TO_ONE, 'product', 'product'),
 ]);
 
-mapping.setMapping([
-    productMetadata,
-    categoryMetadata,
-]);
+mapping.setMapping([productMetadata, categoryMetadata]);
 ```
 
 ### Create the SDK
@@ -147,9 +144,9 @@ export default SomeEntityClient;
 You can inject a custom serializer to the SDK. The serializer must extends the
 base `Serializer` class and implement 3 methods:
 
-* `deserializeItem(rawData, type)` (type is the key of the mapping)
-* `deserializeList(rawListData, type)` (type is the key of the mapping)
-* `serializeItem(item, type)` (type is the key of the mapping)
+- `deserializeItem(rawData, type)` (type is the key of the mapping)
+- `deserializeList(rawListData, type)` (type is the key of the mapping)
+- `serializeItem(item, type)` (type is the key of the mapping)
 
 All text response from GET / PUT / POST request will be send to
 `deserializeItem` or `deserializeList`. All content fom `update` and `create`

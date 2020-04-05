@@ -30,7 +30,7 @@ class PasswordGenerator extends AbstractTokenGenerator {
       parameters.scope = this.tokenGeneratorConfig.scope;
     }
 
-    return this._doFetch(parameters).then(response => response.json());
+    return this._doFetch(parameters).then((response) => response.json());
   }
 
   refreshToken(accessToken, baseParameters = {}) {
@@ -51,7 +51,9 @@ class PasswordGenerator extends AbstractTokenGenerator {
 
     parameters.refresh_token = accessToken.refresh_token;
 
-    return this._doFetch(parameters).then(response => response.clone().json());
+    return this._doFetch(parameters).then((response) =>
+      response.clone().json()
+    );
   }
 
   checkTokenGeneratorConfig(config) {
@@ -82,7 +84,7 @@ class PasswordGenerator extends AbstractTokenGenerator {
     return fetch(url, {
       method: 'POST',
       body: this.convertMapToFormData(parameters),
-    }).then(response => {
+    }).then((response) => {
       if (response.status < 400) {
         return response;
       }

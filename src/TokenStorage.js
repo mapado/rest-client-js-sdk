@@ -1,5 +1,9 @@
 class TokenStorage {
-  constructor(tokenGenerator, asyncStorage, accessTokenKey = 'rest_client_sdk.api.access_token') {
+  constructor(
+    tokenGenerator,
+    asyncStorage,
+    accessTokenKey = 'rest_client_sdk.api.access_token'
+  ) {
     this._tokenGenerator = tokenGenerator;
     this._hasATokenBeenGenerated = false;
     this.setAsyncStorage(asyncStorage);
@@ -13,17 +17,17 @@ class TokenStorage {
   hasAccessToken() {
     return this._asyncStorage
       .getItem(this.accessTokenKey)
-      .then(accessToken => !!accessToken);
+      .then((accessToken) => !!accessToken);
   }
 
   getAccessToken() {
     return this.getAccessTokenObject().then(
-      token => token && token.access_token
+      (token) => token && token.access_token
     );
   }
 
   getAccessTokenObject() {
-    return this._asyncStorage.getItem(this.accessTokenKey).then(token => {
+    return this._asyncStorage.getItem(this.accessTokenKey).then((token) => {
       if (token) {
         const tokenObject = JSON.parse(token);
 
@@ -54,8 +58,13 @@ class TokenStorage {
     const updatedResponseData = Object.assign({}, responseData);
     updatedResponseData.expires_at = null;
 
-    if (typeof updatedResponseData.expires_in !== 'undefined' && updatedResponseData.expires_in !== null && updatedResponseData.expires_in >= 0) {
-      updatedResponseData.expires_at = Math.round(callTimestamp / 1000) + updatedResponseData.expires_in;
+    if (
+      typeof updatedResponseData.expires_in !== 'undefined' &&
+      updatedResponseData.expires_in !== null &&
+      updatedResponseData.expires_in >= 0
+    ) {
+      updatedResponseData.expires_at =
+        Math.round(callTimestamp / 1000) + updatedResponseData.expires_in;
     }
 
     return updatedResponseData;
@@ -66,33 +75,40 @@ class TokenStorage {
     const callTimestamp = Date.now();
     return this._tokenGenerator
       .generateToken(parameters)
-      .then(responseData => {
-        const updatedResponseData = this._addExpiresAtToResponseData(responseData, callTimestamp);
-        return this._storeAccessToken(updatedResponseData, callTimestamp).then(() => updatedResponseData);
+      .then((responseData) => {
+        const updatedResponseData = this._addExpiresAtToResponseData(
+          responseData,
+          callTimestamp
+        );
+        return this._storeAccessToken(updatedResponseData, callTimestamp).then(
+          () => updatedResponseData
+        );
       });
   }
 
   refreshToken(parameters) {
-    return this._asyncStorage
-      .getItem(this.accessTokenKey)
-      .then(token => {
-        const callTimestamp = Date.now();
-        return this._tokenGenerator
-          .refreshToken(JSON.parse(token), parameters)
-          .then(responseData => {
-            const updatedResponseData = this._addExpiresAtToResponseData(responseData, callTimestamp);
-            return this._storeAccessToken(updatedResponseData).then(() => updatedResponseData);
-          })
-      });
+    return this._asyncStorage.getItem(this.accessTokenKey).then((token) => {
+      const callTimestamp = Date.now();
+      return this._tokenGenerator
+        .refreshToken(JSON.parse(token), parameters)
+        .then((responseData) => {
+          const updatedResponseData = this._addExpiresAtToResponseData(
+            responseData,
+            callTimestamp
+          );
+          return this._storeAccessToken(updatedResponseData).then(
+            () => updatedResponseData
+          );
+        });
+    });
   }
 
   /**
    * Return the number of second when the token will expire
    * return value can be negative if the token is already expired
-  */
+   */
   getCurrentTokenExpiresIn() {
-    return this.getAccessTokenObject()
-    .then(accessTokenObject => {
+    return this.getAccessTokenObject().then((accessTokenObject) => {
       if (accessTokenObject === null) {
         throw new Error('No token has been stored.');
       }

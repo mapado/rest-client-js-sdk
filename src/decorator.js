@@ -24,11 +24,11 @@ export function memoizePromise(callback) {
 
     // Delete the value regardless of whether it resolves or rejects
     return value.then(
-      internalValue => {
+      (internalValue) => {
         cache[cacheKey] = false;
         return internalValue;
       },
-      err => {
+      (err) => {
         cache[cacheKey] = false;
         throw err;
       }

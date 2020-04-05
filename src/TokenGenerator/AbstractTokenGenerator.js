@@ -30,12 +30,18 @@ class AbstractTokenGenerator {
   _manageOauthError(response) {
     return response
       .json()
-      .then(body => {
+      .then((body) => {
         if (body.error === 'invalid_grant') {
-          throw new InvalidGrantError(body.error, getHttpErrorFromResponse(response));
+          throw new InvalidGrantError(
+            body.error,
+            getHttpErrorFromResponse(response)
+          );
         }
         if (body.error === 'invalid_scope') {
-          throw new InvalidScopeError(body.error, getHttpErrorFromResponse(response));
+          throw new InvalidScopeError(
+            body.error,
+            getHttpErrorFromResponse(response)
+          );
         }
         throw new OauthError(body.error, getHttpErrorFromResponse(response));
       })
@@ -53,7 +59,7 @@ class AbstractTokenGenerator {
 
     const formData = new FormData();
 
-    keys.forEach(key => {
+    keys.forEach((key) => {
       formData.append(key, parameters[key]);
     });
 

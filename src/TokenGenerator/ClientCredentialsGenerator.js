@@ -38,7 +38,7 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator {
     return fetch(url, {
       method: 'POST',
       body: this.convertMapToFormData(parameters),
-    }).then(response => {
+    }).then((response) => {
       if (response.status < 400) {
         return response.json();
       }

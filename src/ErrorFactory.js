@@ -99,7 +99,7 @@ function InternalServerError(message, baseResponse) {
 InternalServerError.prototype = Object.create(HttpError.prototype);
 InternalServerError.prototype.constructor = InternalServerError;
 
-const getHttpErrorFromResponse = response => {
+const getHttpErrorFromResponse = (response) => {
   switch (true) {
     case response.status === 401:
       return new UnauthorizedError(null, response);

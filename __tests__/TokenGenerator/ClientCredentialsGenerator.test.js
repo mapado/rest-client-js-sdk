@@ -46,7 +46,7 @@ describe('ClientCredentialsGenerator tests', () => {
 
     return Promise.all([
       expect(typeof token).toBe('object'),
-      expect(token.then(a => a.access_token)).resolves.toEqual(
+      expect(token.then((a) => a.access_token)).resolves.toEqual(
         oauthClientCredentialsMock.access_token
       ),
     ]);
@@ -63,7 +63,7 @@ describe('ClientCredentialsGenerator tests', () => {
 
     return Promise.all([
       expect(typeof token).toBe('object'),
-      expect(token.then(a => a.access_token)).resolves.toEqual(
+      expect(token.then((a) => a.access_token)).resolves.toEqual(
         oauthClientCredentialsMock.access_token
       ),
     ]);
@@ -73,7 +73,7 @@ describe('ClientCredentialsGenerator tests', () => {
     fetchMock.mock(() => true, 403);
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
-    return tokenGenerator.generateToken().catch(err => {
+    return tokenGenerator.generateToken().catch((err) => {
       expect(err instanceof OauthError).toEqual(true);
       expect(err.previousError instanceof ForbiddenError).toEqual(true);
     });
@@ -83,7 +83,7 @@ describe('ClientCredentialsGenerator tests', () => {
     fetchMock.mock(() => true, 404);
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
-    return tokenGenerator.generateToken().catch(err => {
+    return tokenGenerator.generateToken().catch((err) => {
       expect(err instanceof OauthError).toEqual(true);
       expect(err.previousError instanceof ResourceNotFoundError).toEqual(true);
     });
@@ -93,7 +93,7 @@ describe('ClientCredentialsGenerator tests', () => {
     fetchMock.mock(() => true, 400);
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
-    return tokenGenerator.generateToken().catch(err => {
+    return tokenGenerator.generateToken().catch((err) => {
       expect(err instanceof OauthError).toEqual(true);
       expect(err.previousError instanceof BadRequestError).toEqual(true);
     });
@@ -103,7 +103,7 @@ describe('ClientCredentialsGenerator tests', () => {
     fetchMock.mock(() => true, 500);
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
-    return tokenGenerator.generateToken().catch(err => {
+    return tokenGenerator.generateToken().catch((err) => {
       expect(err instanceof OauthError).toEqual(true);
       expect(err.previousError instanceof InternalServerError).toEqual(true);
     });
@@ -113,7 +113,7 @@ describe('ClientCredentialsGenerator tests', () => {
     fetchMock.mock(() => true, 401);
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
-    return tokenGenerator.generateToken().catch(err => {
+    return tokenGenerator.generateToken().catch((err) => {
       expect(err instanceof OauthError).toEqual(true);
       expect(err.previousError instanceof UnauthorizedError).toEqual(true);
     });

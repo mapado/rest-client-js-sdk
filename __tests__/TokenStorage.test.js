@@ -18,7 +18,7 @@ describe('Token storage tests', () => {
 
     return oauth
       .getAccessToken()
-      .catch(e => {
+      .catch((e) => {
         expect(e.message).toBe('No token has been generated yet.');
       })
       .then(() => {
@@ -63,7 +63,7 @@ describe('Token storage tests', () => {
 
     expect(generatedToken).toBeInstanceOf(Promise);
 
-    const expectedStoredAccessTokenObject=  Object.assign(
+    const expectedStoredAccessTokenObject = Object.assign(
       {},
       oauthClientCredentialsMock,
       {
@@ -71,7 +71,7 @@ describe('Token storage tests', () => {
       }
     );
 
-    const expectedStoredRefreshTokenObject=  Object.assign(
+    const expectedStoredRefreshTokenObject = Object.assign(
       {},
       refreshedCredentials,
       {
@@ -81,7 +81,7 @@ describe('Token storage tests', () => {
 
     return Promise.all([
       expect(typeof generatedToken).toBe('object'),
-      expect(generatedToken.then(a => a.access_token)).resolves.toEqual(
+      expect(generatedToken.then((a) => a.access_token)).resolves.toEqual(
         expectedStoredAccessTokenObject.access_token
       ),
     ])
@@ -99,7 +99,7 @@ describe('Token storage tests', () => {
       .then(() =>
         Promise.all([
           expect(
-            oauth.refreshToken().then(a => a.access_token)
+            oauth.refreshToken().then((a) => a.access_token)
           ).resolves.toEqual(expectedStoredRefreshTokenObject.access_token),
         ])
       )
@@ -137,9 +137,9 @@ describe('Token storage tests', () => {
       return oauth.refreshToken().then(() => {
         return oauth.getCurrentTokenExpiresIn().then((val) => {
           expect(val).toEqual(12800);
-        })
+        });
       });
-    })
+    });
   });
 
   test('remaining validity time is null for a token with no expiresAt', async () => {
@@ -147,11 +147,14 @@ describe('Token storage tests', () => {
     fetchMock.once(() => true, oauthClientCredentialsMock);
 
     await oauth._storeAccessToken({
-      "access_token": "MzM2ZDY4MSNjYTcwZjg0YTYyMWMxZmY5ZWMwMNAyZjIxMDc5dDZjODI4YjkyZDUbMzU0NTFjVGI1MGMzMzAzMQ",
-      "expires_in": 3600,
-      "token_type": "bearer",
-      "scope": "ticketing:events:read ticketing:tickets:read ticketing:tickets:update",
-      "refresh_token": "NjEwYTlke2I2NTBkNzkzNEI3N8Q5OWVhNDhjYTMmMTJhMNE0NTE2Yzk4oDlkM2Y2MDVjXjBlMjFlN9MwYTNkOA"
+      access_token:
+        'MzM2ZDY4MSNjYTcwZjg0YTYyMWMxZmY5ZWMwMNAyZjIxMDc5dDZjODI4YjkyZDUbMzU0NTFjVGI1MGMzMzAzMQ',
+      expires_in: 3600,
+      token_type: 'bearer',
+      scope:
+        'ticketing:events:read ticketing:tickets:read ticketing:tickets:update',
+      refresh_token:
+        'NjEwYTlke2I2NTBkNzkzNEI3N8Q5OWVhNDhjYTMmMTJhMNE0NTE2Yzk4oDlkM2Y2MDVjXjBlMjFlN9MwYTNkOA',
     });
 
     return oauth.getCurrentTokenExpiresIn().then((value) => {
@@ -159,8 +162,8 @@ describe('Token storage tests', () => {
       return oauth.refreshToken().then(() => {
         return oauth.getCurrentTokenExpiresIn().then((val) => {
           expect(val).toEqual(12800);
-        })
+        });
       });
-    })
+    });
   });
 });
