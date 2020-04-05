@@ -20,36 +20,37 @@
     "urijs": "^1.19.2"
   },
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-core": "^6.24.1",
-    "babel-jest": "^23.6.0",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-env": "^1.7.0",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "babel-jest": "^25.2.6",
     "bundlesize": "^0.18.0",
-    "eslint": "^5.9.0",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-config-prettier": "^3.0.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.1.2",
-    "eslint-plugin-prettier": "^3.0.0",
-    "eslint-plugin-react": "^7.11.1",
+    "core-js": "^3.6.4",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.1.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.19.0",
+    "eslint-plugin-react-hooks": "^2.5.0 || ^1.7.0",
     "fetch-mock": "^5.13.1",
     "form-data": "^2.3.3",
-    "husky": "^1.1.4",
+    "husky": "^4.2.3",
     "immutable": "^4.0.0-rc.12",
-    "jest": "^23.6.0",
+    "jest": "^25.2.7",
     "jest-fetch-mock": "^1.7.4",
-    "lint-staged": "^8.0.4",
-    "pluralize": "^7.0.0",
-    "prettier": "^1.10.2",
-    "rimraf": "^2.6.2",
-    "rollup": "^0.67.1",
-    "rollup-plugin-babel": "^3.0.3",
-    "rollup-plugin-commonjs": "^9.1.0",
-    "rollup-plugin-node-resolve": "^4.0.0"
+    "lint-staged": "^10.1.2",
+    "pluralize": "^8.0.0",
+    "prettier": "^2.0.2",
+    "regenerator-runtime": "^0.13.5",
+    "rimraf": "^3.0.0",
+    "rollup": "^2.3.3",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0"
   },
   "optionalDependencies": {
-    "pluralize": "^7.0.0"
+    "pluralize": "^8.0.0"
   },
   "repository": {
     "type": "git",
@@ -77,13 +78,14 @@
   ],
   "lint-staged": {
     "*.{js,jsx,json,md}": [
-      "yarn run prettier --write",
-      "git add"
+      "yarn run prettier --write"
     ]
   },
   "jest": {
     "automock": false,
-    "setupTestFrameworkScriptFile": "./setupJest.js"
+    "setupFilesAfterEnv": [
+      "./setupJest.js"
+    ]
   },
   "husky": {
     "hooks": {
