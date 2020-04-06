@@ -18,6 +18,7 @@ import ClientCredentialsGenerator from './TokenGenerator/ClientCredentialsGenera
 import PasswordGenerator from './TokenGenerator/PasswordGenerator';
 import ProvidedTokenGenerator from './TokenGenerator/ProvidedTokenGenerator';
 import Serializer from './serializer/Serializer';
+import SerializerInterface from './serializer/SerializerInterface';
 import Mapping from './Mapping';
 import ClassMetadata from './Mapping/ClassMetadata';
 import Attribute from './Mapping/Attribute';
@@ -47,3 +48,4 @@ export {
   Attribute,
   Relation,
 };
+export type { SerializerInterface };
