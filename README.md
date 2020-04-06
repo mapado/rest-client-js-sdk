@@ -144,9 +144,9 @@ export default SomeEntityClient;
 You can inject a custom serializer to the SDK. The serializer must extends the
 base `Serializer` class and implement 3 methods:
 
-- `deserializeItem(rawData, type)` (type is the key of the mapping)
-- `deserializeList(rawListData, type)` (type is the key of the mapping)
-- `serializeItem(item, type)` (type is the key of the mapping)
+- `deserializeItem(rawData, classMetadata)` (`classMetadata` is the instance of ClassMetadata you configured)
+- `deserializeList(rawListData, classMetadata)` (`classMetadata` is the instance of ClassMetadata you configured)
+- `serializeItem(item, classMetadata)` (`classMetadata` is the instance of ClassMetadata you configured)
 
 All text response from GET / PUT / POST request will be send to
 `deserializeItem` or `deserializeList`. All content fom `update` and `create`
@@ -161,17 +161,17 @@ string to JSON objects.
 import { Serializer } from 'rest-client-sdk';
 
 class JsSerializer extends Serializer {
-  deserializeItem(rawData, type) {
+  deserializeItem(rawData, classMetadata) {
     // do stuff with your item input
     return JSON.parse(rawData);
   }
 
-  deserializeList(rawListData, type) {
+  deserializeList(rawListData, classMetadata) {
     // do stuff with your list input
     return JSON.parse(rawListData);
   }
 
-  serializeItem(entity, type) {
+  serializeItem(entity, classMetadata) {
     // prepare item for being sent in a request
     return JSON.stringify(entity);
   }
