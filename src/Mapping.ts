@@ -1,43 +1,50 @@
+import ClassMetadata from './Mapping/ClassMetadata';
+
 const DEFAULT_CONFIG = {
   collectionKey: 'hydra:member',
 };
 
 class Mapping {
+  readonly idPrefix: string;
+
+  #config: object;
+
+  #classMetadataList: ClassMetadata[];
+
   constructor(idPrefix = '', config = {}) {
     this.idPrefix = idPrefix;
 
-    this._idPrefixLength = idPrefix.length;
-    this._classMetadataList = [];
+    this.#classMetadataList = [];
 
-    this.setConfig(config);
+    this.#config = { ...DEFAULT_CONFIG, ...config }; // might be a call to setConfig but TypeScript report an error on #config
   }
 
-  getConfig() {
-    return this._config;
+  getConfig(): object {
+    return this.#config;
   }
 
-  setConfig(config) {
-    this._config = { ...DEFAULT_CONFIG, ...config };
+  setConfig(config: object): void {
+    this.#config = { ...DEFAULT_CONFIG, ...config };
   }
 
-  setMapping(classMetadataList = []) {
-    this._classMetadataList = classMetadataList;
+  setMapping(classMetadataList: ClassMetadata[] = []): void {
+    this.#classMetadataList = classMetadataList;
   }
 
-  getMappingKeys() {
-    return this._classMetadataList.map((classMetadata) => classMetadata.key);
+  getMappingKeys(): string[] {
+    return this.#classMetadataList.map((classMetadata) => classMetadata.key);
   }
 
-  getClassMetadataByKey(key) {
-    const filterList = this._classMetadataList.filter(
+  getClassMetadataByKey(key: string): null | ClassMetadata {
+    const filterList = this.#classMetadataList.filter(
       (classMetadata) => classMetadata.key === key
     );
 
     return filterList.length > 0 ? filterList[0] : null;
   }
 
-  isMappingValid() {
-    return !this._classMetadataList.some((classMetadata) => {
+  isMappingValid(): boolean {
+    return !this.#classMetadataList.some((classMetadata) => {
       // check that the relations exists
       const errorList = Object.values(classMetadata.getAttributeList()).map(
         (attribute) => {
@@ -66,7 +73,7 @@ class Mapping {
             const endsWithList = attribute.attributeName.endsWith('List');
 
             try {
-              // eslint-disable-next-line global-require, import/no-extraneous-dependencies
+              // eslint-disable-next-line global-require, import/no-extraneous-dependencies, @typescript-eslint/no-var-requires
               const pluralize = require('pluralize');
               if (
                 !endsWithList &&
