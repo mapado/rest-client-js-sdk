@@ -1,7 +1,15 @@
 class Attribute {
+  readonly serializedKey: string;
+
+  readonly attributeName: string;
+
+  readonly type: string;
+
+  readonly isIdentifier: boolean;
+
   constructor(
-    serializedKey,
-    attributeName = null,
+    serializedKey: string,
+    attributeName: null | string = null,
     type = 'string',
     isIdentifier = false
   ) {

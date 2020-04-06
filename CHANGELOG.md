@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Migrate codebase to TypeScript. It should not change anything to users, exept a more robust code for TypeScript users. Some small undocumented cases might break:
+  - [Might Break] `ClassMetadata`, `Attribute` and `Relation` attributes are now `readonly`. You can not change them after initialization.
+
 ## 4.1.2
 
 ### Fixed
