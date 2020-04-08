@@ -8,7 +8,7 @@ const pkg = JSON.parse(fs.readFileSync('./package.json'));
 const extensions = ['.ts', '.tsx', '.js', '.jsx'];
 
 export default {
-  input: 'src/index.js',
+  input: 'src/index.ts',
   external: Object.keys(pkg.dependencies),
   plugins: [
     commonjs(),

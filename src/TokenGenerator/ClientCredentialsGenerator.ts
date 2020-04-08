@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
+import { Token } from './TokenGeneratorInterface';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -8,17 +10,45 @@ const ERROR_CONFIG_PATH_SCHEME =
 const ERROR_CONFIG_CLIENT_INFORMATIONS =
   'TokenGenerator config is not valid, it should contain a "clientId", a "clientSecret" parameter';
 
-class ClientCredentialsGenerator extends AbstractTokenGenerator {
-  constructor(props) {
-    super(props);
+type Config = {
+  clientId: string;
+  clientSecret: string;
+  path: string;
+  scheme: string;
+  port?: string;
+  scope?: string;
+};
+
+type Parameters = {
+  client_id: string;
+  client_secret: string;
+  path: string;
+  scheme: string;
+  grant_type: string;
+  scope?: string;
+};
+
+type BaseParameters = {
+  path: string;
+  scheme: string;
+  scope?: string;
+};
+
+class ClientCredentialsGenerator<
+  T extends Token
+> extends AbstractTokenGenerator<T, Config> {
+  constructor(tokenGeneratorConfig: Config) {
+    super(tokenGeneratorConfig);
     this.generateToken = memoizePromise(this.generateToken);
   }
 
-  generateToken(baseParameters = {}) {
-    const parameters = baseParameters;
-    parameters.grant_type = 'client_credentials';
-    parameters.client_id = this.tokenGeneratorConfig.clientId;
-    parameters.client_secret = this.tokenGeneratorConfig.clientSecret;
+  generateToken(baseParameters: BaseParameters): Promise<T> {
+    const parameters: Parameters = {
+      ...baseParameters,
+      grant_type: 'client_credentials',
+      client_id: this.tokenGeneratorConfig.clientId,
+      client_secret: this.tokenGeneratorConfig.clientSecret,
+    };
 
     if (this.tokenGeneratorConfig.scope && !parameters.scope) {
       parameters.scope = this.tokenGeneratorConfig.scope;
@@ -46,11 +76,11 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator {
     });
   }
 
-  refreshToken(accessToken, parameters) {
+  refreshToken(accessToken: T, parameters: Config): Promise<T> {
     return this.generateToken(parameters);
   }
 
-  checkTokenGeneratorConfig(config) {
+  checkTokenGeneratorConfig(config: Config): void {
     if (!config || Object.keys(config).length === 0) {
       throw new RangeError(ERROR_CONFIG_EMPTY);
     }

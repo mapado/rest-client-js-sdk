@@ -44,6 +44,10 @@ class ClassMetadata {
     return this.#attributeList[name];
   }
 
+  hasIdentifierAttribute(): boolean {
+    return !!this.#identifierAttribute;
+  }
+
   getIdentifierAttribute(): Attribute {
     if (!this.#identifierAttribute) {
       throw new TypeError(

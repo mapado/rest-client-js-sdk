@@ -97,7 +97,7 @@ class Mapping {
         }
       );
 
-      if (!classMetadata.getIdentifierAttribute()) {
+      if (!classMetadata.hasIdentifierAttribute()) {
         errorList.push(
           `"${classMetadata.key}" has no identifier attribute set`
         );

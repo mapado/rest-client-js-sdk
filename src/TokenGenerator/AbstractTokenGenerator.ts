@@ -5,29 +5,26 @@ import {
   InvalidScopeError,
   OauthError,
 } from '../ErrorFactory';
+import TokenGeneratorInterface, { Token } from './TokenGeneratorInterface';
 
-class AbstractTokenGenerator {
-  constructor(tokenGeneratorConfig = {}) {
+abstract class AbstractTokenGenerator<T extends Token, P>
+  implements TokenGeneratorInterface<T, P> {
+  readonly tokenGeneratorConfig: P;
+
+  constructor(tokenGeneratorConfig: P) {
     this.tokenGeneratorConfig = tokenGeneratorConfig;
-    this.canAutogenerateToken = false;
-    this.checkTokenGeneratorConfig(this.tokenGeneratorConfig);
+    if (typeof this.checkTokenGeneratorConfig === 'function') {
+      this.checkTokenGeneratorConfig(this.tokenGeneratorConfig);
+    }
   }
 
-  generateToken(parameters) {
-    throw new Error(`AbstractTokenGenerator::generateToken can not be called directly.
-                    You must implement "generateToken" method.`);
-  }
+  abstract generateToken(parameters: P): Promise<T>;
 
-  refreshToken(accessToken, parameters) {
-    throw new Error(`AbstractTokenGenerator::refreshToken can not be called directly.
-                    You must implement "refreshToken" method.`);
-  }
+  abstract refreshToken(accessToken: T, parameters: P): Promise<T>;
 
-  checkTokenGeneratorConfig(config) {
-    return true;
-  }
+  abstract checkTokenGeneratorConfig(config: P): void;
 
-  _manageOauthError(response) {
+  _manageOauthError(response: Response): Promise<void> {
     return response
       .json()
       .then((body) => {
@@ -54,13 +51,19 @@ class AbstractTokenGenerator {
       });
   }
 
-  convertMapToFormData(parameters) {
+  convertMapToFormData(parameters: {
+    [key: string]: undefined | string | Blob;
+  }): FormData {
     const keys = Object.keys(parameters);
 
     const formData = new FormData();
 
     keys.forEach((key) => {
-      formData.append(key, parameters[key]);
+      const value = parameters[key];
+
+      if (typeof value !== 'undefined') {
+        formData.append(key, value);
+      }
     });
 
     return formData;

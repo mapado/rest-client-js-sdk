@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 
 class ProvidedTokenGenerator extends AbstractTokenGenerator {
   constructor(token, refreshTokenFunc = null) {
     super();
     this._token = token;
-    this.canAutogenerateToken = true;
     this._refreshTokenFunc = refreshTokenFunc;
   }
 
@@ -19,6 +19,10 @@ class ProvidedTokenGenerator extends AbstractTokenGenerator {
       return this._refreshTokenFunc();
     }
 
+    return this.generateToken();
+  }
+
+  autoGenerateToken() {
     return this.generateToken();
   }
 }

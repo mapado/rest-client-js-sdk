@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable max-classes-per-file */
 /* eslint no-unused-vars: 0, no-underscore-dangle: 0 */
 import fetchMock from 'fetch-mock';
