@@ -1,6 +1,6 @@
 import ClassMetadata from '../Mapping/ClassMetadata';
 
-export default interface SerializerInterface<I, L = I[]> {
+export default interface SerializerInterface {
   /**
    * convert a plain javascript object to string
    * @param {object} object - The object to convert to convert

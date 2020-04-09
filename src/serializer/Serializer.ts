@@ -2,8 +2,7 @@
 import SerializerInterface from './SerializerInterface';
 import ClassMetadata from '../Mapping/ClassMetadata';
 
-class Serializer<I extends object, L = I[]>
-  implements SerializerInterface<I, L> {
+class Serializer<I extends object, L = I[]> implements SerializerInterface {
   /**
    * convert an entity to a plain javascript object
    * @param {any} entity - The entity to convert
