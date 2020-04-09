@@ -49,7 +49,7 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator<
   }
 
   generateToken(
-    baseParameters: BaseParameters
+    baseParameters: BaseParameters = {}
   ): Promise<ClientCredentialToken> {
     const parameters: Parameters = {
       grant_type: 'client_credentials',
