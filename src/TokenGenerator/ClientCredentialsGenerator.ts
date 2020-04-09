@@ -2,7 +2,7 @@
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
-import { Token } from './TokenGeneratorInterface';
+import { Token, TokenGeneratorParameters } from './TokenGeneratorInterface';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -19,38 +19,47 @@ type Config = {
   scope?: string;
 };
 
-type Parameters = {
-  client_id: string;
-  client_secret: string;
-  path: string;
-  scheme: string;
-  grant_type: string;
-  scope?: string;
-};
-
 type BaseParameters = {
-  path: string;
-  scheme: string;
   scope?: string;
 };
 
-class ClientCredentialsGenerator<
-  T extends Token
-> extends AbstractTokenGenerator<T, Config> {
+type Parameters = TokenGeneratorParameters &
+  BaseParameters & {
+    grant_type: 'client_credentials';
+    client_id: string;
+    client_secret: string;
+  };
+
+interface ClientCredentialToken extends Token {
+  access_token: string;
+  token_type: string;
+  refresh_token: never;
+  expires_in?: number;
+  scope?: string;
+}
+
+class ClientCredentialsGenerator extends AbstractTokenGenerator<
+  ClientCredentialToken,
+  Parameters,
+  Config
+> {
   constructor(tokenGeneratorConfig: Config) {
     super(tokenGeneratorConfig);
     this.generateToken = memoizePromise(this.generateToken);
   }
 
-  generateToken(baseParameters: BaseParameters): Promise<T> {
+  generateToken(
+    baseParameters: BaseParameters
+  ): Promise<ClientCredentialToken> {
     const parameters: Parameters = {
-      ...baseParameters,
       grant_type: 'client_credentials',
       client_id: this.tokenGeneratorConfig.clientId,
       client_secret: this.tokenGeneratorConfig.clientSecret,
     };
 
-    if (this.tokenGeneratorConfig.scope && !parameters.scope) {
+    if (baseParameters.scope) {
+      parameters.scope = baseParameters.scope;
+    } else if (this.tokenGeneratorConfig.scope) {
       parameters.scope = this.tokenGeneratorConfig.scope;
     }
 
@@ -66,7 +75,7 @@ class ClientCredentialsGenerator<
 
     return fetch(url, {
       method: 'POST',
-      body: this.convertMapToFormData(parameters),
+      body: this.convertMapToFormData({ ...parameters }), // hack. See https://github.com/Microsoft/TypeScript/issues/15300
     }).then((response) => {
       if (response.status < 400) {
         return response.json();
@@ -76,8 +85,11 @@ class ClientCredentialsGenerator<
     });
   }
 
-  refreshToken(accessToken: T, parameters: Config): Promise<T> {
-    return this.generateToken(parameters);
+  refreshToken(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    accessToken: ClientCredentialToken
+  ): Promise<ClientCredentialToken> {
+    return this.generateToken({});
   }
 
   checkTokenGeneratorConfig(config: Config): void {

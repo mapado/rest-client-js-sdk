@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import TokenGeneratorInterface, {
   Token,
+  TokenGeneratorParameters,
 } from './TokenGenerator/TokenGeneratorInterface';
 import AsyncStorageInterface from './AsyncStorageInterface';
 
@@ -8,7 +9,7 @@ interface HasExpiresAt {
   expires_at: null | number;
 }
 
-class TokenStorage<T extends Token, G = null | object> {
+class TokenStorage<T extends Token, G extends TokenGeneratorParameters> {
   #tokenGenerator: TokenGeneratorInterface<T, G>;
 
   #hasATokenBeenGenerated: boolean;
@@ -111,11 +112,11 @@ class TokenStorage<T extends Token, G = null | object> {
       });
   }
 
-  refreshToken(parameters: G): Promise<T & HasExpiresAt> {
+  refreshToken(): Promise<T & HasExpiresAt> {
     return this.#asyncStorage.getItem(this.accessTokenKey).then((token) => {
       const callTimestamp = Date.now();
       return this.#tokenGenerator
-        .refreshToken(JSON.parse(token), parameters)
+        .refreshToken(JSON.parse(token))
         .then((responseData) => {
           const updatedResponseData = this._addExpiresAtToResponseData(
             responseData,

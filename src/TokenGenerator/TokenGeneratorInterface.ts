@@ -1,12 +1,22 @@
 export interface Token {
   access_token: string;
-  expires_in?: null | number;
+  token_type: string;
+  refresh_token?: string;
+  expires_in?: number;
+  scope?: string;
 }
 
-export default interface TokenGeneratorInterface<T extends Token, P> {
+export interface TokenGeneratorParameters {
+  grant_type: string;
+}
+
+export default interface TokenGeneratorInterface<
+  T extends Token,
+  P extends TokenGeneratorParameters
+> {
   generateToken(parameters: P): Promise<T>;
 
-  refreshToken(accessToken: T, parameters: P): Promise<T>;
+  refreshToken(accessToken: T): Promise<T>;
 
   autoGenerateToken?(): Promise<T>;
 }

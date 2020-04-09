@@ -5,13 +5,19 @@ import {
   InvalidScopeError,
   OauthError,
 } from '../ErrorFactory';
-import TokenGeneratorInterface, { Token } from './TokenGeneratorInterface';
+import TokenGeneratorInterface, {
+  Token,
+  TokenGeneratorParameters,
+} from './TokenGeneratorInterface';
 
-abstract class AbstractTokenGenerator<T extends Token, P>
-  implements TokenGeneratorInterface<T, P> {
-  readonly tokenGeneratorConfig: P;
+abstract class AbstractTokenGenerator<
+  T extends Token,
+  P extends TokenGeneratorParameters,
+  C
+> implements TokenGeneratorInterface<T, P> {
+  readonly tokenGeneratorConfig: C;
 
-  constructor(tokenGeneratorConfig: P) {
+  constructor(tokenGeneratorConfig: C) {
     this.tokenGeneratorConfig = tokenGeneratorConfig;
     if (typeof this.checkTokenGeneratorConfig === 'function') {
       this.checkTokenGeneratorConfig(this.tokenGeneratorConfig);
@@ -20,11 +26,11 @@ abstract class AbstractTokenGenerator<T extends Token, P>
 
   abstract generateToken(parameters: P): Promise<T>;
 
-  abstract refreshToken(accessToken: T, parameters: P): Promise<T>;
+  abstract refreshToken(accessToken: T): Promise<T>;
 
-  abstract checkTokenGeneratorConfig(config: P): void;
+  abstract checkTokenGeneratorConfig(config: C): void;
 
-  _manageOauthError(response: Response): Promise<void> {
+  _manageOauthError(response: Response): Promise<never> {
     return response
       .json()
       .then((body) => {
