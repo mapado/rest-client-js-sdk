@@ -40,7 +40,6 @@ interface ClientCredentialToken extends Token {
 
 class ClientCredentialsGenerator extends AbstractTokenGenerator<
   ClientCredentialToken,
-  Parameters,
   Config
 > {
   constructor(tokenGeneratorConfig: Config) {

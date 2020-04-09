@@ -10,11 +10,8 @@ export interface TokenGeneratorParameters {
   grant_type: string;
 }
 
-export default interface TokenGeneratorInterface<
-  T extends Token,
-  P extends TokenGeneratorParameters
-> {
-  generateToken(parameters: P): Promise<T>;
+export default interface TokenGeneratorInterface<T extends Token> {
+  generateToken(parameters: unknown): Promise<T>;
 
   refreshToken(accessToken: T): Promise<T>;
 

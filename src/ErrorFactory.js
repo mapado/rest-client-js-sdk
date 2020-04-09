@@ -99,6 +99,9 @@ function InternalServerError(message, baseResponse) {
 InternalServerError.prototype = Object.create(HttpError.prototype);
 InternalServerError.prototype.constructor = InternalServerError;
 
+/**
+ * @returns {HttpError}
+ */
 const getHttpErrorFromResponse = (response) => {
   switch (true) {
     case response.status === 401:

@@ -33,6 +33,7 @@ type DefaultParameters = {
 type GenerateTokenParameters = {
   username: string;
   password: string;
+  scope?: string;
 };
 
 type RefreshTokenParameters = {
@@ -50,11 +51,7 @@ interface PasswordToken extends Token {
 type CallParameters = DefaultParameters &
   (GenerateTokenParameters | RefreshTokenParameters);
 
-class PasswordGenerator extends AbstractTokenGenerator<
-  PasswordToken,
-  DefaultParameters & GenerateTokenParameters,
-  Config
-> {
+class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
   constructor(props: Config) {
     super(props);
     this._doFetch = memoizePromise(this._doFetch);

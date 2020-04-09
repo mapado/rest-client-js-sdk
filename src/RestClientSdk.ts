@@ -18,10 +18,10 @@ type Config = {
   useDefaultParameters?: boolean;
 };
 
-class RestClientSdk<T extends Token, G extends TokenGeneratorParameters> {
+class RestClientSdk<T extends Token> {
   config: Config;
 
-  public tokenStorage: TokenStorage<T, G>;
+  public tokenStorage: TokenStorage<T>;
 
   public serializer: SerializerInterface;
 
@@ -29,10 +29,10 @@ class RestClientSdk<T extends Token, G extends TokenGeneratorParameters> {
 
   public unitOfWork: UnitOfWork;
 
-  #repositoryList: { [key: string]: AbstractClient };
+  #repositoryList: { [key: string]: AbstractClient<unknown, unknown, T> };
 
   constructor(
-    tokenStorage: TokenStorage<T, G>,
+    tokenStorage: TokenStorage<T>,
     config: Config,
     mapping: Mapping,
     serializer: SerializerInterface = new JsSerializer()

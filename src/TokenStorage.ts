@@ -9,8 +9,8 @@ interface HasExpiresAt {
   expires_at: null | number;
 }
 
-class TokenStorage<T extends Token, G extends TokenGeneratorParameters> {
-  #tokenGenerator: TokenGeneratorInterface<T, G>;
+class TokenStorage<T extends Token> {
+  #tokenGenerator: TokenGeneratorInterface<T>;
 
   #hasATokenBeenGenerated: boolean;
 
@@ -19,7 +19,7 @@ class TokenStorage<T extends Token, G extends TokenGeneratorParameters> {
   #asyncStorage: AsyncStorageInterface;
 
   constructor(
-    tokenGenerator: TokenGeneratorInterface<T, G>,
+    tokenGenerator: TokenGeneratorInterface<T>,
     asyncStorage: AsyncStorageInterface,
     accessTokenKey = 'rest_client_sdk.api.access_token'
   ) {
@@ -94,7 +94,9 @@ class TokenStorage<T extends Token, G extends TokenGeneratorParameters> {
     return updatedResponseData;
   }
 
-  generateToken(parameters: G): Promise<T & HasExpiresAt> {
+  generateToken<G extends TokenGeneratorParameters>(
+    parameters: G
+  ): Promise<T & HasExpiresAt> {
     this.#hasATokenBeenGenerated = true;
     const callTimestamp = Date.now();
 

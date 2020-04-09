@@ -12,6 +12,7 @@
   - [Might Break] `ClassMetadata`, `Attribute` and `Relation` attributes are now `readonly`. You can not change them after initialization.
   - [Might Break] `AbstractTokenGenerator` is now abstract. It should not have been used directly anyway. It implies that the method than previously did thrown errors are not callable (`generateToken`, `refreshToken` and `checkTokenGeneratorConfig`). They should not have been called.
   - `canAutogenerateToken` has been removed from the token storages and replaced by a `autogenerateToken()` method (it's not real POO, but I did not manage to deal with instance of for now)
+  - [Might Break] AbstractClient.\_refreshTokenAndRefetch does not take the response as a first argument (it wan unused). The method was supposed to be private be the way.
 
 ## 4.1.2
 

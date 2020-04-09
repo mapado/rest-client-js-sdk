@@ -13,8 +13,7 @@ type Parameters = {
   grant_type: 'provided';
 };
 
-class ProvidedTokenGenerator
-  implements TokenGeneratorInterface<ProvidedToken, Parameters> {
+class ProvidedTokenGenerator implements TokenGeneratorInterface<ProvidedToken> {
   #token: string;
 
   #refreshTokenFunc: null | Function;

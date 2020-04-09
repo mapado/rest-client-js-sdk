@@ -2,14 +2,14 @@
 import SerializerInterface from './SerializerInterface';
 import ClassMetadata from '../Mapping/ClassMetadata';
 
-class Serializer<I extends object, L = I[]> implements SerializerInterface {
+class Serializer implements SerializerInterface {
   /**
    * convert an entity to a plain javascript object
    * @param {any} entity - The entity to convert
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {object} the object to serialize
    */
-  normalizeItem(entity: I, classMetadata: ClassMetadata): object {
+  normalizeItem(entity: object, classMetadata: ClassMetadata): object {
     return entity;
   }
 
@@ -29,7 +29,10 @@ class Serializer<I extends object, L = I[]> implements SerializerInterface {
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {string} the content of the request
    */
-  serializeItem(object: I, classMetadata: ClassMetadata): string {
+  serializeItem<E extends object>(
+    object: E,
+    classMetadata: ClassMetadata
+  ): string {
     const noralizedData = this.normalizeItem(object, classMetadata);
     return this.encodeItem(noralizedData, classMetadata);
   }
@@ -41,12 +44,12 @@ class Serializer<I extends object, L = I[]> implements SerializerInterface {
    * @param {object} response - the HTTP response
    * @return {any} an entity
    */
-  denormalizeItem(
+  denormalizeItem<E>(
     object: object,
     classMetadata: ClassMetadata,
     response: Response
-  ): I {
-    return object as I;
+  ): E {
+    return (object as unknown) as E;
   }
 
   /**
@@ -69,13 +72,13 @@ class Serializer<I extends object, L = I[]> implements SerializerInterface {
    * @param {string} rawData - The string fetched from the response
    * @param {ClassMetadata} classMetadata - the class metadata
    * @param {object} response - the HTTP response
-   * @return {object} the entity
+   * @return {E} the entity
    */
-  deserializeItem(
+  deserializeItem<E>(
     rawData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): I {
+  ): E {
     const object = this.decodeItem(rawData, classMetadata, response);
     return this.denormalizeItem(object, classMetadata, response);
   }
@@ -87,7 +90,7 @@ class Serializer<I extends object, L = I[]> implements SerializerInterface {
    * @param {object} response - the HTTP response
    * @return {L} a list of entities
    */
-  denormalizeList(
+  denormalizeList<L>(
     objectList: object | object[],
     classMetadata: ClassMetadata,
     response: Response
@@ -117,7 +120,7 @@ class Serializer<I extends object, L = I[]> implements SerializerInterface {
    * @param {object} response - the HTTP response
    * @return {any} a list of entities
    */
-  deserializeList(
+  deserializeList<L>(
     rawListData: string,
     classMetadata: ClassMetadata,
     response: Response

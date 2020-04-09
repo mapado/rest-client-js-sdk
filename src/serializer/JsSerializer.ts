@@ -2,7 +2,7 @@
 import Serializer from './Serializer';
 import ClassMetadata from '../Mapping/ClassMetadata';
 
-class JsSerializer extends Serializer<object, object[]> {
+class JsSerializer extends Serializer {
   encodeItem(object: object, classMetadata: ClassMetadata): string {
     return JSON.stringify(object);
   }

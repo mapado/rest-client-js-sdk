@@ -5,16 +5,10 @@ import {
   InvalidScopeError,
   OauthError,
 } from '../ErrorFactory';
-import TokenGeneratorInterface, {
-  Token,
-  TokenGeneratorParameters,
-} from './TokenGeneratorInterface';
+import TokenGeneratorInterface, { Token } from './TokenGeneratorInterface';
 
-abstract class AbstractTokenGenerator<
-  T extends Token,
-  P extends TokenGeneratorParameters,
-  C
-> implements TokenGeneratorInterface<T, P> {
+abstract class AbstractTokenGenerator<T extends Token, C>
+  implements TokenGeneratorInterface<T> {
   readonly tokenGeneratorConfig: C;
 
   constructor(tokenGeneratorConfig: C) {
@@ -24,7 +18,7 @@ abstract class AbstractTokenGenerator<
     }
   }
 
-  abstract generateToken(parameters: P): Promise<T>;
+  abstract generateToken(parameters: unknown): Promise<T>;
 
   abstract refreshToken(accessToken: T): Promise<T>;
 
