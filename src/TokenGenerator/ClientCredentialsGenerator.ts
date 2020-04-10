@@ -2,7 +2,7 @@
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
-import { Token, TokenGeneratorParameters } from './TokenGeneratorInterface';
+import { Token, TokenGeneratorParameters } from './types';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =

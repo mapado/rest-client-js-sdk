@@ -1,14 +1,15 @@
 import URI from 'urijs';
 import { OauthError, getHttpErrorFromResponse } from '../ErrorFactory';
-import RestClientSdk from '../RestClientSdk';
-import ClassMetadata from '../Mapping/ClassMetadata';
 import TokenStorage from '../TokenStorage';
-import SerializerInterface from '../serializer/SerializerInterface';
-import { Token } from '../TokenGenerator/TokenGeneratorInterface';
+import { Token } from '../TokenGenerator/types';
+import { removeAuthorization, removeUndefinedHeaders } from './headerUtils';
+import type RestClientSdk from '../RestClientSdk';
+import type ClassMetadata from '../Mapping/ClassMetadata';
+import type SerializerInterface from '../serializer/SerializerInterface';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
-class AbstractClient<E extends object, L, T extends Token> {
+class AbstractClient<E extends object, L extends Iterable<E>, T extends Token> {
   sdk: RestClientSdk<T>;
 
   #tokenStorage: TokenStorage<T>;
@@ -174,7 +175,7 @@ class AbstractClient<E extends object, L, T extends Token> {
       .then(({ response, text }) => {
         if (listOrItem === 'list') {
           // for list, we need to deserialize the result to get an object
-          const itemList = this.serializer.deserializeList<L>(
+          const itemList = this.serializer.deserializeList<E, L>(
             text,
             this.metadata,
             response
@@ -312,17 +313,16 @@ class AbstractClient<E extends object, L, T extends Token> {
 
   _refreshTokenAndRefetch(
     input: string,
-    requestParams: { headers?: HeadersInit } = {}
+    requestParams: RequestInit = {}
   ): Promise<Response> {
     return this.#tokenStorage.refreshToken().then(() => {
-      const updatedRequestParams: RequestInit = {
-        ...requestParams,
-        headers: { ...requestParams.headers },
-      };
+      // eslint-disable-next-line prefer-const
+      let { headers, ...rest } = requestParams;
 
-      if (typeof updatedRequestParams.headers?.Authorization !== 'undefined') {
-        delete updatedRequestParams.headers.Authorization;
-      }
+      const updatedRequestParams: RequestInit = {
+        ...rest,
+        headers: removeAuthorization(headers),
+      };
 
       return this._fetchWithToken(input, updatedRequestParams);
     });
@@ -368,7 +368,7 @@ class AbstractClient<E extends object, L, T extends Token> {
   _doFetch(
     accessToken: null | string,
     input: string,
-    requestParams: { headers?: HeadersInit }
+    requestParams: RequestInit
   ): Promise<Response> {
     let params = requestParams;
 
@@ -397,7 +397,7 @@ class AbstractClient<E extends object, L, T extends Token> {
     }
 
     if (params.headers) {
-      params.headers = this._removeUndefinedHeaders(params.headers);
+      params.headers = removeUndefinedHeaders(params.headers);
     }
 
     // eslint-disable-next-line consistent-return
@@ -413,18 +413,6 @@ class AbstractClient<E extends object, L, T extends Token> {
       const httpError = getHttpErrorFromResponse(response);
       throw httpError;
     });
-  }
-
-  _removeUndefinedHeaders(headers: HeadersInit): HeadersInit {
-    // remove undefined key, usefull to remove Content-Type for example
-    const localHeaders = headers;
-    Object.keys(localHeaders).forEach((key) => {
-      if (localHeaders[key] === undefined) {
-        delete localHeaders[key];
-      }
-    });
-
-    return localHeaders;
   }
 
   _getEntityIdentifier(object: object): null | string | number {

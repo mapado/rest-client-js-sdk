@@ -4,10 +4,7 @@ import Mapping from './Mapping';
 import TokenStorage from './TokenStorage';
 import SerializerInterface from './serializer/SerializerInterface';
 import AbstractClient from './client/AbstractClient';
-import {
-  TokenGeneratorParameters,
-  Token,
-} from './TokenGenerator/TokenGeneratorInterface';
+import { Token } from './TokenGenerator/types';
 
 type Config = {
   path: string;
@@ -29,7 +26,7 @@ class RestClientSdk<T extends Token> {
 
   public unitOfWork: UnitOfWork;
 
-  #repositoryList: { [key: string]: AbstractClient<unknown, unknown, T> };
+  #repositoryList: { [key: string]: AbstractClient<any, any, any> };
 
   constructor(
     tokenStorage: TokenStorage<T>,
@@ -53,7 +50,9 @@ class RestClientSdk<T extends Token> {
     this.#repositoryList = {};
   }
 
-  getRepository(key: string): AbstractClient {
+  getRepository<E extends object, L extends Iterable<E>, T extends Token>(
+    key: string
+  ): AbstractClient<E, L, T> {
     if (!this.#repositoryList[key]) {
       const metadata = this.mapping.getClassMetadataByKey(key);
 
@@ -62,7 +61,10 @@ class RestClientSdk<T extends Token> {
       }
 
       // eslint-disable-next-line new-cap
-      this.#repositoryList[key] = new metadata.repositoryClass(this, metadata);
+      this.#repositoryList[key] = (new metadata.repositoryClass(
+        this,
+        metadata
+      ) as unknown) as AbstractClient<E, L, T>;
     }
 
     return this.#repositoryList[key];

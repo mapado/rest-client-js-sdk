@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import TokenGeneratorInterface, {
-  Token,
-  TokenGeneratorParameters,
-} from './TokenGenerator/TokenGeneratorInterface';
+import TokenGeneratorInterface from './TokenGenerator/TokenGeneratorInterface';
+import { Token, TokenGeneratorParameters } from './TokenGenerator/types';
 import AsyncStorageInterface from './AsyncStorageInterface';
 
 interface HasExpiresAt {

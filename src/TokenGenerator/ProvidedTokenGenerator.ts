@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import TokenGeneratorInterface, { Token } from './TokenGeneratorInterface';
+import TokenGeneratorInterface from './TokenGeneratorInterface';
+import { Token } from './types';
 
 interface ProvidedToken extends Token {
   access_token: string;

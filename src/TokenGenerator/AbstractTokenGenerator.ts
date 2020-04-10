@@ -5,7 +5,8 @@ import {
   InvalidScopeError,
   OauthError,
 } from '../ErrorFactory';
-import TokenGeneratorInterface, { Token } from './TokenGeneratorInterface';
+import TokenGeneratorInterface from './TokenGeneratorInterface';
+import { Token } from './types';
 
 abstract class AbstractTokenGenerator<T extends Token, C>
   implements TokenGeneratorInterface<T> {

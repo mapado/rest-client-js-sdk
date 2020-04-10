@@ -79,7 +79,7 @@ export default interface SerializerInterface {
    * @param {object} response - the HTTP response
    * @return {L} a list of entities
    */
-  deserializeList<L>(
+  deserializeList<E, L extends Iterable<E>>(
     rawListData: string,
     classMetadata: ClassMetadata,
     response: Response
