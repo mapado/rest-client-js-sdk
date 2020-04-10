@@ -132,7 +132,10 @@ class AbstractClient<E extends object, L extends Iterable<E>, T extends Token> {
     );
 
     const identifier = this._getEntityIdentifier(newSerializedModel);
-    const oldModel = this.sdk.unitOfWork.getDirtyEntity(identifier);
+    let oldModel;
+    if (identifier !== null) {
+      oldModel = this.sdk.unitOfWork.getDirtyEntity(identifier);
+    }
 
     if (oldModel) {
       newSerializedModel = this.sdk.unitOfWork.getDirtyData(
@@ -160,7 +163,9 @@ class AbstractClient<E extends object, L extends Iterable<E>, T extends Token> {
       method: 'DELETE',
       ...requestParams,
     }).then((response) => {
-      this.sdk.unitOfWork.clear(identifier);
+      if (identifier !== null) {
+        this.sdk.unitOfWork.clear(identifier);
+      }
 
       return response;
     });
@@ -190,7 +195,9 @@ class AbstractClient<E extends object, L extends Iterable<E>, T extends Token> {
             );
 
             // then we register the re-normalized item
-            this.sdk.unitOfWork.registerClean(identifier, normalizedItem);
+            if (identifier !== null) {
+              this.sdk.unitOfWork.registerClean(identifier, normalizedItem);
+            }
           }
 
           return itemList as L;
@@ -213,10 +220,12 @@ class AbstractClient<E extends object, L extends Iterable<E>, T extends Token> {
           response
         );
 
-        this.sdk.unitOfWork.registerClean(
-          identifier,
-          this.serializer.normalizeItem(item, this.metadata)
-        );
+        if (identifier !== null) {
+          this.sdk.unitOfWork.registerClean(
+            identifier,
+            this.serializer.normalizeItem(item, this.metadata)
+          );
+        }
 
         return item as E;
       });

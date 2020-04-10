@@ -4,7 +4,7 @@ import Relation from './Relation';
 
 type AttributeListType = { [key: string]: Attribute };
 type RelationListType = { [key: string]: Relation };
-type DefaultSerializedModelType = {
+export type DefaultSerializedModelType = {
   [key: string]: null | null[];
 };
 
