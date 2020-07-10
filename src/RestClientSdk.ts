@@ -15,10 +15,9 @@ type Config = {
   useDefaultParameters?: boolean;
 };
 
-class RestClientSdk<
-  Metadata extends Record<string, [any, Iterable<any>]>,
-  T extends Token
-> {
+export type SdkMetadata = Record<string, [any, Iterable<any>]>;
+
+class RestClientSdk<M extends SdkMetadata, T extends Token> {
   config: Config;
 
   public tokenStorage: TokenStorage<T>;
@@ -29,9 +28,7 @@ class RestClientSdk<
 
   public unitOfWork: UnitOfWork;
 
-  #repositoryList: Partial<
-    Record<keyof Metadata, AbstractClient<Metadata, any, any, any>>
-  >;
+  #repositoryList: Partial<Record<keyof M, AbstractClient<M, keyof M, any>>>;
 
   constructor(
     tokenStorage: TokenStorage<T>,
@@ -55,11 +52,7 @@ class RestClientSdk<
     this.#repositoryList = {};
   }
 
-  getRepository<
-    K extends keyof Metadata & string,
-    E extends Metadata[K][0],
-    L extends Metadata[K][1] & Iterable<E>
-  >(key: K): AbstractClient<Metadata, E, L, T> {
+  getRepository<K extends keyof M & string>(key: K): AbstractClient<M, K, T> {
     if (!this.#repositoryList[key]) {
       const metadata = this.mapping.getClassMetadataByKey(key);
 
@@ -71,7 +64,8 @@ class RestClientSdk<
       this.#repositoryList[key] = new metadata.repositoryClass(this, metadata);
     }
 
-    return this.#repositoryList[key] as AbstractClient<Metadata, E, L, T>;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this.#repositoryList[key]!;
   }
 
   private _mergeWithBaseConfig(config: Config): Config {

@@ -54,6 +54,28 @@ categoryMetadata.setRelationList([
 mapping.setMapping([productMetadata, categoryMetadata]);
 ```
 
+Typescript users:
+
+```ts
+type Product = {
+  @id: string;
+  name: string;
+  categoryList: Category[];
+};
+
+type Category = {
+  @id: string;
+  name: string;
+  product: Product;
+};
+
+type TSMetadata = {
+  // first value is the entity object, second one is the listing type, it can be any Iterable<Entity>
+  products: [Product, Array<Product>];
+  categories: [Category, Array<Category>];
+};
+```
+
 ### Create the SDK
 
 #### Create the token storage
@@ -95,6 +117,14 @@ const config = {
 const sdk = new RestClientSdk(tokenStorage, config, mapping);
 ```
 
+Typescript users:
+
+```ts
+import RestClientSdk, { Token } from 'rest-client-sdk';
+
+const sdk = new RestClientSdk<TSMetadata, Token>(tokenStorage, config, mapping);
+```
+
 ### Make calls
 
 #### Find
@@ -109,6 +139,9 @@ sdk.getRepository('products').findAll(); // will find all entities. ie. /v2/my_p
 sdk.getRepository('products').findBy({ foo: 'bar' }); // will find all entities for the request: /v2/my_products?foo=bar
 ```
 
+All these methods returns promises.
+`find` returns a `Promise<Entity>`, `findBy` and `findAll` returns `Promise<Iterable<Entity>>`
+
 #### Update / delete
 
 ```js
@@ -118,6 +151,10 @@ sdk.getRepository('products').update(entity);
 
 sdk.getRepository('products').delete(entity);
 ```
+
+All these methods returns promises.
+`create` and `update` returns a `Promise<Entity>` with the new entity.
+`delete` returns `Promise<void>`.
 
 ### Overriding repository
 
@@ -137,6 +174,26 @@ class SomeEntityClient extends AbstractClient {
 }
 
 export default SomeEntityClient;
+```
+
+Typescript users:
+
+```ts
+import { SdkMetadata } from 'rest-client-sdk';
+
+class SomeEntityClient<
+  M extends SdkMetadata,
+  K extends keyof M,
+  T extends Token
+> extends AbstractClient<M, K, T> {
+  getPathBase(pathParameters: object) {
+    return '/v2/some_entities'; // you need to return the full query string for the collection GET query
+  }
+
+  getEntityURI(entity: M[K][0]) {
+    return `${this.getPathBase()}/${entity.id}`; // this will be the URI used by update / delete script
+  }
+}
 ```
 
 ### Custom serializer
@@ -181,3 +238,6 @@ const serializer = new JsSerializer();
 
 const sdk = new RestClientSdk(tokenStorage, config, clients, serializer);
 ```
+
+Typescript users:
+@TODO

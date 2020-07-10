@@ -3,19 +3,21 @@ import { OauthError, getHttpErrorFromResponse } from '../ErrorFactory';
 import TokenStorage from '../TokenStorage';
 import { Token } from '../TokenGenerator/types';
 import { removeAuthorization, removeUndefinedHeaders } from './headerUtils';
+// eslint-disable-next-line import/no-duplicates
 import type RestClientSdk from '../RestClientSdk';
+// eslint-disable-next-line import/no-duplicates
+import type { SdkMetadata } from '../RestClientSdk';
 import type ClassMetadata from '../Mapping/ClassMetadata';
 import type SerializerInterface from '../serializer/SerializerInterface';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
 class AbstractClient<
-  Metadata extends Record<string, [any, Iterable<any>]>,
-  E extends object,
-  L extends Iterable<E>,
+  M extends SdkMetadata,
+  K extends keyof M,
   T extends Token
 > {
-  sdk: RestClientSdk<Metadata, T>;
+  sdk: RestClientSdk<M, T>;
 
   #tokenStorage: TokenStorage<T>;
 
@@ -23,7 +25,7 @@ class AbstractClient<
 
   metadata: ClassMetadata;
 
-  constructor(sdk: RestClientSdk<Metadata, T>, metadata: ClassMetadata) {
+  constructor(sdk: RestClientSdk<M, T>, metadata: ClassMetadata) {
     this.sdk = sdk;
     this.#tokenStorage = sdk.tokenStorage;
     this.serializer = sdk.serializer;
@@ -39,7 +41,7 @@ class AbstractClient<
     return `/${this.metadata.pathRoot}`;
   }
 
-  getEntityURI(entity: E): string {
+  getEntityURI(entity: M[K][0]): string {
     let idValue = this._getEntityIdentifier(entity);
 
     if (idValue === null) {
@@ -66,42 +68,42 @@ class AbstractClient<
     queryParam = {},
     pathParameters = {},
     requestParams = {}
-  ): Promise<E> {
+  ): Promise<M[K][0]> {
     const url = this._generateUrlFromParams(queryParam, pathParameters, id);
 
     return this.deserializeResponse(
       this.authorizedFetch(url, requestParams),
       'item'
-    ) as Promise<E>;
+    ) as Promise<M[K][0]>;
   }
 
   findBy(
     queryParam: object,
     pathParameters = {},
     requestParams = {}
-  ): Promise<L> {
+  ): Promise<M[K][1]> {
     const url = this._generateUrlFromParams(queryParam, pathParameters);
 
     return this.deserializeResponse(
       this.authorizedFetch(url, requestParams),
       'list'
-    ) as Promise<L>;
+    ) as Promise<M[K][1]>;
   }
 
   findAll(
     queryParam = {},
     pathParameters = {},
     requestParams = {}
-  ): Promise<L> {
+  ): Promise<M[K][1]> {
     return this.findBy(queryParam, pathParameters, requestParams);
   }
 
   create(
-    entity: E,
+    entity: M[K][0],
     queryParam = {},
     pathParameters = {},
     requestParams = {}
-  ): Promise<E> {
+  ): Promise<M[K][0]> {
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
 
@@ -124,10 +126,14 @@ class AbstractClient<
         ...requestParams,
       }),
       'item'
-    ) as Promise<E>;
+    ) as Promise<M[K][0]>;
   }
 
-  update(entity: E, queryParam = {}, requestParams = {}): Promise<E> {
+  update(
+    entity: M[K][0],
+    queryParam = {},
+    requestParams = {}
+  ): Promise<M[K][0]> {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
@@ -157,10 +163,10 @@ class AbstractClient<
         ...requestParams,
       }),
       'item'
-    ) as Promise<E>;
+    ) as Promise<M[K][0]>;
   }
 
-  delete(entity: E, requestParams = {}): Promise<Response> {
+  delete(entity: M[K][0], requestParams = {}): Promise<Response> {
     const url = this.getEntityURI(entity);
     const identifier = this._getEntityIdentifier(entity);
 
@@ -179,13 +185,13 @@ class AbstractClient<
   deserializeResponse<LOR extends 'list' | 'item'>(
     requestPromise: Promise<Response>,
     listOrItem: LOR
-  ): Promise<E | L> {
+  ): Promise<M[K][0] | M[K][1]> {
     return requestPromise
       .then((response) => response.text().then((text) => ({ response, text })))
       .then(({ response, text }) => {
         if (listOrItem === 'list') {
           // for list, we need to deserialize the result to get an object
-          const itemList = this.serializer.deserializeList<E, L>(
+          const itemList = this.serializer.deserializeList<M[K][0], M[K][1]>(
             text,
             this.metadata,
             response
@@ -205,7 +211,7 @@ class AbstractClient<
             }
           }
 
-          return itemList as L;
+          return itemList as M[K][1];
         }
 
         // for items, we can just decode the item (ie. transform it to JS object)
@@ -219,7 +225,7 @@ class AbstractClient<
         const identifier = this._getEntityIdentifier(decodedItem);
 
         // and finally return the denormalized item
-        const item = this.serializer.denormalizeItem<E>(
+        const item = this.serializer.denormalizeItem<M[K][0]>(
           decodedItem,
           this.metadata,
           response
@@ -232,7 +238,7 @@ class AbstractClient<
           );
         }
 
-        return item as E;
+        return item as M[K][0];
       });
   }
 

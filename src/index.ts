@@ -24,6 +24,7 @@ import ClassMetadata from './Mapping/ClassMetadata';
 import Attribute from './Mapping/Attribute';
 import Relation from './Mapping/Relation';
 import type { Token } from './TokenGenerator/types';
+import type { SdkMetadata } from './RestClientSdk';
 
 export default RestClientSdk;
 export {
@@ -49,4 +50,4 @@ export {
   Attribute,
   Relation,
 };
-export type { SerializerInterface, Token };
+export type { SerializerInterface, Token, SdkMetadata };
