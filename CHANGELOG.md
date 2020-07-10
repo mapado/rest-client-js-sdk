@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- [BREAKING] TokenGenerator's `refreshToken` method signature changed from `refreshToken(accessToken, parameters)` to `refreshToken(accessToken)`.
+  If you did extend the `AbstractToken` generator, you shouldn't relly on the second parameter.
+  As a matter of fact, the auto-refreshed token in `AbstractClient` did not send any parameters either, so it should not have been working before !
+- [BREAKING] Accordingly The `refreshToken` method of `TokenStorage` signature changed from `refreshToken(parameters)` to `refreshToken()`
+- Migrate codebase to TypeScript. It should not change anything to users, exept a more robust code for TypeScript users. Some small undocumented cases might break:
+  - [Might Break] `ClassMetadata`, `Attribute` and `Relation` attributes are now `readonly`. You can not change them after initialization.
+  - [Might Break] `AbstractTokenGenerator` is now abstract. It should not have been used directly anyway. It implies that the method that previously did thrown errors are not callable (`generateToken`, `refreshToken` and `checkTokenGeneratorConfig`). They should not have been called.
+  - `canAutogenerateToken` has been removed from the token storages and replaced by a `autogenerateToken()` method (it's not real POO, but I did not manage to deal with instance of for now)
+  - [Might Break] AbstractClient.\_refreshTokenAndRefetch does not take the response as a first argument (it wan unused). The method was supposed to be private be the way.
+
 ## 4.1.2
 
 ### Fixed

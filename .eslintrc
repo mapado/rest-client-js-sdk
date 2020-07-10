@@ -1,8 +1,29 @@
 {
-  "extends": ["airbnb", "prettier"],
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "airbnb",
+    "airbnb/hooks",
+    "prettier",
+    "prettier/react",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier/@typescript-eslint",
+    "plugin:import/typescript"
+  ],
+  "plugins": ["prettier", "@typescript-eslint"],
   "env": { "browser": true },
-  "plugins": ["prettier"],
   "rules": {
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "ts": "never",
+        "jsx": "never",
+        "tsx": "never"
+      }
+    ],
     "class-methods-use-this": [0],
     "new-cap": [
       2,
@@ -32,8 +53,8 @@
   },
   "overrides": [
     {
-      files: ["__tests__/**/*"],
-      env: { "jest": true }
+      "files": ["__tests__/**/*"],
+      "env": { "jest": true }
     }
   ]
 }

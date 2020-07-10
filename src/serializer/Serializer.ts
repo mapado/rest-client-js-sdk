@@ -1,13 +1,15 @@
-/* eslint no-unused-vars: 0 */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import SerializerInterface from './SerializerInterface';
+import ClassMetadata from '../Mapping/ClassMetadata';
 
-class Serializer {
+class Serializer implements SerializerInterface {
   /**
    * convert an entity to a plain javascript object
    * @param {any} entity - The entity to convert
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {object} the object to serialize
    */
-  normalizeItem(entity, classMetadata) {
+  normalizeItem(entity: object, classMetadata: ClassMetadata): object {
     return entity;
   }
 
@@ -17,7 +19,7 @@ class Serializer {
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {string} the content of the request
    */
-  encodeItem(object, classMetadata) {
+  encodeItem(object: object, classMetadata: ClassMetadata): string {
     throw new TypeError('`encodeItem` method must be implemented');
   }
 
@@ -27,7 +29,10 @@ class Serializer {
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {string} the content of the request
    */
-  serializeItem(object, classMetadata) {
+  serializeItem<E extends object>(
+    object: E,
+    classMetadata: ClassMetadata
+  ): string {
     const noralizedData = this.normalizeItem(object, classMetadata);
     return this.encodeItem(noralizedData, classMetadata);
   }
@@ -39,8 +44,12 @@ class Serializer {
    * @param {object} response - the HTTP response
    * @return {any} an entity
    */
-  denormalizeItem(object, classMetadata, response) {
-    return object;
+  denormalizeItem<E>(
+    object: object,
+    classMetadata: ClassMetadata,
+    response: Response
+  ): E {
+    return (object as unknown) as E;
   }
 
   /**
@@ -50,7 +59,11 @@ class Serializer {
    * @param {object} response - the HTTP response
    * @return {object} the normalized object
    */
-  decodeItem(rawData, classMetadata, response) {
+  decodeItem(
+    rawData: string,
+    classMetadata: ClassMetadata,
+    response: Response
+  ): object {
     throw new TypeError('`decodeItem` method must be implemented');
   }
 
@@ -59,22 +72,30 @@ class Serializer {
    * @param {string} rawData - The string fetched from the response
    * @param {ClassMetadata} classMetadata - the class metadata
    * @param {object} response - the HTTP response
-   * @return {object} the entity
+   * @return {E} the entity
    */
-  deserializeItem(rawData, classMetadata, response) {
+  deserializeItem<E>(
+    rawData: string,
+    classMetadata: ClassMetadata,
+    response: Response
+  ): E {
     const object = this.decodeItem(rawData, classMetadata, response);
     return this.denormalizeItem(object, classMetadata, response);
   }
 
   /**
    * convert a plain object list to an entity list
-   * @param {array} objectList - The plain javascript object list
+   * @param {object|object[]} objectList - The plain javascript object list (or an iterable object)
    * @param {ClassMetadata} classMetadata - the class metadata
    * @param {object} response - the HTTP response
-   * @return {any} a list of entities
+   * @return {L} a list of entities
    */
-  denormalizeList(objectList, classMetadata, response) {
-    return objectList;
+  denormalizeList<L>(
+    objectList: object | object[],
+    classMetadata: ClassMetadata,
+    response: Response
+  ): L {
+    return (objectList as unknown) as L; // weird conversion as the declaration of list type is fuzzy
   }
 
   /**
@@ -84,7 +105,11 @@ class Serializer {
    * @param {object} response - the HTTP response
    * @return {any} a list of normalized objects
    */
-  decodeList(rawListData, classMetadata, response) {
+  decodeList(
+    rawListData: string,
+    classMetadata: ClassMetadata,
+    response: Response
+  ): object | object[] {
     throw new TypeError('`deserializeList` method must be implemented');
   }
 
@@ -95,7 +120,11 @@ class Serializer {
    * @param {object} response - the HTTP response
    * @return {any} a list of entities
    */
-  deserializeList(rawListData, classMetadata, response) {
+  deserializeList<L>(
+    rawListData: string,
+    classMetadata: ClassMetadata,
+    response: Response
+  ): L {
     const objectList = this.decodeList(rawListData, classMetadata, response);
     return this.denormalizeList(objectList, classMetadata, response);
   }

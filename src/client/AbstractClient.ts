@@ -1,30 +1,52 @@
 import URI from 'urijs';
 import { OauthError, getHttpErrorFromResponse } from '../ErrorFactory';
+import TokenStorage from '../TokenStorage';
+import { Token } from '../TokenGenerator/types';
+import { removeAuthorization, removeUndefinedHeaders } from './headerUtils';
+import type RestClientSdk from '../RestClientSdk';
+import type ClassMetadata from '../Mapping/ClassMetadata';
+import type SerializerInterface from '../serializer/SerializerInterface';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
-class AbstractClient {
-  constructor(sdk, metadata) {
+class AbstractClient<E extends object, L extends Iterable<E>, T extends Token> {
+  sdk: RestClientSdk<T>;
+
+  #tokenStorage: TokenStorage<T>;
+
+  serializer: SerializerInterface;
+
+  metadata: ClassMetadata;
+
+  constructor(sdk: RestClientSdk<T>, metadata: ClassMetadata) {
     this.sdk = sdk;
-    this._tokenStorage = sdk.tokenStorage;
+    this.#tokenStorage = sdk.tokenStorage;
     this.serializer = sdk.serializer;
     this.metadata = metadata;
   }
 
-  getDefaultParameters() {
-    return [];
+  getDefaultParameters(): object {
+    return {};
   }
 
-  // eslint-disable-next-line no-unused-vars
-  getPathBase(pathParameters) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getPathBase(pathParameters: object): string {
     return `/${this.metadata.pathRoot}`;
   }
 
-  getEntityURI(entity) {
+  getEntityURI(entity: E): string {
     let idValue = this._getEntityIdentifier(entity);
 
-    if (Number.isFinite(idValue)) {
-      idValue = idValue.toString();
+    if (idValue === null) {
+      throw new Error('Cannot call `getEntityURI for entity without id.`');
+    }
+
+    if (typeof idValue === 'number') {
+      if (Number.isFinite(idValue)) {
+        idValue = idValue.toString();
+      } else {
+        throw new Error('Unable to handle non-finite number');
+      }
     }
 
     const pathBase = this.getPathBase({});
@@ -34,29 +56,47 @@ class AbstractClient {
     return `${pathBase}/${idValue}`;
   }
 
-  find(id, queryParam = {}, pathParameters = {}, requestParams = {}) {
+  find(
+    id: string | number,
+    queryParam = {},
+    pathParameters = {},
+    requestParams = {}
+  ): Promise<E> {
     const url = this._generateUrlFromParams(queryParam, pathParameters, id);
 
     return this.deserializeResponse(
       this.authorizedFetch(url, requestParams),
       'item'
-    );
+    ) as Promise<E>;
   }
 
-  findBy(queryParam, pathParameters = {}, requestParams = {}) {
+  findBy(
+    queryParam: object,
+    pathParameters = {},
+    requestParams = {}
+  ): Promise<L> {
     const url = this._generateUrlFromParams(queryParam, pathParameters);
 
     return this.deserializeResponse(
       this.authorizedFetch(url, requestParams),
       'list'
-    );
+    ) as Promise<L>;
   }
 
-  findAll(queryParam = {}, pathParameters = {}, requestParams = {}) {
+  findAll(
+    queryParam = {},
+    pathParameters = {},
+    requestParams = {}
+  ): Promise<L> {
     return this.findBy(queryParam, pathParameters, requestParams);
   }
 
-  create(entity, queryParam = {}, pathParameters = {}, requestParams = {}) {
+  create(
+    entity: E,
+    queryParam = {},
+    pathParameters = {},
+    requestParams = {}
+  ): Promise<E> {
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
 
@@ -79,10 +119,10 @@ class AbstractClient {
         ...requestParams,
       }),
       'item'
-    );
+    ) as Promise<E>;
   }
 
-  update(entity, queryParam = {}, requestParams = {}) {
+  update(entity: E, queryParam = {}, requestParams = {}): Promise<E> {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
@@ -92,7 +132,10 @@ class AbstractClient {
     );
 
     const identifier = this._getEntityIdentifier(newSerializedModel);
-    const oldModel = this.sdk.unitOfWork.getDirtyEntity(identifier);
+    let oldModel;
+    if (identifier !== null) {
+      oldModel = this.sdk.unitOfWork.getDirtyEntity(identifier);
+    }
 
     if (oldModel) {
       newSerializedModel = this.sdk.unitOfWork.getDirtyData(
@@ -109,10 +152,10 @@ class AbstractClient {
         ...requestParams,
       }),
       'item'
-    );
+    ) as Promise<E>;
   }
 
-  delete(entity, requestParams = {}) {
+  delete(entity: E, requestParams = {}): Promise<Response> {
     const url = this.getEntityURI(entity);
     const identifier = this._getEntityIdentifier(entity);
 
@@ -120,19 +163,24 @@ class AbstractClient {
       method: 'DELETE',
       ...requestParams,
     }).then((response) => {
-      this.sdk.unitOfWork.clear(identifier);
+      if (identifier !== null) {
+        this.sdk.unitOfWork.clear(identifier);
+      }
 
       return response;
     });
   }
 
-  deserializeResponse(requestPromise, listOrItem) {
+  deserializeResponse<LOR extends 'list' | 'item'>(
+    requestPromise: Promise<Response>,
+    listOrItem: LOR
+  ): Promise<E | L> {
     return requestPromise
-      .then((response) => response.text().then((text) => [response, text]))
-      .then(([response, text]) => {
+      .then((response) => response.text().then((text) => ({ response, text })))
+      .then(({ response, text }) => {
         if (listOrItem === 'list') {
           // for list, we need to deserialize the result to get an object
-          const itemList = this.serializer.deserializeList(
+          const itemList = this.serializer.deserializeList<E, L>(
             text,
             this.metadata,
             response
@@ -141,13 +189,18 @@ class AbstractClient {
           // eslint-disable-next-line no-restricted-syntax
           for (const decodedItem of itemList) {
             const identifier = this._getEntityIdentifier(decodedItem);
-            const normalizedItem = this.serializer.normalizeItem(decodedItem);
+            const normalizedItem = this.serializer.normalizeItem(
+              decodedItem,
+              this.metadata
+            );
 
             // then we register the re-normalized item
-            this.sdk.unitOfWork.registerClean(identifier, normalizedItem);
+            if (identifier !== null) {
+              this.sdk.unitOfWork.registerClean(identifier, normalizedItem);
+            }
           }
 
-          return itemList;
+          return itemList as L;
         }
 
         // for items, we can just decode the item (ie. transform it to JS object)
@@ -161,27 +214,29 @@ class AbstractClient {
         const identifier = this._getEntityIdentifier(decodedItem);
 
         // and finally return the denormalized item
-        const item = this.serializer.denormalizeItem(
+        const item = this.serializer.denormalizeItem<E>(
           decodedItem,
           this.metadata,
           response
         );
 
-        this.sdk.unitOfWork.registerClean(
-          identifier,
-          this.serializer.normalizeItem(item)
-        );
+        if (identifier !== null) {
+          this.sdk.unitOfWork.registerClean(
+            identifier,
+            this.serializer.normalizeItem(item, this.metadata)
+          );
+        }
 
-        return item;
+        return item as E;
       });
   }
 
-  makeUri(input) {
+  makeUri(input: string | URI): URI {
     const url = input instanceof URI ? input : new URI(input);
     url.host(this.sdk.config.path).scheme(this.sdk.config.scheme);
 
     if (this.sdk.config.port) {
-      url.port(this.sdk.config.port);
+      url.port(String(this.sdk.config.port));
     }
 
     if (this.sdk.mapping.idPrefix) {
@@ -195,13 +250,17 @@ class AbstractClient {
     return url;
   }
 
-  authorizedFetch(input, requestParams = {}) {
+  authorizedFetch(input: string | URI, requestParams = {}): Promise<Response> {
     const url = this.makeUri(input);
 
     return this._fetchWithToken(url.toString(), requestParams);
   }
 
-  _generateUrlFromParams(queryParam, pathParameters = {}, id = null) {
+  _generateUrlFromParams(
+    queryParam: object,
+    pathParameters = {},
+    id: null | string | number = null
+  ): URI {
     const params = queryParam;
     if (this.sdk.config.useDefaultParameters) {
       Object.assign(params, this.getDefaultParameters());
@@ -231,22 +290,22 @@ class AbstractClient {
     return url;
   }
 
-  _fetchWithToken(input, requestParams = {}) {
+  _fetchWithToken(input: string, requestParams = {}): Promise<Response> {
     if (!input) {
       throw new Error('input is empty');
     }
 
-    if (this._tokenStorage) {
+    if (this.#tokenStorage) {
       return Promise.all([
-        this._tokenStorage.getCurrentTokenExpiresIn(),
-        this._tokenStorage.getAccessToken(),
+        this.#tokenStorage.getCurrentTokenExpiresIn(),
+        this.#tokenStorage.getAccessToken(),
       ])
         .then(([accessTokenExpiresIn, accessToken]) => {
           if (
             accessTokenExpiresIn !== null &&
             accessTokenExpiresIn <= EXPIRE_LIMIT_SECONDS
           ) {
-            return this._tokenStorage
+            return this.#tokenStorage
               .refreshToken()
               .then(
                 (refreshedTokenObject) => refreshedTokenObject.access_token
@@ -261,19 +320,28 @@ class AbstractClient {
     return this._doFetch(null, input, requestParams);
   }
 
-  _refreshTokenAndRefetch(response, input, requestParams = {}) {
-    return this._tokenStorage.refreshToken().then(() => {
-      const updatedRequestParams = {
-        ...requestParams,
-        headers: { ...requestParams.headers },
+  _refreshTokenAndRefetch(
+    input: string,
+    requestParams: RequestInit = {}
+  ): Promise<Response> {
+    return this.#tokenStorage.refreshToken().then(() => {
+      // eslint-disable-next-line prefer-const
+      let { headers, ...rest } = requestParams;
+
+      const updatedRequestParams: RequestInit = {
+        ...rest,
+        headers: removeAuthorization(headers),
       };
-      delete updatedRequestParams.headers.Authorization;
 
       return this._fetchWithToken(input, updatedRequestParams);
     });
   }
 
-  _manageUnauthorized(response, input, requestParams = {}) {
+  _manageUnauthorized(
+    response: Response,
+    input: string,
+    requestParams = {}
+  ): Promise<Response> {
     const error = getHttpErrorFromResponse(response);
 
     // https://tools.ietf.org/html/rfc2617#section-1.2
@@ -282,8 +350,8 @@ class AbstractClient {
       const invalidGrant = authorizationHeader.indexOf(
         'error = "invalid_grant"'
       );
-      if (invalidGrant && this._tokenStorage) {
-        return this._refreshTokenAndRefetch(response, input, requestParams);
+      if (invalidGrant && this.#tokenStorage) {
+        return this._refreshTokenAndRefetch(input, requestParams);
       }
 
       throw error;
@@ -292,8 +360,8 @@ class AbstractClient {
       return response
         .json()
         .then((body) => {
-          if (this._tokenStorage && body.error === 'invalid_grant') {
-            return this._refreshTokenAndRefetch(response, input, requestParams);
+          if (this.#tokenStorage && body.error === 'invalid_grant') {
+            return this._refreshTokenAndRefetch(input, requestParams);
           }
           throw error;
         })
@@ -306,10 +374,14 @@ class AbstractClient {
     }
   }
 
-  _doFetch(accessToken, input, requestParams) {
+  _doFetch(
+    accessToken: null | string,
+    input: string,
+    requestParams: RequestInit
+  ): Promise<Response> {
     let params = requestParams;
 
-    const baseHeaders = {
+    const baseHeaders: HeadersInit = {
       'Content-Type': 'application/json',
     };
 
@@ -333,7 +405,9 @@ class AbstractClient {
       params = { headers: baseHeaders };
     }
 
-    params.headers = this._removeUndefinedHeaders(params.headers);
+    if (params.headers) {
+      params.headers = removeUndefinedHeaders(params.headers);
+    }
 
     // eslint-disable-next-line consistent-return
     return fetch(input, params).then((response) => {
@@ -345,28 +419,22 @@ class AbstractClient {
         return this._manageUnauthorized(response, input, params);
       }
 
-      if (response.status !== 401) {
-        const httpError = getHttpErrorFromResponse(response);
-        throw httpError;
-      }
+      const httpError = getHttpErrorFromResponse(response);
+      throw httpError;
     });
   }
 
-  _removeUndefinedHeaders(headers) {
-    // remove undefined key, usefull to remove Content-Type for example
-    const localHeaders = headers;
-    Object.keys(localHeaders).forEach((key) => {
-      if (localHeaders[key] === undefined) {
-        delete localHeaders[key];
-      }
-    });
+  _getEntityIdentifier(object: object): null | string | number {
+    const idKey = this.metadata.getIdentifierAttribute().serializedKey;
 
-    return localHeaders;
-  }
-
-  _getEntityIdentifier(object) {
-    return object[this.metadata.getIdentifierAttribute().serializedKey];
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    return object[idKey];
   }
 }
+
+type Headers = {
+  [key: string]: unknown;
+};
 
 export default AbstractClient;

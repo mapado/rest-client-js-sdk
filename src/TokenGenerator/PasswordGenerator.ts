@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
+import { Token } from './types';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -12,19 +14,60 @@ const ERROR_TOKEN_EMPTY = 'parameters must be set';
 const ERROR_TOKEN_USERNAME_PASSWORD =
   'username and password must be passed as parameters';
 
-class PasswordGenerator extends AbstractTokenGenerator {
-  constructor(props) {
+type Config = {
+  clientId: string;
+  clientSecret: string;
+  path: string;
+  scheme: string;
+  port?: string;
+  scope?: string;
+};
+
+type DefaultParameters = {
+  client_id: string;
+  client_secret: string;
+  grant_type: string;
+  scope?: string;
+};
+
+type GenerateTokenParameters = {
+  username: string;
+  password: string;
+  scope?: string;
+};
+
+type RefreshTokenParameters = {
+  refresh_token: string;
+};
+
+interface PasswordToken extends Token {
+  access_token: string;
+  token_type: string;
+  refresh_token: never;
+  expires_in?: number;
+  scope?: string;
+}
+
+type CallParameters = DefaultParameters &
+  (GenerateTokenParameters | RefreshTokenParameters);
+
+class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
+  constructor(props: Config) {
     super(props);
     this._doFetch = memoizePromise(this._doFetch);
   }
 
-  generateToken(baseParameters) {
-    const parameters = baseParameters;
-    this._checkGenerateParameters(parameters);
+  generateToken(
+    baseParameters: GenerateTokenParameters
+  ): Promise<PasswordToken> {
+    this._checkGenerateParameters(baseParameters);
 
-    parameters.grant_type = 'password';
-    parameters.client_id = this.tokenGeneratorConfig.clientId;
-    parameters.client_secret = this.tokenGeneratorConfig.clientSecret;
+    const parameters: CallParameters = {
+      ...baseParameters,
+      grant_type: 'password',
+      client_id: this.tokenGeneratorConfig.clientId,
+      client_secret: this.tokenGeneratorConfig.clientSecret,
+    };
 
     if (this.tokenGeneratorConfig.scope && !parameters.scope) {
       parameters.scope = this.tokenGeneratorConfig.scope;
@@ -33,30 +76,30 @@ class PasswordGenerator extends AbstractTokenGenerator {
     return this._doFetch(parameters).then((response) => response.json());
   }
 
-  refreshToken(accessToken, baseParameters = {}) {
+  refreshToken(accessToken: PasswordToken): Promise<PasswordToken> {
     if (!(accessToken && accessToken.refresh_token)) {
       throw new Error(
         'refresh_token is not set. Did you called `generateToken` before ?'
       );
     }
 
-    const parameters = baseParameters;
+    const parameters: CallParameters = {
+      grant_type: 'refresh_token',
+      client_id: this.tokenGeneratorConfig.clientId,
+      client_secret: this.tokenGeneratorConfig.clientSecret,
+      refresh_token: accessToken.refresh_token,
+    };
 
-    parameters.grant_type = 'refresh_token';
-    parameters.client_id = this.tokenGeneratorConfig.clientId;
-    parameters.client_secret = this.tokenGeneratorConfig.clientSecret;
-    if (this.tokenGeneratorConfig.scope && !parameters.scope) {
+    if (this.tokenGeneratorConfig.scope) {
       parameters.scope = this.tokenGeneratorConfig.scope;
     }
-
-    parameters.refresh_token = accessToken.refresh_token;
 
     return this._doFetch(parameters).then((response) =>
       response.clone().json()
     );
   }
 
-  checkTokenGeneratorConfig(config) {
+  checkTokenGeneratorConfig(config: Config): void {
     if (!config || Object.keys(config).length === 0) {
       throw new RangeError(ERROR_CONFIG_EMPTY);
     }
@@ -70,7 +113,7 @@ class PasswordGenerator extends AbstractTokenGenerator {
     }
   }
 
-  _doFetch(parameters) {
+  _doFetch(parameters: CallParameters): Promise<Response> {
     const uri = new URI(
       `${this.tokenGeneratorConfig.scheme}://${this.tokenGeneratorConfig.path}`
     );
@@ -88,11 +131,12 @@ class PasswordGenerator extends AbstractTokenGenerator {
       if (response.status < 400) {
         return response;
       }
+
       return this._manageOauthError(response);
     });
   }
 
-  _checkGenerateParameters(parameters) {
+  _checkGenerateParameters(parameters: GenerateTokenParameters): void {
     if (!(parameters && Object.keys(parameters).length > 0)) {
       throw new RangeError(ERROR_TOKEN_EMPTY);
     }

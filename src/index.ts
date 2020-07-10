@@ -18,10 +18,12 @@ import ClientCredentialsGenerator from './TokenGenerator/ClientCredentialsGenera
 import PasswordGenerator from './TokenGenerator/PasswordGenerator';
 import ProvidedTokenGenerator from './TokenGenerator/ProvidedTokenGenerator';
 import Serializer from './serializer/Serializer';
+import SerializerInterface from './serializer/SerializerInterface';
 import Mapping from './Mapping';
 import ClassMetadata from './Mapping/ClassMetadata';
 import Attribute from './Mapping/Attribute';
 import Relation from './Mapping/Relation';
+import { Token } from './TokenGenerator/types';
 
 export default RestClientSdk;
 export {
@@ -47,3 +49,4 @@ export {
   Attribute,
   Relation,
 };
+export type { SerializerInterface, Token };

@@ -1,26 +1,21 @@
+import fs from 'fs';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import babel from 'rollup-plugin-babel';
 
-const pkg = require('./package.json');
+const pkg = JSON.parse(fs.readFileSync('./package.json'));
+
+const extensions = ['.ts', '.tsx', '.js', '.jsx'];
 
 export default {
-  input: 'src/index.js',
+  input: 'src/index.ts',
   external: Object.keys(pkg.dependencies),
   plugins: [
     commonjs(),
-    resolve(),
+    resolve({ extensions }),
     babel({
+      extensions,
       exclude: 'node_modules/**',
-      babelrc: false,
-      presets: [
-        [
-          '@babel/preset-env',
-          {
-            modules: false,
-          },
-        ],
-      ],
     }),
   ],
   output: [
