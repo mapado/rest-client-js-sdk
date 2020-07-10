@@ -19,7 +19,8 @@
     "prepublishOnly": "npm run clean && npm run check:src && npm run build",
     "lint": "yarn lint:types && yarn lint:eslint",
     "lint:eslint": "eslint --ext js,jsx,jsx,ts,tsx src/",
-    "lint:types": "tsc --noEmit"
+    "lint:types": "tsc --noEmit",
+    "version": "sed -i \"s/current_version = .*/current_version = $npm_package_version/\" .bumpversion.cfg && git add .bumpversion.cfg"
   },
   "dependencies": {
     "deep-diff": "^1.0.2",
