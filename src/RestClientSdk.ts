@@ -15,7 +15,15 @@ type Config = {
   useDefaultParameters?: boolean;
 };
 
-export type SdkMetadata = Record<string, [any, Iterable<any>]>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// export type SdkMetadata = Record<string, [any, Iterable<any>, undefined | any]>;
+type MetadataDefinition = {
+  entity: any;
+  list: Iterable<any>;
+  // repository?: any;
+};
+
+export type SdkMetadata = Record<string, MetadataDefinition>;
 
 class RestClientSdk<M extends SdkMetadata, T extends Token> {
   config: Config;

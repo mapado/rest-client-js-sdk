@@ -41,7 +41,7 @@ class AbstractClient<
     return `/${this.metadata.pathRoot}`;
   }
 
-  getEntityURI(entity: M[K][0]): string {
+  getEntityURI(entity: M[K]['entity']): string {
     let idValue = this._getEntityIdentifier(entity);
 
     if (idValue === null) {
@@ -68,42 +68,42 @@ class AbstractClient<
     queryParam = {},
     pathParameters = {},
     requestParams = {}
-  ): Promise<M[K][0]> {
+  ): Promise<M[K]['entity']> {
     const url = this._generateUrlFromParams(queryParam, pathParameters, id);
 
     return this.deserializeResponse(
       this.authorizedFetch(url, requestParams),
       'item'
-    ) as Promise<M[K][0]>;
+    ) as Promise<M[K]['entity']>;
   }
 
   findBy(
     queryParam: object,
     pathParameters = {},
     requestParams = {}
-  ): Promise<M[K][1]> {
+  ): Promise<M[K]['list']> {
     const url = this._generateUrlFromParams(queryParam, pathParameters);
 
     return this.deserializeResponse(
       this.authorizedFetch(url, requestParams),
       'list'
-    ) as Promise<M[K][1]>;
+    ) as Promise<M[K]['list']>;
   }
 
   findAll(
     queryParam = {},
     pathParameters = {},
     requestParams = {}
-  ): Promise<M[K][1]> {
+  ): Promise<M[K]['list']> {
     return this.findBy(queryParam, pathParameters, requestParams);
   }
 
   create(
-    entity: M[K][0],
+    entity: M[K]['entity'],
     queryParam = {},
     pathParameters = {},
     requestParams = {}
-  ): Promise<M[K][0]> {
+  ): Promise<M[K]['entity']> {
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
 
@@ -126,14 +126,14 @@ class AbstractClient<
         ...requestParams,
       }),
       'item'
-    ) as Promise<M[K][0]>;
+    ) as Promise<M[K]['entity']>;
   }
 
   update(
-    entity: M[K][0],
+    entity: M[K]['entity'],
     queryParam = {},
     requestParams = {}
-  ): Promise<M[K][0]> {
+  ): Promise<M[K]['entity']> {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
@@ -163,10 +163,10 @@ class AbstractClient<
         ...requestParams,
       }),
       'item'
-    ) as Promise<M[K][0]>;
+    ) as Promise<M[K]['entity']>;
   }
 
-  delete(entity: M[K][0], requestParams = {}): Promise<Response> {
+  delete(entity: M[K]['entity'], requestParams = {}): Promise<Response> {
     const url = this.getEntityURI(entity);
     const identifier = this._getEntityIdentifier(entity);
 
@@ -185,17 +185,16 @@ class AbstractClient<
   deserializeResponse<LOR extends 'list' | 'item'>(
     requestPromise: Promise<Response>,
     listOrItem: LOR
-  ): Promise<M[K][0] | M[K][1]> {
+  ): Promise<M[K]['entity'] | M[K]['list']> {
     return requestPromise
       .then((response) => response.text().then((text) => ({ response, text })))
       .then(({ response, text }) => {
         if (listOrItem === 'list') {
           // for list, we need to deserialize the result to get an object
-          const itemList = this.serializer.deserializeList<M[K][0], M[K][1]>(
-            text,
-            this.metadata,
-            response
-          );
+          const itemList = this.serializer.deserializeList<
+            M[K]['entity'],
+            M[K]['list']
+          >(text, this.metadata, response);
 
           // eslint-disable-next-line no-restricted-syntax
           for (const decodedItem of itemList) {
@@ -211,7 +210,7 @@ class AbstractClient<
             }
           }
 
-          return itemList as M[K][1];
+          return itemList as M[K]['list'];
         }
 
         // for items, we can just decode the item (ie. transform it to JS object)
@@ -225,7 +224,7 @@ class AbstractClient<
         const identifier = this._getEntityIdentifier(decodedItem);
 
         // and finally return the denormalized item
-        const item = this.serializer.denormalizeItem<M[K][0]>(
+        const item = this.serializer.denormalizeItem<M[K]['entity']>(
           decodedItem,
           this.metadata,
           response
@@ -238,7 +237,7 @@ class AbstractClient<
           );
         }
 
-        return item as M[K][0];
+        return item as M[K]['entity'];
       });
   }
 

@@ -54,7 +54,7 @@ categoryMetadata.setRelationList([
 mapping.setMapping([productMetadata, categoryMetadata]);
 ```
 
-Typescript users:
+Using TypeScript ? You need to configure the mapping to benefits from TypeScript types detection.
 
 ```ts
 type Product = {
@@ -71,8 +71,14 @@ type Category = {
 
 type TSMetadata = {
   // first value is the entity object, second one is the listing type, it can be any Iterable<Entity>
-  products: [Product, Array<Product>];
-  categories: [Category, Array<Category>];
+  products: {
+    entity: Product;
+    list: Array<Product>;
+  };
+  categories: {
+    entity: Category;
+    list: Array<Category>;
+  };
 };
 ```
 
@@ -117,7 +123,7 @@ const config = {
 const sdk = new RestClientSdk(tokenStorage, config, mapping);
 ```
 
-Typescript users:
+Using TypeScript ? You should now pass the TSMetadata that you defined.
 
 ```ts
 import RestClientSdk, { Token } from 'rest-client-sdk';
@@ -179,22 +185,24 @@ export default SomeEntityClient;
 Typescript users:
 
 ```ts
-import { SdkMetadata } from 'rest-client-sdk';
+import { SdkMetadata, Token } from 'rest-client-sdk';
 
 class SomeEntityClient<
   M extends SdkMetadata,
-  K extends keyof M,
+  K extends 'some_entities',
   T extends Token
 > extends AbstractClient<M, K, T> {
   getPathBase(pathParameters: object) {
     return '/v2/some_entities'; // you need to return the full query string for the collection GET query
   }
 
-  getEntityURI(entity: M[K][0]) {
+  getEntityURI(entity: SomeEntity) {
     return `${this.getPathBase()}/${entity.id}`; // this will be the URI used by update / delete script
   }
 }
 ```
+
+TODO : For the moment, if you want to call a custom repository method, you have to cast it. Find a way to get it from the mapping.
 
 ### Custom serializer
 
