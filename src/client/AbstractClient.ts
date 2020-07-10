@@ -9,8 +9,13 @@ import type SerializerInterface from '../serializer/SerializerInterface';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
-class AbstractClient<E extends object, L extends Iterable<E>, T extends Token> {
-  sdk: RestClientSdk<T>;
+class AbstractClient<
+  Metadata extends Record<string, [any, Iterable<any>]>,
+  E extends object,
+  L extends Iterable<E>,
+  T extends Token
+> {
+  sdk: RestClientSdk<Metadata, T>;
 
   #tokenStorage: TokenStorage<T>;
 
@@ -18,7 +23,7 @@ class AbstractClient<E extends object, L extends Iterable<E>, T extends Token> {
 
   metadata: ClassMetadata;
 
-  constructor(sdk: RestClientSdk<T>, metadata: ClassMetadata) {
+  constructor(sdk: RestClientSdk<Metadata, T>, metadata: ClassMetadata) {
     this.sdk = sdk;
     this.#tokenStorage = sdk.tokenStorage;
     this.serializer = sdk.serializer;

@@ -1,5 +1,5 @@
 export default interface AsyncStorageInterface {
-  setItem(key: string, value: string): Promise<void>;
+  setItem(key: string, value: string): Promise<unknown>;
 
   getItem(key: string): Promise<string>;
 

@@ -151,7 +151,7 @@ class TokenStorage<T extends Token> {
     });
   }
 
-  _storeAccessToken(responseData: T): Promise<void> {
+  _storeAccessToken(responseData: T): Promise<unknown> {
     return this.#asyncStorage.setItem(
       this.accessTokenKey,
       JSON.stringify(responseData)
