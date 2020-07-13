@@ -199,26 +199,55 @@ class SomeEntityClient<
   getEntityURI(entity: SomeEntity) {
     return `${this.getPathBase()}/${entity.id}`; // this will be the URI used by update / delete script
   }
+
+  findThisPost(params): Post {
+    // do stuff
+  }
 }
 ```
 
-TODO : For the moment, if you want to call a custom repository method, you have to cast it. Find a way to get it from the mapping.
+TODO : For the moment, if you want to call a custom repository method, you have to cast it. (TODO : Find a way to get it from the mapping).
+
+```ts
+const repo = sdk.getRepository('posts') as PostRepository<TSMetadata, Token>;
+
+repo.findThisPost();
+```
 
 ### Custom serializer
 
-You can inject a custom serializer to the SDK. The serializer must extends the
-base `Serializer` class and implement 3 methods:
+The serializer is the object in charge of converting strings to object and vice-versa.
 
-- `deserializeItem(rawData, classMetadata)` (`classMetadata` is the instance of ClassMetadata you configured)
-- `deserializeList(rawListData, classMetadata)` (`classMetadata` is the instance of ClassMetadata you configured)
-- `serializeItem(item, classMetadata)` (`classMetadata` is the instance of ClassMetadata you configured)
+It deserializes strings from the API in two phases (for both items and lists) :
 
-All text response from GET / PUT / POST request will be send to
-`deserializeItem` or `deserializeList`. All content fom `update` and `create`
-call will be send to `serializeItem`.
+- converts a string to a plain object (decode)
+- optionnally converts this object to a model object (denormalize), if you want to work with something different than plain JS object (like [immutable Record](https://immutable-js.github.io/immutable-js/docs/#/Record) or a [custom model class](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)).
 
-The default serializer uses `JSON.parse` and `JSON.stringify`, so it converts
-string to JSON objects.
+and on the other way serializes in two phase two:
+
+- optionnaly converts the model object to a plain JavaScript object (normalize)
+- converts this plain JavaScript object to a string that will be sent to the API (encode)
+
+It has been greatly inspired by [PHP Symfony's serializer](https://symfony.com/doc/current/components/serializer.html).
+
+#### Default implementation
+
+The default serializer implementations deserializes JSON to plain JavaScript object and serializes plain JavaScript object to JSON.
+
+#### Creating custom serializer implementation
+
+You can create and inject a custom serializer to the SDK. The serializer must extends the base `Serializer` class and implement the following methods:
+
+- `normalizeItem(entity: object, classMetadata: ClassMetadata): object`: convert an entity to a plain javascript object
+- `encodeItem(object: object, classMetadata: ClassMetadata): string`: convert a plain javascript object to string
+- `decodeItem(rawData: string, classMetadata: ClassMetadata, response: Response): object`: convert a string containing an object to a plain javascript object
+- `denormalizeItem(object: object, classMetadata: ClassMetadata, response: Response): object`: convert a plain object to an entity
+- `decodeList(rawListData: string, classMetadata: ClassMetadata, response: Response): object | object[]`: convert a string containing a list of objects to a list of plain javascript objects
+- `denormalizeList(objectList: object | object[], classMetadata: ClassMetadata, response: Response): object[]`: convert a plain object list to an entity list
+
+`classMetadata` is the instance of ClassMetadata you configured. `response` is the HTTP response object.
+
+All text response from GET / PUT / POST request will be send to `decodeItem + denormalizeItem` or `decodeList + denormalizeList`. All content fom `update` and `create` call will be send to `encodeItem + normalizeItem`.
 
 #### Example with the default serializer
 
@@ -226,19 +255,28 @@ string to JSON objects.
 import { Serializer } from 'rest-client-sdk';
 
 class JsSerializer extends Serializer {
-  deserializeItem(rawData, classMetadata) {
-    // do stuff with your item input
+  normalizeItem(entity, classMetadata) {
+    return entity; // we don't have model object here, so return the plain JS object
+  }
+
+  encodeItem(object, classMetadata) {
+    return JSON.stringify(object);
+  }
+
+  decodeItem(rawData, classMetadata, response) {
     return JSON.parse(rawData);
   }
 
-  deserializeList(rawListData, classMetadata) {
-    // do stuff with your list input
+  denormalizeItem(object, classMetadata, response) {
+    return object; // we don't have any model object here, so return the plain JS object
+  }
+
+  decodeList(rawListData, classMetadata, response) {
     return JSON.parse(rawListData);
   }
 
-  serializeItem(entity, classMetadata) {
-    // prepare item for being sent in a request
-    return JSON.stringify(entity);
+  denormalizeList(objectList, classMetadata, response) {
+    return objectList; // we don't have any model object here, so return the plain JS object
   }
 }
 
@@ -248,4 +286,58 @@ const sdk = new RestClientSdk(tokenStorage, config, clients, serializer);
 ```
 
 Typescript users:
-@TODO
+
+```ts
+import { Serializer, ClassMetadata } from 'rest-client-sdk';
+
+class JsSerializer extends Serializer {
+  normalizeItem(entity: object, classMetadata: ClassMetadata): object {
+    return entity; // we don't have model object here, so return the plain JS object
+  }
+
+  encodeItem(object: object, classMetadata: ClassMetadata): string {
+    return JSON.stringify(object);
+  }
+
+  decodeItem(
+    rawData: string,
+    classMetadata: ClassMetadata,
+    response: Response
+  ): object {
+    return JSON.parse(rawData);
+  }
+
+  denormalizeItem(
+    object: object,
+    classMetadata: ClassMetadata,
+    response: Response
+  ): object {
+    return object; // we don't have any model object here, so return the plain JS object
+  }
+
+  decodeList(
+    rawListData: string,
+    classMetadata: ClassMetadata,
+    response: Response
+  ): object | object[] {
+    return JSON.parse(rawListData);
+  }
+
+  denormalizeList(
+    objectList: object | object[],
+    classMetadata: ClassMetadata,
+    response: Response
+  ): object | object[] {
+    return objectList; // we don't have any model object here, so return the plain JS object
+  }
+}
+
+const serializer = new JsSerializer();
+
+const sdk = new RestClientSdk<TSMetadata, Token>(
+  tokenStorage,
+  config,
+  clients,
+  serializer
+);
+```

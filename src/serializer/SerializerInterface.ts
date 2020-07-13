@@ -3,14 +3,11 @@ import ClassMetadata from '../Mapping/ClassMetadata';
 export default interface SerializerInterface {
   /**
    * convert an entity to a plain javascript object
-   * @param {E} entity - The entity to convert
+   * @param {object} entity - The entity to convert
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {object} the object to serialize
    */
-  normalizeItem<E extends object>(
-    entity: E,
-    classMetadata: ClassMetadata
-  ): object;
+  normalizeItem(entity: object, classMetadata: ClassMetadata): object;
 
   /**
    * convert a plain javascript object to string
@@ -25,13 +22,13 @@ export default interface SerializerInterface {
    * @param {string} object - The plain javascript object
    * @param {ClassMetadata} classMetadata - the class metadata
    * @param {object} response - the HTTP response
-   * @return {E} an entity
+   * @return {object} an entity
    */
-  denormalizeItem<E extends object>(
+  denormalizeItem(
     object: object,
     classMetadata: ClassMetadata,
     response: Response
-  ): E;
+  ): object;
 
   /**
    * convert a string containing an object to a plain javascript object
@@ -51,13 +48,13 @@ export default interface SerializerInterface {
    * @param {object|object[]} objectList - The plain javascript object list (or an iterable object)
    * @param {ClassMetadata} classMetadata - the class metadata
    * @param {object} response - the HTTP response
-   * @return {L} a list of entities
+   * @return {object | object[]} a list of entities
    */
-  denormalizeList<L>(
+  denormalizeList(
     objectList: object | object[],
     classMetadata: ClassMetadata,
     response: Response
-  ): L;
+  ): object | object[];
 
   /**
    * convert a string containing a list of objects to a list of plain javascript objects
@@ -79,9 +76,9 @@ export default interface SerializerInterface {
    * @param {object} response - the HTTP response
    * @return {L} a list of entities
    */
-  deserializeList<E, L extends Iterable<E>>(
+  deserializeList(
     rawListData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): L;
+  ): object | object[];
 }

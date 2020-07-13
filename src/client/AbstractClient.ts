@@ -191,10 +191,11 @@ class AbstractClient<
       .then(({ response, text }) => {
         if (listOrItem === 'list') {
           // for list, we need to deserialize the result to get an object
-          const itemList = this.serializer.deserializeList<
-            M[K]['entity'],
-            M[K]['list']
-          >(text, this.metadata, response);
+          const itemList = this.serializer.deserializeList(
+            text,
+            this.metadata,
+            response
+          ) as M[K]['list'];
 
           // eslint-disable-next-line no-restricted-syntax
           for (const decodedItem of itemList) {
@@ -224,11 +225,11 @@ class AbstractClient<
         const identifier = this._getEntityIdentifier(decodedItem);
 
         // and finally return the denormalized item
-        const item = this.serializer.denormalizeItem<M[K]['entity']>(
+        const item = this.serializer.denormalizeItem(
           decodedItem,
           this.metadata,
           response
-        );
+        ) as M[K]['entity'];
 
         if (identifier !== null) {
           this.sdk.unitOfWork.registerClean(

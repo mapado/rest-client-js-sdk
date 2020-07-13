@@ -29,10 +29,7 @@ class Serializer implements SerializerInterface {
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {string} the content of the request
    */
-  serializeItem<E extends object>(
-    object: E,
-    classMetadata: ClassMetadata
-  ): string {
+  serializeItem(object: object, classMetadata: ClassMetadata): string {
     const noralizedData = this.normalizeItem(object, classMetadata);
     return this.encodeItem(noralizedData, classMetadata);
   }
@@ -44,12 +41,12 @@ class Serializer implements SerializerInterface {
    * @param {object} response - the HTTP response
    * @return {any} an entity
    */
-  denormalizeItem<E>(
+  denormalizeItem(
     object: object,
     classMetadata: ClassMetadata,
     response: Response
-  ): E {
-    return (object as unknown) as E;
+  ): object {
+    return object;
   }
 
   /**
@@ -72,13 +69,13 @@ class Serializer implements SerializerInterface {
    * @param {string} rawData - The string fetched from the response
    * @param {ClassMetadata} classMetadata - the class metadata
    * @param {object} response - the HTTP response
-   * @return {E} the entity
+   * @return {object} the entity
    */
-  deserializeItem<E>(
+  deserializeItem(
     rawData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): E {
+  ): object {
     const object = this.decodeItem(rawData, classMetadata, response);
     return this.denormalizeItem(object, classMetadata, response);
   }
@@ -88,14 +85,14 @@ class Serializer implements SerializerInterface {
    * @param {object|object[]} objectList - The plain javascript object list (or an iterable object)
    * @param {ClassMetadata} classMetadata - the class metadata
    * @param {object} response - the HTTP response
-   * @return {L} a list of entities
+   * @return {object | object[]} a list of entities
    */
-  denormalizeList<L>(
+  denormalizeList(
     objectList: object | object[],
     classMetadata: ClassMetadata,
     response: Response
-  ): L {
-    return (objectList as unknown) as L; // weird conversion as the declaration of list type is fuzzy
+  ): object | object[] {
+    return objectList; // weird conversion as the declaration of list type is fuzzy
   }
 
   /**
@@ -120,11 +117,11 @@ class Serializer implements SerializerInterface {
    * @param {object} response - the HTTP response
    * @return {any} a list of entities
    */
-  deserializeList<L>(
+  deserializeList(
     rawListData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): L {
+  ): object | object[] {
     const objectList = this.decodeList(rawListData, classMetadata, response);
     return this.denormalizeList(objectList, classMetadata, response);
   }
