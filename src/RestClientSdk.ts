@@ -4,7 +4,6 @@ import Mapping from './Mapping';
 import TokenStorage from './TokenStorage';
 import SerializerInterface from './serializer/SerializerInterface';
 import AbstractClient from './client/AbstractClient';
-import { Token } from './TokenGenerator/types';
 
 type Config = {
   path: string;
@@ -25,10 +24,10 @@ type MetadataDefinition = {
 
 export type SdkMetadata = Record<string, MetadataDefinition>;
 
-class RestClientSdk<M extends SdkMetadata, T extends Token> {
+class RestClientSdk<M extends SdkMetadata> {
   config: Config;
 
-  public tokenStorage: TokenStorage<T>;
+  public tokenStorage: TokenStorage<any>;
 
   public serializer: SerializerInterface;
 
@@ -36,10 +35,10 @@ class RestClientSdk<M extends SdkMetadata, T extends Token> {
 
   public unitOfWork: UnitOfWork;
 
-  #repositoryList: Partial<Record<keyof M, AbstractClient<M, keyof M, any>>>;
+  #repositoryList: Partial<Record<keyof M, AbstractClient<M, keyof M>>>;
 
   constructor(
-    tokenStorage: TokenStorage<T>,
+    tokenStorage: TokenStorage<any>,
     config: Config,
     mapping: Mapping,
     serializer: SerializerInterface = new JsSerializer()
@@ -60,7 +59,7 @@ class RestClientSdk<M extends SdkMetadata, T extends Token> {
     this.#repositoryList = {};
   }
 
-  getRepository<K extends keyof M & string>(key: K): AbstractClient<M, K, T> {
+  getRepository<K extends keyof M & string>(key: K): AbstractClient<M, K> {
     if (!this.#repositoryList[key]) {
       const metadata = this.mapping.getClassMetadataByKey(key);
 
@@ -73,7 +72,7 @@ class RestClientSdk<M extends SdkMetadata, T extends Token> {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.#repositoryList[key]!;
+    return (this.#repositoryList[key]! as unknown) as AbstractClient<M, K>;
   }
 
   private _mergeWithBaseConfig(config: Config): Config {

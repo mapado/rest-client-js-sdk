@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.0.0-rc.2
+
+### Changed
+
+- Remove types from serializer
+
 ## 5.0.0-rc.1
 
 ### Changed

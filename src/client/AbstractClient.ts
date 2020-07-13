@@ -1,7 +1,6 @@
 import URI from 'urijs';
 import { OauthError, getHttpErrorFromResponse } from '../ErrorFactory';
 import TokenStorage from '../TokenStorage';
-import { Token } from '../TokenGenerator/types';
 import { removeAuthorization, removeUndefinedHeaders } from './headerUtils';
 // eslint-disable-next-line import/no-duplicates
 import type RestClientSdk from '../RestClientSdk';
@@ -12,20 +11,16 @@ import type SerializerInterface from '../serializer/SerializerInterface';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
-class AbstractClient<
-  M extends SdkMetadata,
-  K extends keyof M,
-  T extends Token
-> {
-  sdk: RestClientSdk<M, T>;
+class AbstractClient<M extends SdkMetadata, K extends keyof M> {
+  sdk: RestClientSdk<M>;
 
-  #tokenStorage: TokenStorage<T>;
+  #tokenStorage: TokenStorage<any>;
 
   serializer: SerializerInterface;
 
   metadata: ClassMetadata;
 
-  constructor(sdk: RestClientSdk<M, T>, metadata: ClassMetadata) {
+  constructor(sdk: RestClientSdk<M>, metadata: ClassMetadata) {
     this.sdk = sdk;
     this.#tokenStorage = sdk.tokenStorage;
     this.serializer = sdk.serializer;
