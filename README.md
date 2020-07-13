@@ -128,7 +128,7 @@ Using TypeScript ? You should now pass the TSMetadata that you defined.
 ```ts
 import RestClientSdk, { Token } from 'rest-client-sdk';
 
-const sdk = new RestClientSdk<TSMetadata, Token>(tokenStorage, config, mapping);
+const sdk = new RestClientSdk<TSMetadata>(tokenStorage, config, mapping);
 ```
 
 ### Make calls
@@ -185,13 +185,9 @@ export default SomeEntityClient;
 Typescript users:
 
 ```ts
-import { SdkMetadata, Token } from 'rest-client-sdk';
+import { SdkMetadata } from 'rest-client-sdk';
 
-class SomeEntityClient<
-  M extends SdkMetadata,
-  K extends 'some_entities',
-  T extends Token
-> extends AbstractClient<M, K, T> {
+class SomeEntityClient extends AbstractClient<TSMetadata['some_entities']> {
   getPathBase(pathParameters: object) {
     return '/v2/some_entities'; // you need to return the full query string for the collection GET query
   }
@@ -334,7 +330,7 @@ class JsSerializer extends Serializer {
 
 const serializer = new JsSerializer();
 
-const sdk = new RestClientSdk<TSMetadata, Token>(
+const sdk = new RestClientSdk<TSMetadata>(
   tokenStorage,
   config,
   clients,

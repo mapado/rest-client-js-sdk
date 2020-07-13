@@ -4,6 +4,7 @@ import Mapping from './Mapping';
 import TokenStorage from './TokenStorage';
 import SerializerInterface from './serializer/SerializerInterface';
 import AbstractClient from './client/AbstractClient';
+import { Token } from './TokenGenerator/types';
 
 type Config = {
   path: string;
@@ -15,11 +16,14 @@ type Config = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Entity = any;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 // export type SdkMetadata = Record<string, [any, Iterable<any>, undefined | any]>;
-type MetadataDefinition = {
-  entity: any;
-  list: Iterable<any>;
-  // repository?: any;
+export type MetadataDefinition = {
+  entity: Entity;
+  list: Iterable<Entity>;
+  // repository?: typeof AbstractClient;
 };
 
 export type SdkMetadata = Record<string, MetadataDefinition>;
@@ -27,7 +31,7 @@ export type SdkMetadata = Record<string, MetadataDefinition>;
 class RestClientSdk<M extends SdkMetadata> {
   config: Config;
 
-  public tokenStorage: TokenStorage<any>;
+  public tokenStorage: TokenStorage<Token>;
 
   public serializer: SerializerInterface;
 
@@ -35,10 +39,10 @@ class RestClientSdk<M extends SdkMetadata> {
 
   public unitOfWork: UnitOfWork;
 
-  #repositoryList: Partial<Record<keyof M, AbstractClient<M, keyof M>>>;
+  #repositoryList: Partial<Record<keyof M, AbstractClient<M[keyof M]>>>;
 
   constructor(
-    tokenStorage: TokenStorage<any>,
+    tokenStorage: TokenStorage<Token>,
     config: Config,
     mapping: Mapping,
     serializer: SerializerInterface = new JsSerializer()
@@ -59,7 +63,7 @@ class RestClientSdk<M extends SdkMetadata> {
     this.#repositoryList = {};
   }
 
-  getRepository<K extends keyof M & string>(key: K): AbstractClient<M, K> {
+  getRepository<K extends keyof M & string>(key: K): AbstractClient<M[K]> {
     if (!this.#repositoryList[key]) {
       const metadata = this.mapping.getClassMetadataByKey(key);
 
@@ -72,7 +76,7 @@ class RestClientSdk<M extends SdkMetadata> {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return (this.#repositoryList[key]! as unknown) as AbstractClient<M, K>;
+    return (this.#repositoryList[key]! as unknown) as AbstractClient<M[K]>;
   }
 
   private _mergeWithBaseConfig(config: Config): Config {

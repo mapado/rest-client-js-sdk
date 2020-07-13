@@ -5,22 +5,23 @@ import { removeAuthorization, removeUndefinedHeaders } from './headerUtils';
 // eslint-disable-next-line import/no-duplicates
 import type RestClientSdk from '../RestClientSdk';
 // eslint-disable-next-line import/no-duplicates
-import type { SdkMetadata } from '../RestClientSdk';
+import type { MetadataDefinition, SdkMetadata } from '../RestClientSdk';
 import type ClassMetadata from '../Mapping/ClassMetadata';
 import type SerializerInterface from '../serializer/SerializerInterface';
+import { Token } from '../TokenGenerator/types';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
-class AbstractClient<M extends SdkMetadata, K extends keyof M> {
-  sdk: RestClientSdk<M>;
+class AbstractClient<D extends MetadataDefinition> {
+  sdk: RestClientSdk<SdkMetadata>;
 
-  #tokenStorage: TokenStorage<any>;
+  #tokenStorage: TokenStorage<Token>;
 
   serializer: SerializerInterface;
 
   metadata: ClassMetadata;
 
-  constructor(sdk: RestClientSdk<M>, metadata: ClassMetadata) {
+  constructor(sdk: RestClientSdk<SdkMetadata>, metadata: ClassMetadata) {
     this.sdk = sdk;
     this.#tokenStorage = sdk.tokenStorage;
     this.serializer = sdk.serializer;
@@ -36,7 +37,7 @@ class AbstractClient<M extends SdkMetadata, K extends keyof M> {
     return `/${this.metadata.pathRoot}`;
   }
 
-  getEntityURI(entity: M[K]['entity']): string {
+  getEntityURI(entity: D['entity']): string {
     let idValue = this._getEntityIdentifier(entity);
 
     if (idValue === null) {
@@ -63,42 +64,42 @@ class AbstractClient<M extends SdkMetadata, K extends keyof M> {
     queryParam = {},
     pathParameters = {},
     requestParams = {}
-  ): Promise<M[K]['entity']> {
+  ): Promise<D['entity']> {
     const url = this._generateUrlFromParams(queryParam, pathParameters, id);
 
     return this.deserializeResponse(
       this.authorizedFetch(url, requestParams),
       'item'
-    ) as Promise<M[K]['entity']>;
+    ) as Promise<D['entity']>;
   }
 
   findBy(
     queryParam: object,
     pathParameters = {},
     requestParams = {}
-  ): Promise<M[K]['list']> {
+  ): Promise<D['list']> {
     const url = this._generateUrlFromParams(queryParam, pathParameters);
 
     return this.deserializeResponse(
       this.authorizedFetch(url, requestParams),
       'list'
-    ) as Promise<M[K]['list']>;
+    ) as Promise<D['list']>;
   }
 
   findAll(
     queryParam = {},
     pathParameters = {},
     requestParams = {}
-  ): Promise<M[K]['list']> {
+  ): Promise<D['list']> {
     return this.findBy(queryParam, pathParameters, requestParams);
   }
 
   create(
-    entity: M[K]['entity'],
+    entity: D['entity'],
     queryParam = {},
     pathParameters = {},
     requestParams = {}
-  ): Promise<M[K]['entity']> {
+  ): Promise<D['entity']> {
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
 
@@ -121,14 +122,14 @@ class AbstractClient<M extends SdkMetadata, K extends keyof M> {
         ...requestParams,
       }),
       'item'
-    ) as Promise<M[K]['entity']>;
+    ) as Promise<D['entity']>;
   }
 
   update(
-    entity: M[K]['entity'],
+    entity: D['entity'],
     queryParam = {},
     requestParams = {}
-  ): Promise<M[K]['entity']> {
+  ): Promise<D['entity']> {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
@@ -158,10 +159,10 @@ class AbstractClient<M extends SdkMetadata, K extends keyof M> {
         ...requestParams,
       }),
       'item'
-    ) as Promise<M[K]['entity']>;
+    ) as Promise<D['entity']>;
   }
 
-  delete(entity: M[K]['entity'], requestParams = {}): Promise<Response> {
+  delete(entity: D['entity'], requestParams = {}): Promise<Response> {
     const url = this.getEntityURI(entity);
     const identifier = this._getEntityIdentifier(entity);
 
@@ -180,7 +181,7 @@ class AbstractClient<M extends SdkMetadata, K extends keyof M> {
   deserializeResponse<LOR extends 'list' | 'item'>(
     requestPromise: Promise<Response>,
     listOrItem: LOR
-  ): Promise<M[K]['entity'] | M[K]['list']> {
+  ): Promise<D['entity'] | D['list']> {
     return requestPromise
       .then((response) => response.text().then((text) => ({ response, text })))
       .then(({ response, text }) => {
@@ -190,7 +191,7 @@ class AbstractClient<M extends SdkMetadata, K extends keyof M> {
             text,
             this.metadata,
             response
-          ) as M[K]['list'];
+          ) as D['list'];
 
           // eslint-disable-next-line no-restricted-syntax
           for (const decodedItem of itemList) {
@@ -206,7 +207,7 @@ class AbstractClient<M extends SdkMetadata, K extends keyof M> {
             }
           }
 
-          return itemList as M[K]['list'];
+          return itemList as D['list'];
         }
 
         // for items, we can just decode the item (ie. transform it to JS object)
@@ -224,7 +225,7 @@ class AbstractClient<M extends SdkMetadata, K extends keyof M> {
           decodedItem,
           this.metadata,
           response
-        ) as M[K]['entity'];
+        ) as D['entity'];
 
         if (identifier !== null) {
           this.sdk.unitOfWork.registerClean(
@@ -233,7 +234,7 @@ class AbstractClient<M extends SdkMetadata, K extends keyof M> {
           );
         }
 
-        return item as M[K]['entity'];
+        return item as D['entity'];
       });
   }
 

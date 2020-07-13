@@ -1,10 +1,10 @@
 # Changelog
 
-## 5.0.0-rc.2
+## 5.0.0-rc.5
 
 ### Changed
 
-- Remove types from serializer
+- Simplify configuration for TypeScript (serializer, AbstractClient, etc.)
 
 ## 5.0.0-rc.1
 
