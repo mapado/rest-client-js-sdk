@@ -7,6 +7,12 @@ class Attribute {
 
   readonly isIdentifier: boolean;
 
+  /**
+   * @param {string} serializedKey the key returned from your API
+   * @param {null|string} attributeName the name in your entity, default to the `serializedKey` attribute
+   * @param {string} type type of the attribute
+   * @param {boolean} isIdentifier is this attribute the entity identifier
+   */
   constructor(
     serializedKey: string,
     attributeName: null | string = null,

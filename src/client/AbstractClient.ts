@@ -59,6 +59,14 @@ class AbstractClient<D extends MetadataDefinition> {
     return `${pathBase}/${idValue}`;
   }
 
+  /**
+   * get an entity by its id
+   *
+   * @param {string|number} id the entity identifier
+   * @param {object} queryParam query parameters that will be added to the request
+   * @param {object} pathParameters path parameters, will be pass to the `getPathBase` method
+   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   */
   find(
     id: string | number,
     queryParam = {},
@@ -73,6 +81,13 @@ class AbstractClient<D extends MetadataDefinition> {
     ) as Promise<D['entity']>;
   }
 
+  /**
+   * get a list of entities by some parameters
+   *
+   * @param {object} queryParam query parameters that will be added to the request
+   * @param {object} pathParameters path parameters, will be pass to the `getPathBase` method
+   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   */
   findBy(
     queryParam: object,
     pathParameters = {},
@@ -86,6 +101,13 @@ class AbstractClient<D extends MetadataDefinition> {
     ) as Promise<D['list']>;
   }
 
+  /**
+   * get a list of all entities
+   *
+   * @param {object} queryParam query parameters that will be added to the request
+   * @param {object} pathParameters path parameters, will be pass to the `getPathBase` method
+   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   */
   findAll(
     queryParam = {},
     pathParameters = {},
@@ -94,6 +116,14 @@ class AbstractClient<D extends MetadataDefinition> {
     return this.findBy(queryParam, pathParameters, requestParams);
   }
 
+  /**
+   * create an entity
+   *
+   * @param {object} entity the entity to persist
+   * @param {object} queryParam query parameters that will be added to the request
+   * @param {object} pathParameters path parameters, will be pass to the `getPathBase` method
+   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   */
   create(
     entity: D['entity'],
     queryParam = {},
@@ -125,6 +155,13 @@ class AbstractClient<D extends MetadataDefinition> {
     ) as Promise<D['entity']>;
   }
 
+  /**
+   * update an entity
+   *
+   * @param {object} entity the entity to update
+   * @param {object} queryParam query parameters that will be added to the request
+   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   */
   update(
     entity: D['entity'],
     queryParam = {},
@@ -162,6 +199,12 @@ class AbstractClient<D extends MetadataDefinition> {
     ) as Promise<D['entity']>;
   }
 
+  /**
+   * delete an entity
+   *
+   * @param {object} the entity to delete
+   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   */
   delete(entity: D['entity'], requestParams = {}): Promise<Response> {
     const url = this.getEntityURI(entity);
     const identifier = this._getEntityIdentifier(entity);

@@ -7,7 +7,7 @@ const DEFAULT_CONFIG = {
 class Mapping {
   readonly idPrefix: string;
 
-  #config: object;
+  #config!: object;
 
   #classMetadataList: ClassMetadata[];
 
@@ -16,7 +16,7 @@ class Mapping {
 
     this.#classMetadataList = [];
 
-    this.#config = { ...DEFAULT_CONFIG, ...config }; // might be a call to setConfig but TypeScript report an error on #config
+    this.setConfig(config);
   }
 
   getConfig(): object {

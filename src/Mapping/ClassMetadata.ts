@@ -21,6 +21,11 @@ class ClassMetadata {
 
   #identifierAttribute?: Attribute;
 
+  /**
+   * @param {string} key mandatory, will be passed in your serializer
+   * @param {string|null} pathRoot the endpoint of your API: will be added to the mapping prefix ('/v1' here)
+   * @param {typeof AbstractClient} repositoryClass [Overriding repository]{@link https://github.com/mapado/rest-client-js-sdk/tree/5.x#overriding-repository} for more detail
+   */
   constructor(
     key: string,
     pathRoot: string | null = null,

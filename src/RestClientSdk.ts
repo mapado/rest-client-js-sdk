@@ -63,6 +63,11 @@ class RestClientSdk<M extends SdkMetadata> {
     this.#repositoryList = {};
   }
 
+  /**
+   * get a repository by it's metadata "key" attribute
+   *
+   * @param {string} key the repository "key" (the first argument of `new ClassMetadata`)
+   */
   getRepository<K extends keyof M & string>(key: K): AbstractClient<M[K]> {
     if (!this.#repositoryList[key]) {
       const metadata = this.mapping.getClassMetadataByKey(key);

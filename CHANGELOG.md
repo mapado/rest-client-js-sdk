@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.0.0-rc.6
+
+### Changed
+
+- Improve JSDoc
+
 ## 5.0.0-rc.5
 
 ### Changed

@@ -16,6 +16,12 @@ class Relation {
 
   readonly attributeName: string;
 
+  /**
+   * @param {RelationTypes} type the type of relation
+   * @param {string} targetMetadataKey must match the first argument of `ClassMetadata` constructor of the target entity
+   * @param {string} serializedKey the key returned from your API
+   * @param {string|null} attributeName the name in your entity, default to the `serializedKey` attribute
+   */
   constructor(
     type: RelationTypes,
     targetMetadataKey: string,
