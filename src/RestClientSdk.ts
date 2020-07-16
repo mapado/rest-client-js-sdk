@@ -11,7 +11,7 @@ type Config = {
   scheme: string;
   port?: number;
   segment?: string;
-  authorizationType: string; // default to "Bearer", but can be "Basic" or anything
+  authorizationType?: string; // default to "Bearer", but can be "Basic" or anything
   useDefaultParameters?: boolean;
 };
 

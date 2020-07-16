@@ -8,12 +8,15 @@ import ClassMetadata, {
 import Attribute from './Mapping/Attribute';
 
 type Id = string | number;
-type StringKeyObject = { [key: string]: any };
+type StringKeyObject = Record<string, any>;
 
 /**
  * deep comparaison between objects
  */
-function objectDiffers(left: object, right: object): boolean {
+function objectDiffers(
+  left: Record<string, unknown>,
+  right: Record<string, unknown>
+): boolean {
   const result = diff(left, right);
 
   return result ? result.length > 0 : false;
@@ -23,14 +26,14 @@ function objectDiffers(left: object, right: object): boolean {
  * get the id of an entity or return itself if string
  */
 function getEntityId(
-  stringOrEntity: string | object,
+  stringOrEntity: string | Record<string, unknown>,
   idSerializedKey: string
 ): Id {
   if (typeof stringOrEntity !== 'object') {
     return stringOrEntity;
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   return stringOrEntity[idSerializedKey] as Id;
 }
@@ -45,6 +48,8 @@ function findOldRelation(
   classMetadata: ClassMetadata
 ): DefaultSerializedModelType {
   const idSerializedKey = classMetadata.getIdentifierAttribute().serializedKey;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const relationValueId = getEntityId(newRelationValue, idSerializedKey);
 
   const foundValue =
@@ -92,7 +97,7 @@ function getIdentifierForList(
 class UnitOfWork {
   mapping: Mapping;
 
-  #storage: { [key in Id]: object };
+  #storage: { [key in Id]: Record<string, unknown> };
 
   constructor(mapping: Mapping) {
     this.mapping = mapping;
@@ -100,7 +105,7 @@ class UnitOfWork {
     this.#storage = {};
   }
 
-  registerClean(id: Id, entity: object): void {
+  registerClean(id: Id, entity: Record<string, unknown>): void {
     if (isImmutable(entity)) {
       this.#storage[id] = entity;
     } else {
@@ -108,7 +113,7 @@ class UnitOfWork {
     }
   }
 
-  getDirtyEntity(id: Id): object {
+  getDirtyEntity(id: Id): Record<string, unknown> {
     return this.#storage[id];
   }
 
@@ -117,8 +122,8 @@ class UnitOfWork {
   }
 
   getDirtyData(
-    newSerializedModel: object,
-    oldSerializedModel: object,
+    newSerializedModel: Record<string, unknown>,
+    oldSerializedModel: Record<string, unknown>,
     classMetadata: ClassMetadata
   ): StringKeyObject {
     return this._getDirtyFields(
@@ -132,8 +137,8 @@ class UnitOfWork {
     dirtyFieldsParam: StringKeyObject,
     key: string,
     attribute: Attribute,
-    oldValue: object,
-    newValue: object
+    oldValue: Record<string, unknown>,
+    newValue: Record<string, unknown>
   ): StringKeyObject {
     const dirtyFields = dirtyFieldsParam;
 
@@ -151,8 +156,8 @@ class UnitOfWork {
   _getDirtyFieldsForManyToOne(
     dirtyFieldsParam: StringKeyObject,
     key: string,
-    oldValue: object,
-    newValue: object,
+    oldValue: Record<string, unknown>,
+    newValue: Record<string, unknown>,
     relationMetadata: ClassMetadata,
     idSerializedKey: string
   ): StringKeyObject {

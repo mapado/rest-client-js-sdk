@@ -28,12 +28,12 @@ class AbstractClient<D extends MetadataDefinition> {
     this.metadata = metadata;
   }
 
-  getDefaultParameters(): object {
+  getDefaultParameters(): Record<string, unknown> {
     return {};
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getPathBase(pathParameters: object): string {
+  getPathBase(pathParameters: Record<string, unknown>): string {
     return `/${this.metadata.pathRoot}`;
   }
 
@@ -63,15 +63,15 @@ class AbstractClient<D extends MetadataDefinition> {
    * get an entity by its id
    *
    * @param {string|number} id the entity identifier
-   * @param {object} queryParam query parameters that will be added to the request
-   * @param {object} pathParameters path parameters, will be pass to the `getPathBase` method
-   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   * @param {Record<string, unknown>} queryParam query parameters that will be added to the request
+   * @param {Record<string, unknown>} pathParameters path parameters, will be pass to the `getPathBase` method
+   * @param {Record<string, unknown>} requestParams parameters that will be send as second parameter to the `fetch` call
    */
   find(
     id: string | number,
-    queryParam = {},
-    pathParameters = {},
-    requestParams = {}
+    queryParam: Record<string, unknown> = {},
+    pathParameters: Record<string, unknown> = {},
+    requestParams: Record<string, unknown> = {}
   ): Promise<D['entity']> {
     const url = this._generateUrlFromParams(queryParam, pathParameters, id);
 
@@ -84,14 +84,14 @@ class AbstractClient<D extends MetadataDefinition> {
   /**
    * get a list of entities by some parameters
    *
-   * @param {object} queryParam query parameters that will be added to the request
-   * @param {object} pathParameters path parameters, will be pass to the `getPathBase` method
-   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   * @param {Record<string, unknown>} queryParam query parameters that will be added to the request
+   * @param {Record<string, unknown>} pathParameters path parameters, will be pass to the `getPathBase` method
+   * @param {Record<string, unknown>} requestParams parameters that will be send as second parameter to the `fetch` call
    */
   findBy(
-    queryParam: object,
-    pathParameters = {},
-    requestParams = {}
+    queryParam: Record<string, unknown>,
+    pathParameters: Record<string, unknown> = {},
+    requestParams: Record<string, unknown> = {}
   ): Promise<D['list']> {
     const url = this._generateUrlFromParams(queryParam, pathParameters);
 
@@ -104,14 +104,14 @@ class AbstractClient<D extends MetadataDefinition> {
   /**
    * get a list of all entities
    *
-   * @param {object} queryParam query parameters that will be added to the request
-   * @param {object} pathParameters path parameters, will be pass to the `getPathBase` method
-   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   * @param {Record<string, unknown>} queryParam query parameters that will be added to the request
+   * @param {Record<string, unknown>} pathParameters path parameters, will be pass to the `getPathBase` method
+   * @param {Record<string, unknown>} requestParams parameters that will be send as second parameter to the `fetch` call
    */
   findAll(
-    queryParam = {},
-    pathParameters = {},
-    requestParams = {}
+    queryParam: Record<string, unknown> = {},
+    pathParameters: Record<string, unknown> = {},
+    requestParams: Record<string, unknown> = {}
   ): Promise<D['list']> {
     return this.findBy(queryParam, pathParameters, requestParams);
   }
@@ -119,16 +119,16 @@ class AbstractClient<D extends MetadataDefinition> {
   /**
    * create an entity
    *
-   * @param {object} entity the entity to persist
-   * @param {object} queryParam query parameters that will be added to the request
-   * @param {object} pathParameters path parameters, will be pass to the `getPathBase` method
-   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   * @param {Record<string, unknown>} entity the entity to persist
+   * @param {Record<string, unknown>} queryParam query parameters that will be added to the request
+   * @param {Record<string, unknown>} pathParameters path parameters, will be pass to the `getPathBase` method
+   * @param {Record<string, unknown>} requestParams parameters that will be send as second parameter to the `fetch` call
    */
   create(
     entity: D['entity'],
-    queryParam = {},
-    pathParameters = {},
-    requestParams = {}
+    queryParam: Record<string, unknown> = {},
+    pathParameters: Record<string, unknown> = {},
+    requestParams: Record<string, unknown> = {}
   ): Promise<D['entity']> {
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
@@ -158,14 +158,14 @@ class AbstractClient<D extends MetadataDefinition> {
   /**
    * update an entity
    *
-   * @param {object} entity the entity to update
-   * @param {object} queryParam query parameters that will be added to the request
-   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   * @param {Record<string, unknown>} entity the entity to update
+   * @param {Record<string, unknown>} queryParam query parameters that will be added to the request
+   * @param {Record<string, unknown>} requestParams parameters that will be send as second parameter to the `fetch` call
    */
   update(
     entity: D['entity'],
-    queryParam = {},
-    requestParams = {}
+    queryParam: Record<string, unknown> = {},
+    requestParams: Record<string, unknown> = {}
   ): Promise<D['entity']> {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
@@ -202,8 +202,8 @@ class AbstractClient<D extends MetadataDefinition> {
   /**
    * delete an entity
    *
-   * @param {object} the entity to delete
-   * @param {object} requestParams parameters that will be send as second parameter to the `fetch` call
+   * @param {Record<string, unknown>} the entity to delete
+   * @param {Record<string, unknown>} requestParams parameters that will be send as second parameter to the `fetch` call
    */
   delete(entity: D['entity'], requestParams = {}): Promise<Response> {
     const url = this.getEntityURI(entity);
@@ -307,8 +307,8 @@ class AbstractClient<D extends MetadataDefinition> {
   }
 
   _generateUrlFromParams(
-    queryParam: object,
-    pathParameters = {},
+    queryParam: Record<string, unknown>,
+    pathParameters: Record<string, unknown> = {},
     id: null | string | number = null
   ): URI {
     const params = queryParam;
@@ -474,10 +474,12 @@ class AbstractClient<D extends MetadataDefinition> {
     });
   }
 
-  _getEntityIdentifier(object: object): null | string | number {
+  _getEntityIdentifier(
+    object: Record<string, unknown>
+  ): null | string | number {
     const idKey = this.metadata.getIdentifierAttribute().serializedKey;
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return object[idKey];
   }

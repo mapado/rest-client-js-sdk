@@ -7,7 +7,7 @@ const DEFAULT_CONFIG = {
 class Mapping {
   readonly idPrefix: string;
 
-  #config!: object;
+  #config!: Record<string, unknown>;
 
   #classMetadataList: ClassMetadata[];
 
@@ -19,11 +19,11 @@ class Mapping {
     this.setConfig(config);
   }
 
-  getConfig(): object {
+  getConfig(): Record<string, unknown> {
     return this.#config;
   }
 
-  setConfig(config: object): void {
+  setConfig(config: Record<string, unknown>): void {
     this.#config = { ...DEFAULT_CONFIG, ...config };
   }
 

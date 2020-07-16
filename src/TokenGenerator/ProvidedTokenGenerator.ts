@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable camelcase */
 import TokenGeneratorInterface from './TokenGeneratorInterface';
 import { Token } from './types';
 
@@ -14,12 +14,14 @@ type Parameters = {
   grant_type: 'provided';
 };
 
+type RefreshTokenFunc = () => Promise<ProvidedToken>;
+
 class ProvidedTokenGenerator implements TokenGeneratorInterface<ProvidedToken> {
   #token: string;
 
-  #refreshTokenFunc: null | Function;
+  #refreshTokenFunc: null | RefreshTokenFunc;
 
-  constructor(token: string, refreshTokenFunc: null | Function = null) {
+  constructor(token: string, refreshTokenFunc: null | RefreshTokenFunc = null) {
     this.#token = token;
     this.#refreshTokenFunc = refreshTokenFunc;
   }

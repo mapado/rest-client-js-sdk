@@ -1,5 +1,10 @@
 import ClassMetadata from '../Mapping/ClassMetadata';
 
+export type Entity = Record<string, unknown>;
+export type NormalizedObject = Record<string, unknown>;
+export type NormalizedList = Iterable<Record<string, unknown>>;
+export type EntityList = Iterable<Entity>;
+
 export default interface SerializerInterface {
   /**
    * convert an entity to a plain javascript object
@@ -7,7 +12,7 @@ export default interface SerializerInterface {
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {object} the object to serialize
    */
-  normalizeItem(entity: object, classMetadata: ClassMetadata): object;
+  normalizeItem(entity: Entity, classMetadata: ClassMetadata): NormalizedObject;
 
   /**
    * convert a plain javascript object to string
@@ -15,20 +20,20 @@ export default interface SerializerInterface {
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {string} the content of the request
    */
-  encodeItem(object: object, classMetadata: ClassMetadata): string;
+  encodeItem(object: NormalizedObject, classMetadata: ClassMetadata): string;
 
   /**
    * convert a plain object to an entity
-   * @param {string} object - The plain javascript object
+   * @param {object} object - The plain javascript object
    * @param {ClassMetadata} classMetadata - the class metadata
    * @param {object} response - the HTTP response
    * @return {object} an entity
    */
   denormalizeItem(
-    object: object,
+    object: NormalizedObject,
     classMetadata: ClassMetadata,
     response: Response
-  ): object;
+  ): Entity;
 
   /**
    * convert a string containing an object to a plain javascript object
@@ -41,44 +46,44 @@ export default interface SerializerInterface {
     rawData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): object;
+  ): NormalizedObject;
 
   /**
    * convert a plain object list to an entity list
-   * @param {object|object[]} objectList - The plain javascript object list (or an iterable object)
+   * @param {Iterable<object>} objectList - The plain javascript object list (or an iterable object)
    * @param {ClassMetadata} classMetadata - the class metadata
    * @param {object} response - the HTTP response
-   * @return {object | object[]} a list of entities
+   * @return {Iterable<object>} a list of entities
    */
   denormalizeList(
-    objectList: object | object[],
+    objectList: NormalizedList,
     classMetadata: ClassMetadata,
     response: Response
-  ): object | object[];
+  ): EntityList;
 
   /**
    * convert a string containing a list of objects to a list of plain javascript objects
    * @param {string} rawListData - The string fetched from the response
    * @param {ClassMetadata} classMetadata - the class metadata
    * @param {object} response - the HTTP response
-   * @return {object|object[]} a list of normalized objects or an iterable object containint the list
+   * @return {Iterable<object>} a list of normalized objects or an iterable object containint the list
    */
   decodeList(
     rawListData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): object | object[];
+  ): NormalizedList;
 
   /**
    * convert a string containing a list of objects to a list of entities
    * @param {string} rawListData - The string fetched from the response
    * @param {ClassMetadata} classMetadata - the class metadata
    * @param {object} response - the HTTP response
-   * @return {L} a list of entities
+   * @return {Iterable<object>} a list of entities
    */
   deserializeList(
     rawListData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): object | object[];
+  ): EntityList;
 }

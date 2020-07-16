@@ -1,15 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import SerializerInterface from './SerializerInterface';
+import SerializerInterface, {
+  Entity,
+  NormalizedObject,
+  NormalizedList,
+  EntityList,
+} from './SerializerInterface';
 import ClassMetadata from '../Mapping/ClassMetadata';
 
 class Serializer implements SerializerInterface {
   /**
    * convert an entity to a plain javascript object
-   * @param {any} entity - The entity to convert
+   * @param {object} entity - The entity to convert
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {object} the object to serialize
    */
-  normalizeItem(entity: object, classMetadata: ClassMetadata): object {
+  normalizeItem(
+    entity: Entity,
+    classMetadata: ClassMetadata
+  ): NormalizedObject {
     return entity;
   }
 
@@ -19,7 +27,7 @@ class Serializer implements SerializerInterface {
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {string} the content of the request
    */
-  encodeItem(object: object, classMetadata: ClassMetadata): string {
+  encodeItem(object: NormalizedObject, classMetadata: ClassMetadata): string {
     throw new TypeError('`encodeItem` method must be implemented');
   }
 
@@ -29,23 +37,23 @@ class Serializer implements SerializerInterface {
    * @param {ClassMetadata} classMetadata - the class metadata
    * @return {string} the content of the request
    */
-  serializeItem(object: object, classMetadata: ClassMetadata): string {
+  serializeItem(object: Entity, classMetadata: ClassMetadata): string {
     const noralizedData = this.normalizeItem(object, classMetadata);
     return this.encodeItem(noralizedData, classMetadata);
   }
 
   /**
    * convert a plain object to an entity
-   * @param {string} object - The plain javascript object
+   * @param {object} object - The plain javascript object
    * @param {ClassMetadata} classMetadata - the class metadata
-   * @param {object} response - the HTTP response
-   * @return {any} an entity
+   * @param {Record<string, unknown>} response - the HTTP response
+   * @return {object} an entity
    */
   denormalizeItem(
-    object: object,
+    object: NormalizedObject,
     classMetadata: ClassMetadata,
     response: Response
-  ): object {
+  ): Entity {
     return object;
   }
 
@@ -53,14 +61,14 @@ class Serializer implements SerializerInterface {
    * convert a string containing an object to a plain javascript object
    * @param {string} rawData - The string fetched from the response
    * @param {ClassMetadata} classMetadata - the class metadata
-   * @param {object} response - the HTTP response
+   * @param {Record<string, unknown>} response - the HTTP response
    * @return {object} the normalized object
    */
   decodeItem(
     rawData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): object {
+  ): NormalizedObject {
     throw new TypeError('`decodeItem` method must be implemented');
   }
 
@@ -68,30 +76,30 @@ class Serializer implements SerializerInterface {
    * convert a string containing an object to an entity
    * @param {string} rawData - The string fetched from the response
    * @param {ClassMetadata} classMetadata - the class metadata
-   * @param {object} response - the HTTP response
+   * @param {Record<string, unknown>} response - the HTTP response
    * @return {object} the entity
    */
   deserializeItem(
     rawData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): object {
+  ): Entity {
     const object = this.decodeItem(rawData, classMetadata, response);
     return this.denormalizeItem(object, classMetadata, response);
   }
 
   /**
    * convert a plain object list to an entity list
-   * @param {object|object[]} objectList - The plain javascript object list (or an iterable object)
+   * @param {Iterable<object>} objectList - The plain javascript object list (or an iterable object)
    * @param {ClassMetadata} classMetadata - the class metadata
-   * @param {object} response - the HTTP response
-   * @return {object | object[]} a list of entities
+   * @param {Record<string, unknown>} response - the HTTP response
+   * @return {Iterable<object>} a list of entities
    */
   denormalizeList(
-    objectList: object | object[],
+    objectList: NormalizedList,
     classMetadata: ClassMetadata,
     response: Response
-  ): object | object[] {
+  ): EntityList {
     return objectList; // weird conversion as the declaration of list type is fuzzy
   }
 
@@ -99,14 +107,14 @@ class Serializer implements SerializerInterface {
    * convert a string containing a list of objects to a list of plain javascript objects
    * @param {string} rawListData - The string fetched from the response
    * @param {ClassMetadata} classMetadata - the class metadata
-   * @param {object} response - the HTTP response
-   * @return {any} a list of normalized objects
+   * @param {Record<string, unknown>} response - the HTTP response
+   * @return {Iterable<object>} a list of normalized objects
    */
   decodeList(
     rawListData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): object | object[] {
+  ): NormalizedList {
     throw new TypeError('`deserializeList` method must be implemented');
   }
 
@@ -114,14 +122,14 @@ class Serializer implements SerializerInterface {
    * convert a string containing a list of objects to a list of entities
    * @param {string} rawListData - The string fetched from the response
    * @param {ClassMetadata} classMetadata - the class metadata
-   * @param {object} response - the HTTP response
-   * @return {any} a list of entities
+   * @param {Record<string, unknown>} response - the HTTP response
+   * @return {Iterable<object>} a list of entities
    */
   deserializeList(
     rawListData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): object | object[] {
+  ): EntityList {
     const objectList = this.decodeList(rawListData, classMetadata, response);
     return this.denormalizeList(objectList, classMetadata, response);
   }

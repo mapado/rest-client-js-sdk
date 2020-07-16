@@ -3,7 +3,10 @@ import Serializer from './Serializer';
 import ClassMetadata from '../Mapping/ClassMetadata';
 
 class JsSerializer extends Serializer {
-  encodeItem(object: object, classMetadata: ClassMetadata): string {
+  encodeItem(
+    object: Record<string, unknown>,
+    classMetadata: ClassMetadata
+  ): string {
     return JSON.stringify(object);
   }
 
@@ -11,7 +14,7 @@ class JsSerializer extends Serializer {
     rawData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): object {
+  ): Record<string, unknown> {
     return JSON.parse(rawData);
   }
 
@@ -19,7 +22,7 @@ class JsSerializer extends Serializer {
     rawListData: string,
     classMetadata: ClassMetadata,
     response: Response
-  ): object | object[] {
+  ): Iterable<Record<string, unknown>> {
     return JSON.parse(rawListData);
   }
 }

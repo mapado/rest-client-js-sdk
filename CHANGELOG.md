@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.0.0-rc.7
+
+### Changed
+
+- `config.authorizationType` is in fact optional (default to "Bearer"), so update the types accordingly
+- Update typescript-eslint and fix eslint issues
+- Make `SerializerInterace` and `Serializer` input and output understandable
+
 ## 5.0.0-rc.6
 
 ### Changed

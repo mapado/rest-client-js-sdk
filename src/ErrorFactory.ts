@@ -1,4 +1,4 @@
-/* eslint-disable max-classes-per-file, @typescript-eslint/no-use-before-define */
+/* eslint-disable max-classes-per-file, no-use-before-define */
 /**
  * It's a bit tricky to extends native errors
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error

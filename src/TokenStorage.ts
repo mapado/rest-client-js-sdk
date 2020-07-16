@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable camelcase */
 import TokenGeneratorInterface from './TokenGenerator/TokenGeneratorInterface';
 import { Token, TokenGeneratorParameters } from './TokenGenerator/types';
 import AsyncStorageInterface from './AsyncStorageInterface';
