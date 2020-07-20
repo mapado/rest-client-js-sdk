@@ -34,6 +34,16 @@
   - `canAutogenerateToken` has been removed from the token storages and replaced by a `autogenerateToken()` method (it's not real POO, but I did not manage to deal with instance of for now)
   - [Might Break] AbstractClient.\_refreshTokenAndRefetch does not take the response as a first argument (it wan unused). The method was supposed to be private be the way.
 
+## 4.1.4
+
+### Changed
+
+- Passing a string as argument to `ProvidedTokenGenerator` is now deprecated. You should pass the token object instead. It should have had a weird comportment before by the way.
+
+### Fixed
+
+- Fix issue when two token generation are send on the same time : the second one will not throw an error now.
+
 ## 4.1.3
 
 ### Fixed

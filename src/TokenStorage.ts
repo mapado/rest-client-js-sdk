@@ -99,7 +99,6 @@ class TokenStorage<T extends Token> {
   generateToken<G extends TokenGeneratorParameters>(
     parameters: G
   ): Promise<T & HasExpiresAt> {
-    this.#hasATokenBeenGenerated = true;
     const callTimestamp = Date.now();
 
     return this.#tokenGenerator
@@ -110,9 +109,10 @@ class TokenStorage<T extends Token> {
           callTimestamp
         );
 
-        return this._storeAccessToken(updatedResponseData).then(
-          () => updatedResponseData
-        );
+        return this._storeAccessToken(updatedResponseData).then(() => {
+          this.#hasATokenBeenGenerated = true;
+          return updatedResponseData;
+        });
       });
   }
 

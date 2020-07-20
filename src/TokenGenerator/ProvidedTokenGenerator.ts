@@ -2,49 +2,34 @@
 import TokenGeneratorInterface from './TokenGeneratorInterface';
 import { Token } from './types';
 
-interface ProvidedToken extends Token {
-  access_token: string;
-  token_type: string;
-  refresh_token?: never;
-  expires_in?: never;
-  scope?: never;
-}
+type RefreshTokenFunc = () => Promise<Token>;
 
-type Parameters = {
-  grant_type: 'provided';
-};
-
-type RefreshTokenFunc = () => Promise<ProvidedToken>;
-
-class ProvidedTokenGenerator implements TokenGeneratorInterface<ProvidedToken> {
-  #token: string;
+class ProvidedTokenGenerator implements TokenGeneratorInterface<Token> {
+  #token: Token;
 
   #refreshTokenFunc: null | RefreshTokenFunc;
 
-  constructor(token: string, refreshTokenFunc: null | RefreshTokenFunc = null) {
+  constructor(token: Token, refreshTokenFunc: null | RefreshTokenFunc = null) {
     this.#token = token;
     this.#refreshTokenFunc = refreshTokenFunc;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  generateToken(parameters: Parameters): Promise<ProvidedToken> {
-    return Promise.resolve({
-      access_token: this.#token,
-      token_type: 'bearer',
-    });
+  generateToken(): Promise<Token> {
+    return Promise.resolve(this.#token);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  refreshToken(accessToken: ProvidedToken): Promise<ProvidedToken> {
+  refreshToken(accessToken: Token): Promise<Token> {
     if (typeof this.#refreshTokenFunc === 'function') {
       return this.#refreshTokenFunc();
     }
 
-    return this.generateToken({ grant_type: 'provided' });
+    return this.generateToken();
   }
 
-  autoGenerateToken(): Promise<ProvidedToken> {
-    return this.generateToken({ grant_type: 'provided' });
+  autoGenerateToken(): Promise<Token> {
+    return this.generateToken();
   }
 }
 

@@ -346,11 +346,9 @@ class AbstractClient<D extends MetadataDefinition> {
     }
 
     if (this.#tokenStorage) {
-      return Promise.all([
-        this.#tokenStorage.getCurrentTokenExpiresIn(),
-        this.#tokenStorage.getAccessToken(),
-      ])
-        .then(([accessTokenExpiresIn, accessToken]) => {
+      return this.#tokenStorage
+        .getCurrentTokenExpiresIn()
+        .then((accessTokenExpiresIn) => {
           if (
             accessTokenExpiresIn !== null &&
             accessTokenExpiresIn <= EXPIRE_LIMIT_SECONDS
@@ -362,7 +360,7 @@ class AbstractClient<D extends MetadataDefinition> {
               );
           }
 
-          return accessToken;
+          return this.#tokenStorage.getAccessToken();
         })
         .then((token) => this._doFetch(token, input, requestParams));
     }

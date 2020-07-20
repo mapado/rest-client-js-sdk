@@ -14,7 +14,7 @@ afterEach(fetchMock.reset);
 
 describe('Token storage tests', () => {
   test('handle empty token', () => {
-    const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
+    const oauth = new TokenStorage(new NoTokenGeneratorMock(), new Storage());
 
     const hasAccessToken = oauth.hasAccessToken();
     expect(hasAccessToken).toBeInstanceOf(Promise);
