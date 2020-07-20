@@ -34,6 +34,12 @@
   - `canAutogenerateToken` has been removed from the token storages and replaced by a `autogenerateToken()` method (it's not real POO, but I did not manage to deal with instance of for now)
   - [Might Break] AbstractClient.\_refreshTokenAndRefetch does not take the response as a first argument (it wan unused). The method was supposed to be private be the way.
 
+## 4.1.3
+
+### Fixed
+
+- Fix issue when no token is provided but the object is `{ expires_at: null }`
+
 ## 4.1.2
 
 ### Fixed

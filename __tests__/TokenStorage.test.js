@@ -1,6 +1,7 @@
 import fetchMock from 'fetch-mock';
 import { TokenStorage } from '../src';
 import TokenGeneratorMock from '../__mocks__/TokenGeneratorMock';
+import NoTokenGeneratorMock from '../__mocks__/NoTokenGeneratorMock';
 import oauthClientCredentialsMock from '../__mocks__/oauthClientCredentials.json';
 import refreshedCredentials from '../__mocks__/refreshedCredentials.json';
 import Storage from '../__mocks__/mockStorage';
@@ -167,5 +168,15 @@ describe('Token storage tests', () => {
         });
       });
     });
+  });
+});
+
+describe('issue with expires_at when to token has been generated', () => {
+  test('no expires_at should be found if there is no responseData', async () => {
+    const oauth = new TokenStorage(new NoTokenGeneratorMock(), new Storage());
+
+    const token = await oauth.generateToken();
+
+    expect(token).toBeNull();
   });
 });

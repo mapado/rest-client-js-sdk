@@ -75,6 +75,10 @@ class TokenStorage<T extends Token> {
     responseData: T,
     callTimestamp: number
   ): T & HasExpiresAt {
+    if (!responseData) {
+      return responseData;
+    }
+
     const updatedResponseData: T & HasExpiresAt = {
       ...responseData,
       expires_at: null,
