@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.3
+
+### Fixed
+
+- Fix issue when no token is provided but the object is `{ expires_at: null }`
+
 ## 4.1.2
 
 ### Fixed
