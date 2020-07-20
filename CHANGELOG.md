@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.1.4
+
+### Changed
+
+- Passing a string as argument to `ProvidedTokenGenerator` is now deprecated. You should pass the token object instead. It should have had a weird comportment before by the way.
+
+### Fixed
+
+- Fix issue when two token generation are send on the same time : the second one will not throw an error now.
+
 ## 4.1.3
 
 ### Fixed

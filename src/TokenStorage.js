@@ -75,7 +75,6 @@ class TokenStorage {
   }
 
   generateToken(parameters) {
-    this._hasATokenBeenGenerated = true;
     const callTimestamp = Date.now();
     return this._tokenGenerator
       .generateToken(parameters)
@@ -85,7 +84,10 @@ class TokenStorage {
           callTimestamp
         );
         return this._storeAccessToken(updatedResponseData, callTimestamp).then(
-          () => updatedResponseData
+          () => {
+            this._hasATokenBeenGenerated = true;
+            return updatedResponseData;
+          }
         );
       });
   }

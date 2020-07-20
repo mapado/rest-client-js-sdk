@@ -237,11 +237,9 @@ class AbstractClient {
     }
 
     if (this._tokenStorage) {
-      return Promise.all([
-        this._tokenStorage.getCurrentTokenExpiresIn(),
-        this._tokenStorage.getAccessToken(),
-      ])
-        .then(([accessTokenExpiresIn, accessToken]) => {
+      return this._tokenStorage
+        .getCurrentTokenExpiresIn()
+        .then((accessTokenExpiresIn) => {
           if (
             accessTokenExpiresIn !== null &&
             accessTokenExpiresIn <= EXPIRE_LIMIT_SECONDS
@@ -253,7 +251,7 @@ class AbstractClient {
               );
           }
 
-          return accessToken;
+          return this._tokenStorage.getAccessToken();
         })
         .then((token) => this._doFetch(token, input, requestParams));
     }
