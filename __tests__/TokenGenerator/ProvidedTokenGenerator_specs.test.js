@@ -5,7 +5,10 @@ import Storage from '../../__mocks__/mockStorage';
 
 global.FormData = require('form-data');
 
-const providedToken = oauthClientCredentialsMock.access_token;
+const providedToken = {
+  access_token: oauthClientCredentialsMock.access_token,
+  token_type: 'bearer',
+};
 
 describe('ProvidedTokenGenerator tests', () => {
   afterEach(fetchMock.restore);
