@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 5.0.0-rc.8
 
 - export (and implement) `RestClientSdkInterface` and `TokenStorageInterface`
 - export `TokenGeneratorInterface` and `AsyncStorageInterface`
