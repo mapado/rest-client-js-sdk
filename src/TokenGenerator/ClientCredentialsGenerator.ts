@@ -2,7 +2,7 @@
 import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
-import { Token, TokenGeneratorParameters } from './types';
+import { Token } from './types';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -23,12 +23,11 @@ type BaseParameters = {
   scope?: string;
 };
 
-type Parameters = TokenGeneratorParameters &
-  BaseParameters & {
-    grant_type: 'client_credentials';
-    client_id: string;
-    client_secret: string;
-  };
+type Parameters = BaseParameters & {
+  grant_type: 'client_credentials';
+  client_id: string;
+  client_secret: string;
+};
 
 interface ClientCredentialToken extends Token {
   access_token: string;

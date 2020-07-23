@@ -1,6 +1,6 @@
 import URI from 'urijs';
 import { OauthError, getHttpErrorFromResponse } from '../ErrorFactory';
-import TokenStorage from '../TokenStorage';
+import TokenStorageInterface from '../TokenStorageInterface';
 import { removeAuthorization, removeUndefinedHeaders } from './headerUtils';
 // eslint-disable-next-line import/no-duplicates
 import type RestClientSdk from '../RestClientSdk';
@@ -15,7 +15,7 @@ const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 class AbstractClient<D extends MetadataDefinition> {
   sdk: RestClientSdk<SdkMetadata>;
 
-  #tokenStorage: TokenStorage<Token>;
+  #tokenStorage: TokenStorageInterface<Token>;
 
   serializer: SerializerInterface;
 

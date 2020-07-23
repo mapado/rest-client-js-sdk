@@ -1,19 +1,14 @@
 import JsSerializer from './serializer/JsSerializer';
 import UnitOfWork from './UnitOfWork';
 import Mapping from './Mapping';
-import TokenStorage from './TokenStorage';
+import TokenStorageInterface from './TokenStorageInterface';
 import SerializerInterface from './serializer/SerializerInterface';
 import AbstractClient from './client/AbstractClient';
 import { Token } from './TokenGenerator/types';
-
-type Config = {
-  path: string;
-  scheme: string;
-  port?: number;
-  segment?: string;
-  authorizationType?: string; // default to "Bearer", but can be "Basic" or anything
-  useDefaultParameters?: boolean;
-};
+// eslint-disable-next-line import/no-duplicates
+import type RestClientSdkInterface from './RestClientSdkInterface';
+// eslint-disable-next-line import/no-duplicates
+import type { Config } from './RestClientSdkInterface';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Entity = any;
@@ -28,10 +23,11 @@ export type MetadataDefinition = {
 
 export type SdkMetadata = Record<string, MetadataDefinition>;
 
-class RestClientSdk<M extends SdkMetadata> {
+class RestClientSdk<M extends SdkMetadata>
+  implements RestClientSdkInterface<M> {
   config: Config;
 
-  public tokenStorage: TokenStorage<Token>;
+  public tokenStorage: TokenStorageInterface<Token>;
 
   public serializer: SerializerInterface;
 
@@ -42,7 +38,7 @@ class RestClientSdk<M extends SdkMetadata> {
   #repositoryList: Partial<Record<keyof M, AbstractClient<M[keyof M]>>>;
 
   constructor(
-    tokenStorage: TokenStorage<Token>,
+    tokenStorage: TokenStorageInterface<Token>,
     config: Config,
     mapping: Mapping,
     serializer: SerializerInterface = new JsSerializer()

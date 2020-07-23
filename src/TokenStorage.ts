@@ -1,20 +1,21 @@
 /* eslint-disable camelcase */
 import TokenGeneratorInterface from './TokenGenerator/TokenGeneratorInterface';
-import { Token, TokenGeneratorParameters } from './TokenGenerator/types';
+import { Token } from './TokenGenerator/types';
 import AsyncStorageInterface from './AsyncStorageInterface';
+import type TokenStorageInterface from './TokenStorageInterface';
 
 interface HasExpiresAt {
   expires_at: null | number;
 }
 
-class TokenStorage<T extends Token> {
+class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
   #tokenGenerator: TokenGeneratorInterface<T>;
 
   #hasATokenBeenGenerated: boolean;
 
   accessTokenKey: string;
 
-  #asyncStorage: AsyncStorageInterface;
+  #asyncStorage!: AsyncStorageInterface;
 
   constructor(
     tokenGenerator: TokenGeneratorInterface<T>,
@@ -23,7 +24,7 @@ class TokenStorage<T extends Token> {
   ) {
     this.#tokenGenerator = tokenGenerator;
     this.#hasATokenBeenGenerated = false;
-    this.#asyncStorage = asyncStorage; // should be `setAsyncStorage(asyncStorage)` but TS mark this an an error
+    this.setAsyncStorage(asyncStorage);
     this.accessTokenKey = accessTokenKey;
   }
 
@@ -96,9 +97,7 @@ class TokenStorage<T extends Token> {
     return updatedResponseData;
   }
 
-  generateToken<G extends TokenGeneratorParameters>(
-    parameters: G
-  ): Promise<T & HasExpiresAt> {
+  generateToken(parameters: unknown): Promise<T & HasExpiresAt> {
     const callTimestamp = Date.now();
 
     return this.#tokenGenerator

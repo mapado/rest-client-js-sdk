@@ -25,6 +25,10 @@ import Attribute from './Mapping/Attribute';
 import Relation from './Mapping/Relation';
 import type { Token } from './TokenGenerator/types';
 import type { SdkMetadata } from './RestClientSdk';
+import type RestClientSdkInterface from './RestClientSdkInterface';
+import type TokenStorageInterface from './TokenStorageInterface';
+import type TokenGeneratorInterface from './TokenGenerator/TokenGeneratorInterface';
+import type AsyncStorageInterface from './AsyncStorageInterface';
 
 export default RestClientSdk;
 export {
@@ -50,4 +54,12 @@ export {
   Attribute,
   Relation,
 };
-export type { SerializerInterface, Token, SdkMetadata };
+export type {
+  SerializerInterface,
+  Token,
+  SdkMetadata,
+  RestClientSdkInterface,
+  TokenStorageInterface,
+  TokenGeneratorInterface,
+  AsyncStorageInterface,
+};

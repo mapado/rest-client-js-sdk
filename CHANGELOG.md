@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- export (and implement) `RestClientSdkInterface` and `TokenStorageInterface`
+- export `TokenGeneratorInterface` and `AsyncStorageInterface`
+- Fix wrong parameter with `grant_type` in `generateToken`
+
 ## 5.0.0-rc.7
 
 ### Changed

@@ -6,6 +6,3 @@ export interface Token {
   expires_in?: number;
   scope?: string;
 }
-export interface TokenGeneratorParameters {
-  grant_type: string;
-}
