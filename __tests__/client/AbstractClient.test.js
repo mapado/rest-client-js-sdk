@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable max-classes-per-file */
 /* eslint no-unused-vars: 0, no-underscore-dangle: 0 */
 import fetchMock from 'fetch-mock';
@@ -854,12 +855,6 @@ describe('Test unit of work', () => {
   let unitOfWorkSdk = null;
 
   beforeEach(() => {
-    const tokenGenerator = new PasswordGenerator({
-      path: 'oauth.me',
-      scheme: 'https',
-      clientId: 'clientId',
-      clientSecret: 'clientSecret',
-    });
     unitOfWorkSdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https' },
@@ -1264,13 +1259,34 @@ describe('Test unit of work', () => {
     });
 
     test('data not present in the API response', async () => {
-      fetchMock.mock({
-        matcher: 'end:/v12/carts/1',
-        response: {
-          status: 200,
-          body: { '@id': '/v12/carts/1', status: 'payed' },
-        },
-      });
+      fetchMock
+        .mock({
+          matcher: 'end:/v12/carts/1',
+          method: 'GET',
+          response: {
+            status: 200,
+            body: { '@id': '/v12/carts/1', status: 'payed' },
+          },
+        })
+        .mock({
+          name: 'put_cart',
+          matcher: 'end:/v12/carts/1',
+          method: 'PUT',
+          response: {
+            status: 200,
+            body: {
+              '@id': '/v12/carts/1',
+              status: 'foo',
+              cartItemList: [
+                {
+                  '@id': '/v12/carts/1',
+                  status: 'refunded',
+                  data: null,
+                },
+              ],
+            },
+          },
+        });
 
       const cart = await unitOfWorkSdk
         .getRepository('carts')
@@ -1281,7 +1297,14 @@ describe('Test unit of work', () => {
       cart.status = 'refunded';
       cart.data = null;
 
-      unitOfWorkSdk.getRepository('carts').update(cart);
+      await unitOfWorkSdk.getRepository('carts').update(cart);
+
+      expect(fetchMock.lastOptions().body).toEqual(
+        JSON.stringify({
+          status: 'refunded',
+          data: null,
+        })
+      );
     });
 
     test('many-to-one relation with null value in newValue', async () => {

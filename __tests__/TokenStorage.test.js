@@ -13,25 +13,24 @@ const tokenGeneratorMock = new TokenGeneratorMock();
 afterEach(fetchMock.reset);
 
 describe('Token storage tests', () => {
-  test('handle empty token', () => {
+  test('handle empty token', async (done) => {
     const oauth = new TokenStorage(new NoTokenGeneratorMock(), new Storage());
 
-    const hasAccessToken = oauth.hasAccessToken();
-    expect(hasAccessToken).toBeInstanceOf(Promise);
+    const hasAccessToken = await oauth.hasAccessToken();
+    expect(hasAccessToken).toBe(false);
 
     return oauth
       .getAccessToken()
       .catch((e) => {
         expect(e.message).toBe('No token has been generated yet.');
       })
-      .then(() => {
-        oauth.generateToken();
-        const accessToken = oauth.getAccessToken();
+      .then(async () => {
+        await oauth.generateToken();
+        const accessToken = await oauth.getAccessToken();
 
-        return Promise.all([
-          expect(hasAccessToken).resolves.toBe(false),
-          expect(accessToken).resolves.toBeNull(),
-        ]);
+        expect(accessToken).toBeNull();
+
+        done();
       });
   });
 

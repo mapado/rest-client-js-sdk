@@ -1,28 +1,42 @@
 {
   "name": "rest-client-sdk",
-  "version": "4.1.4",
+  "version": "5.0.0-rc.8",
   "description": "Rest Client SDK for API",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
+  "types": "dist/types/index.d.ts",
   "files": [
     "dist",
     "src"
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "test": "yarn lint && jest",
-    "build": "rollup -c",
+    "test": "yarn lint --quiet && jest",
+    "build": "yarn clean && yarn build:types && yarn build:js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:js": "rollup -c",
     "check:src": "npm run test",
     "prepublishOnly": "npm run clean && npm run check:src && npm run build",
-    "lint": "eslint src/"
+    "lint": "yarn lint:types && yarn lint:eslint",
+    "lint:eslint": "eslint --ext js,jsx,jsx,ts,tsx src/",
+    "lint:types": "tsc --noEmit",
+    "version": "sed -i \"s/current_version = .*/current_version = $npm_package_version/\" .bumpversion.cfg && git add .bumpversion.cfg"
   },
   "dependencies": {
+    "@types/urijs": "^1.19.9",
     "deep-diff": "^1.0.2",
     "urijs": "^1.19.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
+    "@babel/core": "^7.10.5",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
+    "@babel/preset-typescript": "^7.10.4",
+    "@types/deep-diff": "^1.0.0",
+    "@types/urijs": "^1.19.9",
+    "@typescript-eslint/eslint-plugin": "^3.6.1",
+    "@typescript-eslint/parser": "^3.6.1",
     "babel-jest": "^25.2.6",
     "bundlesize": "^0.18.0",
     "core-js": "^3.6.4",
@@ -48,7 +62,8 @@
     "rollup": "^2.3.3",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-resolve": "^5.2.0"
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "typescript": "^3.9.6"
   },
   "optionalDependencies": {
     "pluralize": "^8.0.0"

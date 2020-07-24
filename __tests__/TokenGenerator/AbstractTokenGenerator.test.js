@@ -1,13 +1,13 @@
 import { AbstractTokenGenerator } from '../../src';
 
 describe('AbstractTokenGenerator tests', () => {
-  test('contains all methods', () => {
-    const tokenGenerator = new AbstractTokenGenerator();
+  // test('contains all methods', () => {
+  //   const tokenGenerator = new AbstractTokenGenerator();
 
-    expect(tokenGenerator.checkTokenGeneratorConfig).not.toThrowError(Error);
-    expect(tokenGenerator.generateToken).toThrowError(Error);
-    expect(tokenGenerator.refreshToken).toThrowError(Error);
-  });
+  //   expect(tokenGenerator.checkTokenGeneratorConfig).not.toThrowError(Error);
+  //   expect(tokenGenerator.generateToken).toThrowError(Error);
+  //   expect(tokenGenerator.refreshToken).toThrowError(Error);
+  // });
 
   test('test convert map to FormData', () => {
     const tokenGenerator = new AbstractTokenGenerator();

@@ -18,10 +18,17 @@ import ClientCredentialsGenerator from './TokenGenerator/ClientCredentialsGenera
 import PasswordGenerator from './TokenGenerator/PasswordGenerator';
 import ProvidedTokenGenerator from './TokenGenerator/ProvidedTokenGenerator';
 import Serializer from './serializer/Serializer';
+import type SerializerInterface from './serializer/SerializerInterface';
 import Mapping from './Mapping';
 import ClassMetadata from './Mapping/ClassMetadata';
 import Attribute from './Mapping/Attribute';
 import Relation from './Mapping/Relation';
+import type { Token } from './TokenGenerator/types';
+import type { SdkMetadata } from './RestClientSdk';
+import type RestClientSdkInterface from './RestClientSdkInterface';
+import type TokenStorageInterface from './TokenStorageInterface';
+import type TokenGeneratorInterface from './TokenGenerator/TokenGeneratorInterface';
+import type AsyncStorageInterface from './AsyncStorageInterface';
 
 export default RestClientSdk;
 export {
@@ -46,4 +53,13 @@ export {
   ClassMetadata,
   Attribute,
   Relation,
+};
+export type {
+  SerializerInterface,
+  Token,
+  SdkMetadata,
+  RestClientSdkInterface,
+  TokenStorageInterface,
+  TokenGeneratorInterface,
+  AsyncStorageInterface,
 };
