@@ -133,7 +133,7 @@ class UnitOfWork {
     );
   }
 
-  _getDirtyFieldsForAttribute(
+  private _getDirtyFieldsForAttribute(
     dirtyFieldsParam: StringKeyObject,
     key: string,
     attribute: Attribute,
@@ -153,7 +153,7 @@ class UnitOfWork {
     return dirtyFields;
   }
 
-  _getDirtyFieldsForManyToOne(
+  private _getDirtyFieldsForManyToOne(
     dirtyFieldsParam: StringKeyObject,
     key: string,
     oldValue: Record<string, unknown>,
@@ -188,7 +188,7 @@ class UnitOfWork {
     return dirtyFields;
   }
 
-  _getDirtyFieldsForOneToMany(
+  private _getDirtyFieldsForOneToMany(
     dirtyFieldsParam: StringKeyObject,
     key: string,
     idSerializedKey: string,
@@ -270,7 +270,7 @@ class UnitOfWork {
     return dirtyFields;
   }
 
-  _getDirtyFields(
+  private _getDirtyFields(
     newSerializedModel: StringKeyObject,
     oldSerializedModel: StringKeyObject,
     classMetadata: ClassMetadata

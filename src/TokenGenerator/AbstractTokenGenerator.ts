@@ -25,7 +25,7 @@ abstract class AbstractTokenGenerator<T extends Token, C>
 
   abstract checkTokenGeneratorConfig(config: C): void;
 
-  _manageOauthError(response: Response): Promise<never> {
+  protected _manageOauthError(response: Response): Promise<never> {
     return response
       .json()
       .then((body) => {
@@ -52,7 +52,7 @@ abstract class AbstractTokenGenerator<T extends Token, C>
       });
   }
 
-  convertMapToFormData(parameters: {
+  protected convertMapToFormData(parameters: {
     [key: string]: undefined | string | Blob;
   }): FormData {
     const keys = Object.keys(parameters);

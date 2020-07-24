@@ -306,7 +306,7 @@ class AbstractClient<D extends MetadataDefinition> {
     return this._fetchWithToken(url.toString(), requestParams);
   }
 
-  _generateUrlFromParams(
+  private _generateUrlFromParams(
     queryParam: Record<string, unknown>,
     pathParameters: Record<string, unknown> = {},
     id: null | string | number = null
@@ -340,7 +340,10 @@ class AbstractClient<D extends MetadataDefinition> {
     return url;
   }
 
-  _fetchWithToken(input: string, requestParams = {}): Promise<Response> {
+  private _fetchWithToken(
+    input: string,
+    requestParams = {}
+  ): Promise<Response> {
     if (!input) {
       throw new Error('input is empty');
     }
@@ -368,7 +371,7 @@ class AbstractClient<D extends MetadataDefinition> {
     return this._doFetch(null, input, requestParams);
   }
 
-  _refreshTokenAndRefetch(
+  private _refreshTokenAndRefetch(
     input: string,
     requestParams: RequestInit = {}
   ): Promise<Response> {
@@ -385,7 +388,7 @@ class AbstractClient<D extends MetadataDefinition> {
     });
   }
 
-  _manageUnauthorized(
+  private _manageUnauthorized(
     response: Response,
     input: string,
     requestParams = {}
@@ -422,7 +425,7 @@ class AbstractClient<D extends MetadataDefinition> {
     }
   }
 
-  _doFetch(
+  private _doFetch(
     accessToken: null | string,
     input: string,
     requestParams: RequestInit
@@ -472,7 +475,7 @@ class AbstractClient<D extends MetadataDefinition> {
     });
   }
 
-  _getEntityIdentifier(
+  private _getEntityIdentifier(
     object: Record<string, unknown>
   ): null | string | number {
     const idKey = this.metadata.getIdentifierAttribute().serializedKey;

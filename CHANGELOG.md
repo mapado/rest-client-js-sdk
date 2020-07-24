@@ -1,44 +1,28 @@
 # Changelog
 
-## 5.0.0-rc.8
+## 5.0.0
 
-- export (and implement) `RestClientSdkInterface` and `TokenStorageInterface`
-- export `TokenGeneratorInterface` and `AsyncStorageInterface`
-- Fix wrong parameter with `grant_type` in `generateToken`
-
-## 5.0.0-rc.7
-
-### Changed
-
-- `config.authorizationType` is in fact optional (default to "Bearer"), so update the types accordingly
-- Update typescript-eslint and fix eslint issues
-- Make `SerializerInterace` and `Serializer` input and output understandable
-
-## 5.0.0-rc.6
-
-### Changed
-
-- Improve JSDoc
-
-## 5.0.0-rc.5
-
-### Changed
-
-- Simplify configuration for TypeScript (serializer, AbstractClient, etc.)
-
-## 5.0.0-rc.1
+This release is a migration to TypeScript, but the API stay the same. The only breaking changes are more fixed bugs that might be breaking in really improbable case.
 
 ### Changed
 
 - [BREAKING] TokenGenerator's `refreshToken` method signature changed from `refreshToken(accessToken, parameters)` to `refreshToken(accessToken)`.
   If you did extend the `AbstractToken` generator, you shouldn't relly on the second parameter.
   As a matter of fact, the auto-refreshed token in `AbstractClient` did not send any parameters either, so it should not have been working before !
-- [BREAKING] Accordingly The `refreshToken` method of `TokenStorage` signature changed from `refreshToken(parameters)` to `refreshToken()`
-- Migrate codebase to TypeScript. It should not change anything to users, exept a more robust code for TypeScript users. Some small undocumented cases might break:
-  - [Might Break] `ClassMetadata`, `Attribute` and `Relation` attributes are now `readonly`. You can not change them after initialization.
-  - [Might Break] `AbstractTokenGenerator` is now abstract. It should not have been used directly anyway. It implies that the method that previously did thrown errors are not callable (`generateToken`, `refreshToken` and `checkTokenGeneratorConfig`). They should not have been called.
-  - `canAutogenerateToken` has been removed from the token storages and replaced by a `autogenerateToken()` method (it's not real POO, but I did not manage to deal with instance of for now)
-  - [Might Break] AbstractClient.\_refreshTokenAndRefetch does not take the response as a first argument (it wan unused). The method was supposed to be private be the way.
+  Accordingly The `refreshToken` method of `TokenStorage` signature changed from `refreshToken(parameters)` to `refreshToken()`
+- [Might Break] all pseudo-private methods and attributes (starting with `_`) are unavailable and are now really private (or protected).
+  - `_storeAccessToken` should be replace by a `ProvidedTokenGenerator`
+- [Might Break] `ClassMetadata`, `Attribute` and `Relation` attributes are now `readonly`. You can not change them after initialization.
+- [Might Break] `AbstractTokenGenerator` is now abstract. It should not have been used directly anyway. It implies that the method that previously did thrown errors are not callable (`generateToken`, `refreshToken` and `checkTokenGeneratorConfig`). They should not have been called. They don't exist in JS land anymore.
+- [Might Break] `canAutogenerateToken` has been removed from the token storages and replaced by a `autogenerateToken()` method (it's not real POO, but I did not manage to deal with instance of for now)
+- [Might Break] AbstractClient.\_refreshTokenAndRefetch does not take the response as a first argument (it wan unused). The method was supposed to be private be the way.
+
+- Make `SerializerInterace` and `Serializer` input and output understandable
+
+### Added
+
+- export (and implement) `RestClientSdkInterface` and `TokenStorageInterface`
+- export `TokenGeneratorInterface` and `AsyncStorageInterface`
 
 ## 4.1.4
 

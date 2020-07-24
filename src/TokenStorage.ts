@@ -72,7 +72,7 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
     return this.#asyncStorage.removeItem(this.accessTokenKey);
   }
 
-  _addExpiresAtToResponseData(
+  private _addExpiresAtToResponseData(
     responseData: T,
     callTimestamp: number
   ): T & HasExpiresAt {
@@ -154,7 +154,7 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
     });
   }
 
-  _storeAccessToken(responseData: T): Promise<unknown> {
+  private _storeAccessToken(responseData: T): Promise<unknown> {
     return this.#asyncStorage.setItem(
       this.accessTokenKey,
       JSON.stringify(responseData)
