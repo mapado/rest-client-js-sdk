@@ -2,6 +2,7 @@
 import TokenGeneratorInterface from './TokenGenerator/TokenGeneratorInterface';
 import { Token } from './TokenGenerator/types';
 import AsyncStorageInterface from './AsyncStorageInterface';
+import { memoizePromise } from './decorator';
 import type TokenStorageInterface from './TokenStorageInterface';
 
 interface HasExpiresAt {
@@ -26,6 +27,9 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
     this.#hasATokenBeenGenerated = false;
     this.setAsyncStorage(asyncStorage);
     this.accessTokenKey = accessTokenKey;
+
+    this.generateToken = memoizePromise(this.generateToken);
+    this.refreshToken = memoizePromise(this.refreshToken);
   }
 
   setAsyncStorage(asyncStorage: AsyncStorageInterface): void {
