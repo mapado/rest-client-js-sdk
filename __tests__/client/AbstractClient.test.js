@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable max-classes-per-file */
 /* eslint no-unused-vars: 0, no-underscore-dangle: 0 */
 import fetchMock from 'fetch-mock';
@@ -12,7 +11,6 @@ import RestClientSdk, {
   Mapping,
   ClassMetadata,
   Attribute,
-  Relation,
 } from '../../src/index';
 import tokenStorageMock from '../../__mocks__/tokenStorage';
 import MockStorage from '../../__mocks__/mockStorage';
@@ -48,7 +46,7 @@ class WeirdSerializer extends Serializer {
   }
 
   _addInfoToItem(item) {
-    return Object.assign({}, item, { customName: `${item.name}${item.name}` });
+    return { ...item, customName: `${item.name}${item.name}` };
   }
 }
 
@@ -88,7 +86,7 @@ mappingNoPrefix.setMapping([testMetadata, defParamMetadata, noAtIdMetadata]);
 
 const SomeSdk = new RestClientSdk(
   tokenStorageMock,
-  { path: 'api.me', scheme: 'https' },
+  { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
   mapping
 );
 SomeSdk.tokenStorage.generateToken();
@@ -235,7 +233,7 @@ describe('Test Client', () => {
   test('handle entityFactory with a custom serializer', () => {
     const EntityFactorySdk = new RestClientSdk(
       tokenStorageMock,
-      { path: 'api.me', scheme: 'https' },
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
       mapping,
       new WeirdSerializer()
     );
@@ -311,7 +309,7 @@ describe('Test Client', () => {
 
     const SomeSdkNoPrefix = new RestClientSdk(
       tokenStorageMock,
-      { path: 'api.me', scheme: 'https' },
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
       mappingNoPrefix
     );
 
@@ -339,7 +337,12 @@ describe('Test Client', () => {
 
     const BasicAuthSdk = new RestClientSdk(
       tokenStorageMock,
-      { path: 'api.me', scheme: 'https', authorizationType: 'Basic' },
+      {
+        path: 'api.me',
+        scheme: 'https',
+        authorizationType: 'Basic',
+        unitOfWorkEnabled: true,
+      },
       mapping
     );
     BasicAuthSdk.tokenStorage.generateToken();
@@ -362,7 +365,12 @@ describe('Test Client', () => {
 
     const NoAuthSdk = new RestClientSdk(
       null,
-      { path: 'api.me', scheme: 'https', authorizationType: 'Basic' },
+      {
+        path: 'api.me',
+        scheme: 'https',
+        authorizationType: 'Basic',
+        unitOfWorkEnabled: true,
+      },
       mapping
     );
 
@@ -444,7 +452,7 @@ describe('Fix bugs', () => {
   test('generate good url', () => {
     const SomeInnerSdk = new RestClientSdk(
       tokenStorageMock,
-      { path: 'api.me', scheme: 'https' },
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
       mapping
     );
     SomeInnerSdk.tokenStorage.generateToken();
@@ -665,7 +673,7 @@ describe('Fix bugs', () => {
 
     const SomeInnerSdk = new RestClientSdk(
       new TokenStorage(tokenGenerator, storage),
-      { path: 'api.me', scheme: 'https' },
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
       mapping
     );
 
@@ -756,7 +764,7 @@ describe('Fix bugs', () => {
 
     const SomeInnerSdk = new RestClientSdk(
       new TokenStorage(tokenGenerator, storage),
-      { path: 'api.me', scheme: 'https' },
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
       mapping
     );
 
@@ -833,7 +841,7 @@ describe('Fix bugs', () => {
 
     const SomeInnerSdk = new RestClientSdk(
       new TokenStorage(tokenGenerator, storage),
-      { path: 'api.me', scheme: 'https' },
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
       mapping
     );
 
@@ -857,7 +865,7 @@ describe('Test unit of work', () => {
   beforeEach(() => {
     unitOfWorkSdk = new RestClientSdk(
       tokenStorageMock,
-      { path: 'api.me', scheme: 'https' },
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
       unitOfWorkMapping
     );
   });

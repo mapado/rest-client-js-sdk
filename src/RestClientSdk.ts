@@ -54,7 +54,7 @@ class RestClientSdk<M extends SdkMetadata>
     this.serializer = serializer;
     this.mapping = mapping;
 
-    this.unitOfWork = new UnitOfWork(this.mapping);
+    this.unitOfWork = new UnitOfWork(this.mapping, this.config.unitOfWorkEnabled);
 
     this.#repositoryList = {};
   }

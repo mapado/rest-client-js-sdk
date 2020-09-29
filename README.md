@@ -118,6 +118,7 @@ const config = {
   segment: '/my-api',
   authorizationType: 'Bearer', // default to "Bearer", but can be "Basic" or anything
   useDefaultParameters: true,
+  unitOfWorkEnabled: true, // if key is missing, UnitOfWork will be disabled by default
 }; // path and scheme are mandatory
 
 const sdk = new RestClientSdk(tokenStorage, config, mapping);
@@ -130,6 +131,35 @@ import RestClientSdk, { Token } from 'rest-client-sdk';
 
 const sdk = new RestClientSdk<TSMetadata>(tokenStorage, config, mapping);
 ```
+
+#### UnitOfWork
+
+Adding the key `unitOfWorkEnabled` to the `config` object passed to the `RestClientSdk` constructor will enable or disable the UnitOfWork
+The UnitOfWork keeps track of the changes made to entity props so as to only send dirty fields when updating that entity
+
+```js
+const productRepo = sdk.getRepository('products');
+let product = await productRepo.find(1);
+/*
+    considering the json body of the response was
+
+    {
+      "category": "book",
+      "name": "Tom Sawyer"
+    }
+  */
+
+product = product.set('name', 'Huckleberry Finn');
+
+productRepo.update(product);
+/*
+    The PUT call produced will be made with the json body : { "name": "Huckleberry Finn" }
+    It will not include other unchanged props like "category" which could overwrite existing values
+    (if not fetched and initialized with a default null value for example)
+  */
+```
+
+When dealing with large collections of objects, the UnitOfWork can add a considerable memory overhead. If you do not plan to do updates, it is advised to leave it disabled
 
 ### Make calls
 
