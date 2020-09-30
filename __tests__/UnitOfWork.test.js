@@ -1,13 +1,12 @@
 import { Map, Record } from 'immutable';
 import unitOfWorkMapping, {
   cartMetadata,
-  orderMetadata,
 } from '../__mocks__/unitOfWorkMapping';
 import UnitOfWork from '../src/UnitOfWork';
 
 let unitOfWork = null;
 beforeEach(() => {
-  unitOfWork = new UnitOfWork(unitOfWorkMapping);
+  unitOfWork = new UnitOfWork(unitOfWorkMapping, true);
 });
 describe('UnitOfWork', () => {
   test('register unit of work', () => {

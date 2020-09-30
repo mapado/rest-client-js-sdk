@@ -25,7 +25,11 @@ import Attribute from './Mapping/Attribute';
 import Relation from './Mapping/Relation';
 import type { Token } from './TokenGenerator/types';
 import type { SdkMetadata } from './RestClientSdk';
+
+// eslint-disable-next-line import/no-duplicates
 import type RestClientSdkInterface from './RestClientSdkInterface';
+// eslint-disable-next-line import/no-duplicates
+import type { Config } from './RestClientSdkInterface';
 import type TokenStorageInterface from './TokenStorageInterface';
 import type TokenGeneratorInterface from './TokenGenerator/TokenGeneratorInterface';
 import type AsyncStorageInterface from './AsyncStorageInterface';
@@ -57,6 +61,7 @@ export {
 export type {
   SerializerInterface,
   Token,
+  Config,
   SdkMetadata,
   RestClientSdkInterface,
   TokenStorageInterface,

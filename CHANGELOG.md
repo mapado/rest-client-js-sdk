@@ -1,5 +1,12 @@
 # Changelog
 
+## unreleased
+
+### Changed
+
+- [BREAKING] UnitOfWork is disabled by default, one must add a prop `unitOfWorkEnabled` with value true to the config object passed to the RestClientSdk's constructor in order to enable it
+- TokenStorage's `generateToken` and `refreshToken` methods are now memoized in order to avoid bugs when making concurrent calls
+
 ## 5.0.0
 
 This release is a migration to TypeScript, but the API stay the same. The only breaking changes are more fixed bugs that might be breaking in really improbable case.

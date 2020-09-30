@@ -99,13 +99,19 @@ class UnitOfWork {
 
   #storage: { [key in Id]: Record<string, unknown> };
 
-  constructor(mapping: Mapping) {
+  #enabled: boolean;
+
+  constructor(mapping: Mapping, enabled = false) {
     this.mapping = mapping;
 
+    this.#enabled = enabled;
     this.#storage = {};
   }
 
   registerClean(id: Id, entity: Record<string, unknown>): void {
+    if (!this.#enabled) {
+      return;
+    }
     if (isImmutable(entity)) {
       this.#storage[id] = entity;
     } else {
