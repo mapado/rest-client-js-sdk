@@ -4,7 +4,7 @@
 
 ### Changed
 
-- [BREAKING] UnitOfWork is disabled by default, one must pass a prop `unitOfWorkEnabled` with value true to the RestClientSdk's constructor in order to enable it
+- [BREAKING] UnitOfWork is disabled by default, one must add a prop `unitOfWorkEnabled` with value true to the config object passed to the RestClientSdk's constructor in order to enable it
 - TokenStorage's `generateToken` and `refreshToken` methods are now memoized in order to avoid bugs when making concurrent calls
 
 ## 5.0.0
