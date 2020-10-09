@@ -367,3 +367,17 @@ const sdk = new RestClientSdk<TSMetadata>(
   serializer
 );
 ```
+
+### Troubleshooting
+
+This sdk uses Object.fromEntries function. We discovered that it is not always available (very old browsers or even in some versions of the IOS JS engine when using the lib with react-native). In this case you need to add a polyfill to the root of your project (or at least before any call is made by the sdk) like so:
+
+```js
+function fromEntries(arr) {
+  return arr.reduce((acc, curr) => {
+    acc[curr[0]] = curr[1];
+    return acc;
+  }, {});
+}
+Object.fromEntries = Object.fromEntries || fromEntries;
+```
