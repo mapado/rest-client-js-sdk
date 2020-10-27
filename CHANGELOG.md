@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.1.0
+
+### Added
+
+Export `MetadataDefinition` for AbstractClient inheritance
+
 ## 6.0.0
 
 ### Changed
