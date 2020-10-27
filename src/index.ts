@@ -24,8 +24,8 @@ import ClassMetadata from './Mapping/ClassMetadata';
 import Attribute from './Mapping/Attribute';
 import Relation from './Mapping/Relation';
 import type { Token } from './TokenGenerator/types';
-import type { SdkMetadata } from './RestClientSdk';
 
+import type { SdkMetadata, MetadataDefinition } from './RestClientSdk';
 // eslint-disable-next-line import/no-duplicates
 import type RestClientSdkInterface from './RestClientSdkInterface';
 // eslint-disable-next-line import/no-duplicates
@@ -67,4 +67,5 @@ export type {
   TokenStorageInterface,
   TokenGeneratorInterface,
   AsyncStorageInterface,
+  MetadataDefinition,
 };
