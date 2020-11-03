@@ -218,11 +218,11 @@ Typescript users:
 import { SdkMetadata } from 'rest-client-sdk';
 
 class SomeEntityClient extends AbstractClient<TSMetadata['some_entities']> {
-  getPathBase(pathParameters: object) {
+  getPathBase(pathParameters: object): string {
     return '/v2/some_entities'; // you need to return the full query string for the collection GET query
   }
 
-  getEntityURI(entity: SomeEntity) {
+  getEntityURI(entity: SomeEntity): string {
     return `${this.getPathBase()}/${entity.id}`; // this will be the URI used by update / delete script
   }
 

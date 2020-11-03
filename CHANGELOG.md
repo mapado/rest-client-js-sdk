@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.2.0
+
+### Changed
+
+- [TypeScript] better handle deserializeResponse method definition
+
 ## 6.1.0
 
 ### Added

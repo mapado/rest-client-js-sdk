@@ -78,7 +78,7 @@ class AbstractClient<D extends MetadataDefinition> {
     return this.deserializeResponse(
       this.authorizedFetch(url, requestParams),
       'item'
-    ) as Promise<D['entity']>;
+    );
   }
 
   /**
@@ -98,7 +98,7 @@ class AbstractClient<D extends MetadataDefinition> {
     return this.deserializeResponse(
       this.authorizedFetch(url, requestParams),
       'list'
-    ) as Promise<D['list']>;
+    );
   }
 
   /**
@@ -152,7 +152,7 @@ class AbstractClient<D extends MetadataDefinition> {
         ...requestParams,
       }),
       'item'
-    ) as Promise<D['entity']>;
+    );
   }
 
   /**
@@ -196,7 +196,7 @@ class AbstractClient<D extends MetadataDefinition> {
         ...requestParams,
       }),
       'item'
-    ) as Promise<D['entity']>;
+    );
   }
 
   /**
@@ -220,6 +220,16 @@ class AbstractClient<D extends MetadataDefinition> {
       return response;
     });
   }
+
+  deserializeResponse(
+    requestPromise: Promise<Response>,
+    listOrItem: 'list'
+  ): Promise<D['list']>;
+
+  deserializeResponse(
+    requestPromise: Promise<Response>,
+    listOrItem: 'item'
+  ): Promise<D['entity']>;
 
   deserializeResponse<LOR extends 'list' | 'item'>(
     requestPromise: Promise<Response>,
