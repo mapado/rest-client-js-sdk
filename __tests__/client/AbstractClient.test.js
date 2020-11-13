@@ -1092,6 +1092,34 @@ describe('Test unit of work', () => {
     expect(() => repo.withUnitOfWork(false).delete({})).toThrow();
   });
 
+  test('withUnitOfWork should return different instance', () => {
+    const repo = unitOfWorkSdk.getRepository('carts');
+
+    expect(repo.withUnitOfWork(false)).not.toBe(repo);
+  });
+
+  test('withUnitOfWork should the same subtype as getRepository', () => {
+    const innerMapping = new Mapping('/v2');
+    const someMetadata = new ClassMetadata('test', 'test', SomeTestClient);
+    someMetadata.setAttributeList([
+      new Attribute('@id', '@id', 'string', true),
+    ]);
+    innerMapping.setMapping([someMetadata]);
+
+    const innerSdk = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
+      innerMapping
+    );
+    innerSdk.tokenStorage.generateToken();
+
+    const repo = innerSdk.getRepository('test');
+
+    expect(repo).toBeInstanceOf(SomeTestClient);
+    expect(repo.withUnitOfWork(false)).toBeInstanceOf(SomeTestClient);
+    expect(repo.withUnitOfWork(false)).not.toBe(repo);
+  });
+
   test('find all with object as response', async () => {
     unitOfWorkSdk.serializer = new MemberSerializer();
     fetchMock

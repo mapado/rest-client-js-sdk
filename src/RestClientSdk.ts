@@ -9,6 +9,7 @@ import { Token } from './TokenGenerator/types';
 import type RestClientSdkInterface from './RestClientSdkInterface';
 // eslint-disable-next-line import/no-duplicates
 import type { Config } from './RestClientSdkInterface';
+import { generateRepository } from './utils/repositoryGenerator';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Entity = any;
@@ -54,7 +55,10 @@ class RestClientSdk<M extends SdkMetadata>
     this.serializer = serializer;
     this.mapping = mapping;
 
-    this.unitOfWork = new UnitOfWork(this.mapping, this.config.unitOfWorkEnabled);
+    this.unitOfWork = new UnitOfWork(
+      this.mapping,
+      this.config.unitOfWorkEnabled
+    );
 
     this.#repositoryList = {};
   }
@@ -73,7 +77,7 @@ class RestClientSdk<M extends SdkMetadata>
       }
 
       // eslint-disable-next-line new-cap
-      this.#repositoryList[key] = new metadata.repositoryClass(this, metadata);
+      this.#repositoryList[key] = generateRepository<M[K]>(this, metadata);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

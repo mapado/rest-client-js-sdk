@@ -9,6 +9,7 @@ import type { MetadataDefinition, SdkMetadata } from '../RestClientSdk';
 import type ClassMetadata from '../Mapping/ClassMetadata';
 import type SerializerInterface from '../serializer/SerializerInterface';
 import { Token } from '../TokenGenerator/types';
+import { generateRepository } from '../utils/repositoryGenerator';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
@@ -23,18 +24,21 @@ class AbstractClient<D extends MetadataDefinition> {
 
   #isUnitOfWorkEnabled: boolean;
 
-  constructor(sdk: RestClientSdk<SdkMetadata>, metadata: ClassMetadata) {
+  constructor(
+    sdk: RestClientSdk<SdkMetadata>,
+    metadata: ClassMetadata,
+    isUnitOfWorkEnabled = true
+  ) {
     this.sdk = sdk;
     this.#tokenStorage = sdk.tokenStorage;
     this.serializer = sdk.serializer;
     this.metadata = metadata;
-    this.#isUnitOfWorkEnabled = true;
+    this.#isUnitOfWorkEnabled = isUnitOfWorkEnabled;
   }
 
-  withUnitOfWork(enabled: boolean): this {
-    this.#isUnitOfWorkEnabled = enabled;
-
-    return this;
+  withUnitOfWork(enabled: boolean): AbstractClient<D> {
+    // eslint-disable-next-line new-cap
+    return generateRepository<D>(this.sdk, this.metadata, enabled);
   }
 
   getDefaultParameters(): Record<string, unknown> {
@@ -273,8 +277,6 @@ class AbstractClient<D extends MetadataDefinition> {
             if (this.#isUnitOfWorkEnabled && identifier !== null) {
               this.sdk.unitOfWork.registerClean(identifier, normalizedItem);
             }
-
-            this._activateUnitOfWork();
           }
 
           return itemList as D['list'];
@@ -303,8 +305,6 @@ class AbstractClient<D extends MetadataDefinition> {
             this.serializer.normalizeItem(item, this.metadata)
           );
         }
-
-        this._activateUnitOfWork();
 
         return item as D['entity'];
       });
@@ -512,13 +512,6 @@ class AbstractClient<D extends MetadataDefinition> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return object[idKey];
-  }
-
-  /**
-   * TODO convert this to javascript private method (`#`) once https://github.com/microsoft/TypeScript/issues/37677 is resolved
-   */
-  private _activateUnitOfWork(): void {
-    this.#isUnitOfWorkEnabled = true;
   }
 
   private _throwIfUnitOfWorkIsDisabled(): void {

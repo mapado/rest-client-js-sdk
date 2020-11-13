@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.4.1
+
+### Fixed
+
+- withUnitOfWork returns a clone of the base repository to avoid race condition on `isUnitOfWorkEnabled`
+
 ## 6.4.0
 
 - allow unitOfWork deactivation on find\* calls
