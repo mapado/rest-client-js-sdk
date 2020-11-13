@@ -67,8 +67,8 @@ class Mapping {
             return `"${classMetadata.key}.${attribute.serializedKey} is defined as a MANY_TO_ONE relation, but the attribute name ends with "List".`;
           }
 
-          if (relation.isOneToMany()) {
-            const message = `"${classMetadata.key}.${attribute.serializedKey} is defined as a ONE_TO_MANY relation, but the attribute name is nor plural not ends with "List".`;
+          if (relation.isRelationToMany()) {
+            const message = `"${classMetadata.key}.${attribute.serializedKey} is defined as a ${relation.type} relation, but the attribute name is nor plural not ends with "List".`;
 
             const endsWithList = attribute.attributeName.endsWith('List');
 

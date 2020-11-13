@@ -336,7 +336,7 @@ class UnitOfWork {
         return;
       }
 
-      // ONE_TO_MANY relation
+      // *_TO_MANY relation
       dirtyFields = this._getDirtyFieldsForOneToMany(
         dirtyFields,
         key,

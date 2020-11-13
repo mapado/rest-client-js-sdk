@@ -35,7 +35,7 @@ const name = new Attribute('name');
 productMetadata.setAttributeList([idAttr, name]);
 productMetadata.setRelationList([
   new Relation(
-    Relation.ONE_TO_MANY, // type: Relation.ONE_TO_MANY or Relation.MANY_TO_ONE
+    Relation.ONE_TO_MANY, // type: Relation.ONE_TO_MANY, Relation.MANY_TO_ONE or Relation.MANY_TO_MANY
     'categories', // targetMetadataKey: must match the first argument of `ClassMetadata` constructor of the target entity
     'category_list', // serializedKey: the key returned from your API
     'categoryList' // attributeName: optional, the name in your entity, default to the `serializedKey` attribute

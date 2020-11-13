@@ -1,5 +1,6 @@
 enum RelationTypes {
   ONE_TO_MANY = 'ONE_TO_MANY',
+  MANY_TO_MANY = 'MANY_TO_MANY',
   MANY_TO_ONE = 'MANY_TO_ONE',
 }
 
@@ -7,6 +8,8 @@ class Relation {
   public static ONE_TO_MANY = RelationTypes.ONE_TO_MANY;
 
   public static MANY_TO_ONE = RelationTypes.MANY_TO_ONE;
+
+  public static MANY_TO_MANY = RelationTypes.MANY_TO_MANY;
 
   type: RelationTypes;
 
@@ -40,6 +43,14 @@ class Relation {
 
   isManyToOne(): boolean {
     return this.type === Relation.MANY_TO_ONE;
+  }
+
+  isManyToMany(): boolean {
+    return this.type === Relation.MANY_TO_MANY;
+  }
+
+  isRelationToMany(): boolean {
+    return this.isManyToMany() || this.isOneToMany();
   }
 }
 

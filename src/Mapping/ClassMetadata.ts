@@ -94,7 +94,7 @@ class ClassMetadata {
       this.#attributeList[relation.serializedKey] = new Attribute(
         relation.serializedKey,
         relation.serializedKey,
-        relation.isOneToMany() ? 'array' : 'object'
+        relation.isRelationToMany() ? 'array' : 'object'
       );
     });
   }
@@ -113,7 +113,7 @@ class ClassMetadata {
     Object.keys(this.#relationList).forEach((serializedKey) => {
       const relation = this.#relationList[serializedKey];
 
-      if (relation.isOneToMany()) {
+      if (relation.isRelationToMany()) {
         out[serializedKey] = [];
       }
     });

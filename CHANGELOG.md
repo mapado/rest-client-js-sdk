@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.3.0
+
+### Added
+
+Accept Relation.MANY_TO_MANY relation.
+It is basically handled the same way as ONE_TO_MANY, but has been added for semantic purpose.
+The comportment may differ later.
+
 ## 6.2.0
 
 ### Changed
