@@ -21,11 +21,20 @@ class AbstractClient<D extends MetadataDefinition> {
 
   metadata: ClassMetadata;
 
+  #isUnitOfWorkEnabled: boolean;
+
   constructor(sdk: RestClientSdk<SdkMetadata>, metadata: ClassMetadata) {
     this.sdk = sdk;
     this.#tokenStorage = sdk.tokenStorage;
     this.serializer = sdk.serializer;
     this.metadata = metadata;
+    this.#isUnitOfWorkEnabled = true;
+  }
+
+  withUnitOfWork(enabled: boolean): this {
+    this.#isUnitOfWorkEnabled = enabled;
+
+    return this;
   }
 
   getDefaultParameters(): Record<string, unknown> {
@@ -130,6 +139,8 @@ class AbstractClient<D extends MetadataDefinition> {
     pathParameters: Record<string, unknown> = {},
     requestParams: Record<string, unknown> = {}
   ): Promise<D['entity']> {
+    this._throwIfUnitOfWorkIsDisabled();
+
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
 
@@ -167,6 +178,8 @@ class AbstractClient<D extends MetadataDefinition> {
     queryParam: Record<string, unknown> = {},
     requestParams: Record<string, unknown> = {}
   ): Promise<D['entity']> {
+    this._throwIfUnitOfWorkIsDisabled();
+
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
@@ -206,6 +219,8 @@ class AbstractClient<D extends MetadataDefinition> {
    * @param {Record<string, unknown>} requestParams parameters that will be send as second parameter to the `fetch` call
    */
   delete(entity: D['entity'], requestParams = {}): Promise<Response> {
+    this._throwIfUnitOfWorkIsDisabled();
+
     const url = this.getEntityURI(entity);
     const identifier = this._getEntityIdentifier(entity);
 
@@ -255,9 +270,11 @@ class AbstractClient<D extends MetadataDefinition> {
             );
 
             // then we register the re-normalized item
-            if (identifier !== null) {
+            if (this.#isUnitOfWorkEnabled && identifier !== null) {
               this.sdk.unitOfWork.registerClean(identifier, normalizedItem);
             }
+
+            this._activateUnitOfWork();
           }
 
           return itemList as D['list'];
@@ -280,12 +297,14 @@ class AbstractClient<D extends MetadataDefinition> {
           response
         ) as D['entity'];
 
-        if (identifier !== null) {
+        if (this.#isUnitOfWorkEnabled && identifier !== null) {
           this.sdk.unitOfWork.registerClean(
             identifier,
             this.serializer.normalizeItem(item, this.metadata)
           );
         }
+
+        this._activateUnitOfWork();
 
         return item as D['entity'];
       });
@@ -493,6 +512,21 @@ class AbstractClient<D extends MetadataDefinition> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return object[idKey];
+  }
+
+  /**
+   * TODO convert this to javascript private method (`#`) once https://github.com/microsoft/TypeScript/issues/37677 is resolved
+   */
+  private _activateUnitOfWork(): void {
+    this.#isUnitOfWorkEnabled = true;
+  }
+
+  private _throwIfUnitOfWorkIsDisabled(): void {
+    if (!this.#isUnitOfWorkEnabled) {
+      throw new Error(
+        'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
+      );
+    }
   }
 }
 

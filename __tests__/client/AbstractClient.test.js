@@ -1044,6 +1044,54 @@ describe('Test unit of work', () => {
     );
   });
 
+  test('deactivating the unit of work should not register once', async () => {
+    fetchMock.mock({
+      name: 'get_carts',
+      matcher: 'end:/v12/carts',
+      method: 'GET',
+      response: JSON.stringify([
+        {
+          '@id': '/v12/carts/1',
+          status: 'foo',
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        },
+      ]),
+    });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+
+    const mockedRegisterClean = jest.fn();
+    unitOfWorkSdk.unitOfWork.registerClean = mockedRegisterClean;
+
+    await repo.findAll();
+
+    expect(mockedRegisterClean.mock.calls.length).toBe(1);
+
+    await repo.withUnitOfWork(false).findAll();
+
+    expect(mockedRegisterClean.mock.calls.length).toBe(1);
+
+    await repo.findAll();
+
+    expect(mockedRegisterClean.mock.calls.length).toBe(2);
+  });
+
+  test('deactivating the unit of work should not be possible on create / update / delete for now', async () => {
+    // see https://git.io/JkYTO
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+
+    expect(() => repo.withUnitOfWork(false).create({})).toThrow();
+    expect(() => repo.withUnitOfWork(false).update({})).toThrow();
+    expect(() => repo.withUnitOfWork(false).delete({})).toThrow();
+  });
+
   test('find all with object as response', async () => {
     unitOfWorkSdk.serializer = new MemberSerializer();
     fetchMock
