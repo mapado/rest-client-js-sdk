@@ -176,7 +176,7 @@ productRepo.find(1, { fields: ALL_PROPERTIES }); // will register the product wi
 productRepo.withUnitOfWork(false).find(1, { fields: ONLY_ID });
 ```
 
-The `withUnitOfWork` can only be used for find\* calls. See [[#94](https://github.com/mapado/rest-client-js-sdk/issues/94) for more informations.
+The `withUnitOfWork` can only be used for find\* calls. See [#94](https://github.com/mapado/rest-client-js-sdk/issues/94) for more informations.
 
 ### Make calls
 
