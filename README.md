@@ -178,6 +178,8 @@ productRepo.withUnitOfWork(false).find(1, { fields: ONLY_ID });
 
 The `withUnitOfWork` can only be used for find\* calls. See [#94](https://github.com/mapado/rest-client-js-sdk/issues/94) for more informations.
 
+> You can not activate the unit of work if it has not been enabled globally.
+
 ### Make calls
 
 #### Find
