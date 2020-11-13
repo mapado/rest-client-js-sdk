@@ -161,6 +161,23 @@ productRepo.update(product);
 
 When dealing with large collections of objects, the UnitOfWork can add a considerable memory overhead. If you do not plan to do updates, it is advised to leave it disabled
 
+##### Deactivating the UnitOfWork for some calls
+
+You can deactivate unit of work for some calls to avoid registering objects you don't want:
+
+```js
+const productRepo = sdk.getRepository('products');
+
+// imagine a call with a backend returning all product fields
+productRepo.find(1, { fields: ALL_PROPERTIES }); // will register the product with all it's properties.
+
+// then for some reason, we make a call that will return only the id, and no properties
+// you do not want this entity to be registered
+productRepo.withUnitOfWork(false).find(1, { fields: ONLY_ID });
+```
+
+The `withUnitOfWork` can only be used for find\* calls. See [[#94](https://github.com/mapado/rest-client-js-sdk/issues/94) for more informations.
+
 ### Make calls
 
 #### Find
