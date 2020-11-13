@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.4.0
+
+- allow unitOfWork deactivation on find\* calls
+
 ## 6.3.0
 
 ### Added
