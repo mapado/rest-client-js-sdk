@@ -74,6 +74,12 @@ describe('test mapping', () => {
       ]);
 
       expect(mapping.isMappingValid()).toBe(false);
+
+      customerMetadata.setRelationList([
+        new Relation(Relation.ONE_TO_ONE, 'cart', 'cartList'),
+      ]);
+
+      expect(mapping.isMappingValid()).toBe(false);
     });
 
     test('one-to-many relation with attribute name nor plural nor ending with `List`', () => {

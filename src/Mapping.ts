@@ -61,7 +61,7 @@ class Mapping {
 
           // relation name seems weird
           if (
-            relation.isManyToOne() &&
+            relation.isRelationToOne() &&
             attribute.attributeName.endsWith('List')
           ) {
             return `"${classMetadata.key}.${attribute.serializedKey} is defined as a MANY_TO_ONE relation, but the attribute name ends with "List".`;

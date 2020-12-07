@@ -323,7 +323,7 @@ class UnitOfWork {
         .serializedKey;
 
       // MANY_TO_ONE relation
-      if (currentRelation.isManyToOne()) {
+      if (currentRelation.isRelationToOne()) {
         dirtyFields = this._getDirtyFieldsForManyToOne(
           dirtyFields,
           key,

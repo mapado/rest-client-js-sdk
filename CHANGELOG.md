@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.5.0
+
+### Added
+
+Accept Relation.ONE_TO_ONE relation.
+It is basically handled the same way as MANY_TO_ONE, but has been added for semantic purpose.
+The comportment may differ later.
+
 ## 6.4.1
 
 ### Fixed
