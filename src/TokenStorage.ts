@@ -121,12 +121,9 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
 
   refreshToken(): Promise<T & HasExpiresAt> {
     return this.#asyncStorage.getItem(this.accessTokenKey).then((token) => {
-      if (!token) {
-          throw new Error('Unable to refresh a token for an unexistant token');
-      }
       const callTimestamp = Date.now();
       return this.#tokenGenerator
-        .refreshToken(JSON.parse(token))
+        .refreshToken(token ? JSON.parse(token) : null)
         .then((responseData) => {
           const updatedResponseData = this._addExpiresAtToResponseData(
             responseData,

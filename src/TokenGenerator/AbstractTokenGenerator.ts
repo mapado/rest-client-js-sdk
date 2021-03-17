@@ -21,7 +21,7 @@ abstract class AbstractTokenGenerator<T extends Token, C>
 
   abstract generateToken(parameters: unknown): Promise<T>;
 
-  abstract refreshToken(accessToken: T): Promise<T>;
+  abstract refreshToken(accessToken: null | T): Promise<T>;
 
   abstract checkTokenGeneratorConfig(config: C): void;
 

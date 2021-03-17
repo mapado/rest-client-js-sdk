@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.5.2
+
+Fix regression from `6.5.1` : `TokenStorage.refreshToken` does now throws an Error anymore if there is no token stored in the storage.
+
 ## 6.5.1
 
 - getItem from AsyncStorage interface might return null

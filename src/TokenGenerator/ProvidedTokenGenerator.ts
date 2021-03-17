@@ -20,7 +20,7 @@ class ProvidedTokenGenerator implements TokenGeneratorInterface<Token> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  refreshToken(accessToken: Token): Promise<Token> {
+  refreshToken(accessToken: null | Token): Promise<Token> {
     if (typeof this.#refreshTokenFunc === 'function') {
       return this.#refreshTokenFunc();
     }

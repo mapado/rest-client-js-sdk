@@ -85,7 +85,7 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator<
 
   refreshToken(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    accessToken: ClientCredentialToken
+    accessToken: null | ClientCredentialToken
   ): Promise<ClientCredentialToken> {
     return this.generateToken({});
   }

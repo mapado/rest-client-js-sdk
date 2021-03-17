@@ -76,7 +76,7 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
     return this._doFetch(parameters).then((response) => response.json());
   }
 
-  refreshToken(accessToken: PasswordToken): Promise<PasswordToken> {
+  refreshToken(accessToken: null | PasswordToken): Promise<PasswordToken> {
     if (!(accessToken && accessToken.refresh_token)) {
       throw new Error(
         'refresh_token is not set. Did you called `generateToken` before ?'
