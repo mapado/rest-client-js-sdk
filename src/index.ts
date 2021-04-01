@@ -14,6 +14,7 @@ import {
 import AbstractClient from './client/AbstractClient';
 import TokenStorage from './TokenStorage';
 import AbstractTokenGenerator from './TokenGenerator/AbstractTokenGenerator';
+import AuthorizationCodeFlowTokenGenerator from './TokenGenerator/AuthorizationCodeFlowTokenGenerator';
 import ClientCredentialsGenerator from './TokenGenerator/ClientCredentialsGenerator';
 import PasswordGenerator from './TokenGenerator/PasswordGenerator';
 import ProvidedTokenGenerator from './TokenGenerator/ProvidedTokenGenerator';
@@ -23,7 +24,12 @@ import Mapping from './Mapping';
 import ClassMetadata from './Mapping/ClassMetadata';
 import Attribute from './Mapping/Attribute';
 import Relation from './Mapping/Relation';
-import type { Token } from './TokenGenerator/types';
+import type {
+  Token,
+  ErrorBody,
+  TokenResponse,
+  RefreshTokenParameters,
+} from './TokenGenerator/types';
 
 import type { SdkMetadata, MetadataDefinition } from './RestClientSdk';
 // eslint-disable-next-line import/no-duplicates
@@ -38,6 +44,7 @@ export default RestClientSdk;
 export {
   AbstractClient,
   AbstractTokenGenerator,
+  AuthorizationCodeFlowTokenGenerator,
   ClientCredentialsGenerator,
   PasswordGenerator,
   ProvidedTokenGenerator,
@@ -61,6 +68,9 @@ export {
 export type {
   SerializerInterface,
   Token,
+  ErrorBody,
+  TokenResponse,
+  RefreshTokenParameters,
   Config,
   SdkMetadata,
   RestClientSdkInterface,
