@@ -8,7 +8,10 @@ import {
 } from './TokenGenerator/types';
 import AsyncStorageInterface from './AsyncStorageInterface';
 import { memoizePromise } from './decorator';
+// eslint-disable-next-line import/no-duplicates
 import type TokenStorageInterface from './TokenStorageInterface';
+// eslint-disable-next-line import/no-duplicates
+import type { HasExpiresAt } from './TokenStorageInterface';
 import {
   getHttpErrorFromResponse,
   InvalidGrantError,
@@ -16,10 +19,6 @@ import {
   isOauthError,
   OauthError,
 } from './ErrorFactory';
-
-interface HasExpiresAt {
-  expires_at: null | number;
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isResponse(response: any): response is Response {

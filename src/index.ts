@@ -37,7 +37,10 @@ import type { SdkMetadata, MetadataDefinition } from './RestClientSdk';
 import type RestClientSdkInterface from './RestClientSdkInterface';
 // eslint-disable-next-line import/no-duplicates
 import type { Config } from './RestClientSdkInterface';
+// eslint-disable-next-line import/no-duplicates
 import type TokenStorageInterface from './TokenStorageInterface';
+// eslint-disable-next-line import/no-duplicates
+import type { HasExpiresAt } from './TokenStorageInterface';
 import type TokenGeneratorInterface from './TokenGenerator/TokenGeneratorInterface';
 import type AsyncStorageInterface from './AsyncStorageInterface';
 
@@ -72,6 +75,7 @@ export type {
   ErrorBody,
   TokenResponse,
   TokenBody,
+  HasExpiresAt,
   RefreshTokenParameters,
   Config,
   SdkMetadata,
