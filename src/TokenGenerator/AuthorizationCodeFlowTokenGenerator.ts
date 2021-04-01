@@ -20,7 +20,7 @@ type GenerateTokenParameters = {
 interface AuthorizationCodeToken extends Token {
   access_token: string;
   token_type: string;
-  refresh_token: never;
+  refresh_token: string;
   expires_in?: number;
   scope?: string;
 }
@@ -36,11 +36,6 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
   AuthorizationCodeToken,
   AuthorizationCodeFlowTokenGeneratorConfig
 > {
-  // eslint-disable-next-line no-useless-constructor
-  constructor(props: AuthorizationCodeFlowTokenGeneratorConfig) {
-    super(props);
-  }
-
   /**
    * This function needs no generate an access token
    */
@@ -76,6 +71,12 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
   refreshToken(
     oldAccessToken: null | AuthorizationCodeToken
   ): Promise<AuthorizationCodeFlowResponse> {
+    if (!oldAccessToken) {
+      throw new Error(
+        'refresh_token is not set. Did you called `generateToken` before ?'
+      );
+    }
+
     if (!oldAccessToken?.refresh_token) {
       throw new Error('Unable to refreshToken as there are no refresh_token');
     }
