@@ -7,7 +7,7 @@ import {
   OauthError,
 } from '../ErrorFactory';
 import TokenGeneratorInterface from './TokenGeneratorInterface';
-import { ErrorBody, Token, TokenResponse } from './types';
+import { ErrorBody, Token, TokenBody, TokenResponse } from './types';
 
 interface UrlConfig {
   scheme: string;
@@ -27,11 +27,11 @@ abstract class AbstractTokenGenerator<T extends Token, C>
 
   abstract generateToken(
     parameters: unknown
-  ): Promise<T | ErrorBody | TokenResponse<T>>;
+  ): Promise<TokenBody<T> | TokenResponse<T>>;
 
   abstract refreshToken(
     accessToken: null | T
-  ): Promise<T | ErrorBody | TokenResponse<T>>;
+  ): Promise<TokenBody<T> | TokenResponse<T>>;
 
   abstract checkTokenGeneratorConfig(config: C): void;
 

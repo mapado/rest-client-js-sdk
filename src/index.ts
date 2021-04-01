@@ -27,6 +27,7 @@ import Relation from './Mapping/Relation';
 import type {
   Token,
   ErrorBody,
+  TokenBody,
   TokenResponse,
   RefreshTokenParameters,
 } from './TokenGenerator/types';
@@ -70,6 +71,7 @@ export type {
   Token,
   ErrorBody,
   TokenResponse,
+  TokenBody,
   RefreshTokenParameters,
   Config,
   SdkMetadata,

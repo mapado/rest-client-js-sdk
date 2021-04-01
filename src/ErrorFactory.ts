@@ -4,7 +4,7 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
  */
 
-import { ErrorBody, Token } from './TokenGenerator/types';
+import { ErrorBody, Token, TokenBody } from './TokenGenerator/types';
 
 class HttpError extends Error {
   public baseResponse: Response;
@@ -230,7 +230,7 @@ function getHttpErrorFromResponse(response: Response): HttpError {
   }
 }
 
-function isOauthError(body: Token | ErrorBody): body is ErrorBody {
+function isOauthError(body: TokenBody<Token>): body is ErrorBody {
   return typeof (body as ErrorBody)?.error === 'string';
 }
 

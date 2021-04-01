@@ -26,8 +26,10 @@ export type ErrorBody = {
   error_uri?: string;
 };
 
+export type TokenBody<T> = T | ErrorBody;
+
 export interface TokenResponse<T extends Token> extends Response {
-  json(): Promise<T | ErrorBody>;
+  json(): Promise<TokenBody<T>>;
 }
 
 /**

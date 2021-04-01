@@ -1,6 +1,11 @@
 /* eslint-disable camelcase */
 import TokenGeneratorInterface from './TokenGenerator/TokenGeneratorInterface';
-import { ErrorBody, Token, TokenResponse } from './TokenGenerator/types';
+import {
+  ErrorBody,
+  Token,
+  TokenBody,
+  TokenResponse,
+} from './TokenGenerator/types';
 import AsyncStorageInterface from './AsyncStorageInterface';
 import { memoizePromise } from './decorator';
 import type TokenStorageInterface from './TokenStorageInterface';
@@ -153,9 +158,9 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
   }
 
   private async handleTokenResponse(
-    response: T | ErrorBody | TokenResponse<T>
+    response: TokenBody<T> | TokenResponse<T>
   ): Promise<T> {
-    let body: T | ErrorBody;
+    let body: TokenBody<T>;
     if (isResponse(response)) {
       try {
         body = await response.json();
