@@ -1,8 +1,6 @@
 /* eslint-disable camelcase */
-import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
-import { memoizePromise } from '../decorator';
-import { Token } from './types';
+import { RefreshTokenParameters, Token, TokenResponse } from './types';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -23,21 +21,15 @@ type Config = {
   scope?: string;
 };
 
-type DefaultParameters = {
-  client_id: string;
-  client_secret: string;
-  grant_type: string;
-  scope?: string;
+type ClientParameters = {
+  client_id?: string;
+  client_secret?: string;
 };
 
 type GenerateTokenParameters = {
   username: string;
   password: string;
   scope?: string;
-};
-
-type RefreshTokenParameters = {
-  refresh_token: string;
 };
 
 interface PasswordToken extends Token {
@@ -48,21 +40,20 @@ interface PasswordToken extends Token {
   scope?: string;
 }
 
-type CallParameters = DefaultParameters &
-  (GenerateTokenParameters | RefreshTokenParameters);
+type GenerateTokenParametersCallParameter = ClientParameters &
+  GenerateTokenParameters & { grant_type: 'password' };
+
+type RefreshTokenCallParameters = ClientParameters & RefreshTokenParameters;
+
+type PasswordTokenResponse = TokenResponse<PasswordToken>;
 
 class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
-  constructor(props: Config) {
-    super(props);
-    this._doFetch = memoizePromise(this._doFetch);
-  }
-
   generateToken(
     baseParameters: GenerateTokenParameters
-  ): Promise<PasswordToken> {
+  ): Promise<PasswordTokenResponse> {
     this._checkGenerateParameters(baseParameters);
 
-    const parameters: CallParameters = {
+    const parameters: GenerateTokenParametersCallParameter = {
       ...baseParameters,
       grant_type: 'password',
       client_id: this.tokenGeneratorConfig.clientId,
@@ -73,17 +64,24 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
       parameters.scope = this.tokenGeneratorConfig.scope;
     }
 
-    return this._doFetch(parameters).then((response) => response.json());
+    const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
+
+    return fetch(url, {
+      method: 'POST',
+      body: this.convertMapToFormData(parameters),
+    });
   }
 
-  refreshToken(accessToken: null | PasswordToken): Promise<PasswordToken> {
+  refreshToken(
+    accessToken: null | PasswordToken
+  ): Promise<PasswordTokenResponse> {
     if (!(accessToken && accessToken.refresh_token)) {
       throw new Error(
         'refresh_token is not set. Did you called `generateToken` before ?'
       );
     }
 
-    const parameters: CallParameters = {
+    const parameters: RefreshTokenCallParameters = {
       grant_type: 'refresh_token',
       client_id: this.tokenGeneratorConfig.clientId,
       client_secret: this.tokenGeneratorConfig.clientSecret,
@@ -94,9 +92,12 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
       parameters.scope = this.tokenGeneratorConfig.scope;
     }
 
-    return this._doFetch(parameters).then((response) =>
-      response.clone().json()
-    );
+    const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
+
+    return fetch(url, {
+      method: 'POST',
+      body: this.convertMapToFormData(parameters),
+    });
   }
 
   checkTokenGeneratorConfig(config: Config): void {
@@ -111,29 +112,6 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
     if (!(config.clientId && config.clientSecret)) {
       throw new RangeError(ERROR_CONFIG_CLIENT_INFORMATIONS);
     }
-  }
-
-  _doFetch(parameters: CallParameters): Promise<Response> {
-    const uri = new URI(
-      `${this.tokenGeneratorConfig.scheme}://${this.tokenGeneratorConfig.path}`
-    );
-
-    if (this.tokenGeneratorConfig.port) {
-      uri.port(this.tokenGeneratorConfig.port);
-    }
-
-    const url = uri.toString();
-
-    return fetch(url, {
-      method: 'POST',
-      body: this.convertMapToFormData(parameters),
-    }).then((response) => {
-      if (response.status < 400) {
-        return response;
-      }
-
-      return this._manageOauthError(response);
-    });
   }
 
   _checkGenerateParameters(parameters: GenerateTokenParameters): void {

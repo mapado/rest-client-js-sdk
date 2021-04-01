@@ -1,4 +1,5 @@
 /* eslint no-unused-vars: 0 */
+import URI from 'urijs';
 import {
   getHttpErrorFromResponse,
   InvalidGrantError,
@@ -6,8 +7,13 @@ import {
   OauthError,
 } from '../ErrorFactory';
 import TokenGeneratorInterface from './TokenGeneratorInterface';
-import { Token } from './types';
+import { ErrorBody, Token, TokenResponse } from './types';
 
+interface UrlConfig {
+  scheme: string;
+  path: string;
+  port?: string;
+}
 abstract class AbstractTokenGenerator<T extends Token, C>
   implements TokenGeneratorInterface<T> {
   readonly tokenGeneratorConfig: C;
@@ -19,16 +25,21 @@ abstract class AbstractTokenGenerator<T extends Token, C>
     }
   }
 
-  abstract generateToken(parameters: unknown): Promise<T>;
+  abstract generateToken(
+    parameters: unknown
+  ): Promise<T | ErrorBody | TokenResponse<T>>;
 
-  abstract refreshToken(accessToken: null | T): Promise<T>;
+  abstract refreshToken(
+    accessToken: null | T
+  ): Promise<T | ErrorBody | TokenResponse<T>>;
 
   abstract checkTokenGeneratorConfig(config: C): void;
 
+  /** @deprecated */
   protected _manageOauthError(response: Response): Promise<never> {
     return response
       .json()
-      .then((body) => {
+      .then((body: ErrorBody) => {
         if (body.error === 'invalid_grant') {
           throw new InvalidGrantError(
             body.error,
@@ -68,6 +79,16 @@ abstract class AbstractTokenGenerator<T extends Token, C>
     });
 
     return formData;
+  }
+
+  protected generateUrlFromConfig(config: UrlConfig): string {
+    const uri = new URI(`${config.scheme}://${config.path}`);
+
+    if (config.port) {
+      uri.port(config.port);
+    }
+
+    return uri.toString();
   }
 }
 
