@@ -199,6 +199,9 @@ describe('issue with expires_at when to token has been generated', () => {
 });
 
 describe('Oauth token generation error', () => {
+  /**
+   * TODO use a real Mock implementation like jest-fetch-mock or fetch-mock-jest to handle this
+   */
   class Response {
     constructor(status, body) {
       this.status = status;
@@ -207,6 +210,10 @@ describe('Oauth token generation error', () => {
 
     async json() {
       return this.body;
+    }
+
+    clone() {
+      return new Response(this.status, this.body);
     }
   }
 
