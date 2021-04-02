@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.6.1
+
+Do not use async / await to avoid regeneratorRuntime issue
+
 ## 6.6.0
 
 - Add Authorization code flow token generator

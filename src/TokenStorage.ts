@@ -27,6 +27,22 @@ function isResponse(response: any): response is Response {
   return typeof response?.json === 'function';
 }
 
+function manageOauthError(body: ErrorBody, response?: Response): never {
+  let error;
+  if (response) {
+    error = getHttpErrorFromResponse(response);
+  }
+
+  if (body.error === 'invalid_grant') {
+    throw new InvalidGrantError(body.error, error);
+  }
+  if (body.error === 'invalid_scope') {
+    throw new InvalidScopeError(body.error, error);
+  }
+
+  throw new OauthError(body.error, error);
+}
+
 class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
   #tokenGenerator: TokenGeneratorInterface<T>;
 
@@ -124,9 +140,8 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
 
     return this.#tokenGenerator
       .generateToken(parameters)
-      .then(async (response) => {
-        const body = await this.handleTokenResponse(response);
-
+      .then(this.handleTokenResponse)
+      .then((body) => {
         const updatedResponseData = this._addExpiresAtToResponseData(
           body,
           callTimestamp
@@ -144,13 +159,13 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
       const callTimestamp = Date.now();
       return this.#tokenGenerator
         .refreshToken(token ? JSON.parse(token) : null)
-        .then(async (response) => {
-          const body = await this.handleTokenResponse(response);
-
+        .then(this.handleTokenResponse)
+        .then((body) => {
           const updatedResponseData = this._addExpiresAtToResponseData(
             body,
             callTimestamp
           );
+
           return this._storeAccessToken(updatedResponseData).then(
             () => updatedResponseData
           );
@@ -158,39 +173,41 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
     });
   }
 
-  private async handleTokenResponse(
+  private handleTokenResponse(
     responseOrBody: TokenBodyReturn<T> | TokenResponse<T>
   ): Promise<T> {
-    let body: TokenBody<T>;
     if (isResponse(responseOrBody)) {
       const response = responseOrBody;
-      try {
-        body = await response.json();
+      return response
+        .json()
+        .then((body) => {
+          if (isOauthError(body)) {
+            // throw error if response body is an oauth error
+            manageOauthError(body, response);
+          } else if (response.status >= 400) {
+            // throw an error if response status code is an "error" status code
+            throw getHttpErrorFromResponse(response);
+          }
 
-        if (isOauthError(body)) {
-          // throw error if response body is an oauth error
-          this._manageOauthError(body, response);
-        } else if (response.status >= 400) {
-          // throw an error if response status code is an "error" status code
-          throw getHttpErrorFromResponse(response);
-        }
-      } catch (err) {
-        if (!(err instanceof OauthError)) {
-          throw new OauthError(err.type, getHttpErrorFromResponse(response));
-        }
+          return body;
+        })
+        .catch((err) => {
+          if (!(err instanceof OauthError)) {
+            throw new OauthError(err.type, getHttpErrorFromResponse(response));
+          }
 
-        throw err;
-      }
-    } else {
-      body = responseOrBody;
-
-      if (isOauthError(body)) {
-        // throw error if response body is an oauth error
-        this._manageOauthError(body);
-      }
+          throw err;
+        });
     }
 
-    return body;
+    const body = responseOrBody;
+
+    if (isOauthError(body)) {
+      // throw error if response body is an oauth error
+      manageOauthError(body);
+    }
+
+    return Promise.resolve(body);
   }
 
   /**
@@ -220,22 +237,6 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
       this.accessTokenKey,
       JSON.stringify(responseData)
     );
-  }
-
-  private _manageOauthError(body: ErrorBody, response?: Response): never {
-    let error;
-    if (response) {
-      error = getHttpErrorFromResponse(response);
-    }
-
-    if (body.error === 'invalid_grant') {
-      throw new InvalidGrantError(body.error, error);
-    }
-    if (body.error === 'invalid_scope') {
-      throw new InvalidScopeError(body.error, error);
-    }
-
-    throw new OauthError(body.error, error);
   }
 }
 
