@@ -1,4 +1,4 @@
-import { ErrorBody, Token, TokenBody, TokenResponse } from './types';
+import { Token, TokenBody, TokenResponse } from './types';
 
 export default interface TokenGeneratorInterface<T extends Token> {
   /**
