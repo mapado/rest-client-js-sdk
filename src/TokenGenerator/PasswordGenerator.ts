@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import AbstractTokenGenerator from './AbstractTokenGenerator';
-import { RefreshTokenParameters, Token, TokenResponse } from './types';
+import { Token, TokenResponse } from './types';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -21,11 +21,6 @@ type Config = {
   scope?: string;
 };
 
-type ClientParameters = {
-  client_id?: string;
-  client_secret?: string;
-};
-
 type GenerateTokenParameters = {
   username: string;
   password: string;
@@ -35,15 +30,10 @@ type GenerateTokenParameters = {
 interface PasswordToken extends Token {
   access_token: string;
   token_type: string;
-  refresh_token: never;
+  refresh_token?: string;
   expires_in?: number;
   scope?: string;
 }
-
-type GenerateTokenParametersCallParameter = ClientParameters &
-  GenerateTokenParameters & { grant_type: 'password' };
-
-type RefreshTokenCallParameters = ClientParameters & RefreshTokenParameters;
 
 type PasswordTokenResponse = TokenResponse<PasswordToken>;
 
@@ -53,50 +43,60 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
   ): Promise<PasswordTokenResponse> {
     this._checkGenerateParameters(baseParameters);
 
-    const parameters: GenerateTokenParametersCallParameter = {
-      ...baseParameters,
+    const body = new URLSearchParams({
       grant_type: 'password',
+      username: baseParameters.username,
+      password: baseParameters.password,
       client_id: this.tokenGeneratorConfig.clientId,
       client_secret: this.tokenGeneratorConfig.clientSecret,
-    };
+    });
 
-    if (this.tokenGeneratorConfig.scope && !parameters.scope) {
-      parameters.scope = this.tokenGeneratorConfig.scope;
+    if (baseParameters.scope) {
+      body.append('scope', baseParameters.scope);
+    } else if (this.tokenGeneratorConfig.scope) {
+      body.append('scope', this.tokenGeneratorConfig.scope);
     }
 
     const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
     return fetch(url, {
       method: 'POST',
-      body: this.convertMapToFormData(parameters),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body,
     });
   }
 
   refreshToken(
     accessToken: null | PasswordToken
   ): Promise<PasswordTokenResponse> {
-    if (!(accessToken && accessToken.refresh_token)) {
+    const refreshToken = accessToken?.refresh_token;
+    if (!refreshToken) {
       throw new Error(
         'refresh_token is not set. Did you called `generateToken` before ?'
       );
     }
 
-    const parameters: RefreshTokenCallParameters = {
+    const body = new URLSearchParams({
       grant_type: 'refresh_token',
       client_id: this.tokenGeneratorConfig.clientId,
       client_secret: this.tokenGeneratorConfig.clientSecret,
-      refresh_token: accessToken.refresh_token,
-    };
+      refresh_token: refreshToken,
+    });
 
     if (this.tokenGeneratorConfig.scope) {
-      parameters.scope = this.tokenGeneratorConfig.scope;
+      body.append('scope', this.tokenGeneratorConfig.scope);
     }
 
     const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
     return fetch(url, {
       method: 'POST',
-      body: this.convertMapToFormData(parameters),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body,
     });
   }
 

@@ -217,12 +217,14 @@ describe('Oauth token generation error', () => {
       this.error = error;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     generateToken(parameters) {
       return new Promise((resolve) => {
         resolve(new Response(this.status, { error: this.error }));
       });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     refreshToken(accessToken, parameters) {
       return new Promise((resolve) => {
         resolve(new Response(this.status, { error: this.error }));

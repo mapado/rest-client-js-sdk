@@ -6,8 +6,10 @@ import {
   InvalidScopeError,
   OauthError,
 } from '../ErrorFactory';
-import TokenGeneratorInterface from './TokenGeneratorInterface';
-import { ErrorBody, Token, TokenBody, TokenResponse } from './types';
+import TokenGeneratorInterface, {
+  TokenBodyReturn,
+} from './TokenGeneratorInterface';
+import { ErrorBody, Token, TokenResponse } from './types';
 
 interface UrlConfig {
   scheme: string;
@@ -27,17 +29,18 @@ abstract class AbstractTokenGenerator<T extends Token, C>
 
   abstract generateToken(
     parameters: unknown
-  ): Promise<TokenBody<T> | TokenResponse<T>>;
+  ): Promise<TokenBodyReturn<T> | TokenResponse<T>>;
 
   abstract refreshToken(
     accessToken: null | T
-  ): Promise<TokenBody<T> | TokenResponse<T>>;
+  ): Promise<TokenBodyReturn<T> | TokenResponse<T>>;
 
   abstract checkTokenGeneratorConfig(config: C): void;
 
   /** @deprecated */
   protected _manageOauthError(response: Response): Promise<never> {
     return response
+      .clone()
       .json()
       .then((body: ErrorBody) => {
         if (body.error === 'invalid_grant') {
@@ -61,24 +64,6 @@ abstract class AbstractTokenGenerator<T extends Token, C>
 
         throw err;
       });
-  }
-
-  protected convertMapToFormData(parameters: {
-    [key: string]: undefined | string | Blob;
-  }): FormData {
-    const keys = Object.keys(parameters);
-
-    const formData = new FormData();
-
-    keys.forEach((key) => {
-      const value = parameters[key];
-
-      if (typeof value !== 'undefined') {
-        formData.append(key, value);
-      }
-    });
-
-    return formData;
   }
 
   protected generateUrlFromConfig(config: UrlConfig): string {

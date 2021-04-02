@@ -2,8 +2,12 @@
 import TokenGeneratorInterface from './TokenGeneratorInterface';
 import { Token } from './types';
 
-type RefreshTokenFunc = () => Promise<Token>;
+type RefreshTokenFunc = (oldAccessToken: null | Token) => Promise<Token>;
 
+/**
+ * @deprecated ProvidedTokenGenerator is not an Oauth valid generator.
+ * You should use one of the official generator or implement your own custom generator.
+ */
 class ProvidedTokenGenerator implements TokenGeneratorInterface<Token> {
   #token: Token;
 
@@ -14,6 +18,10 @@ class ProvidedTokenGenerator implements TokenGeneratorInterface<Token> {
     this.#refreshTokenFunc = refreshTokenFunc;
   }
 
+  set token(token: Token) {
+    this.#token = token;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   generateToken(): Promise<Token> {
     return Promise.resolve(this.#token);
@@ -22,7 +30,7 @@ class ProvidedTokenGenerator implements TokenGeneratorInterface<Token> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   refreshToken(accessToken: null | Token): Promise<Token> {
     if (typeof this.#refreshTokenFunc === 'function') {
-      return this.#refreshTokenFunc();
+      return this.#refreshTokenFunc(accessToken);
     }
 
     return this.generateToken();

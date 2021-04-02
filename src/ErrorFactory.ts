@@ -205,7 +205,8 @@ class InternalServerError extends HttpError {
 /**
  * @returns {HttpError}
  */
-function getHttpErrorFromResponse(response: Response): HttpError {
+function getHttpErrorFromResponse(originalResponse: Response): HttpError {
+  const response = originalResponse.clone();
   switch (true) {
     case response.status === 401:
       return new UnauthorizedError(null, response);
