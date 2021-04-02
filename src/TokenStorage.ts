@@ -1,5 +1,7 @@
 /* eslint-disable camelcase */
-import TokenGeneratorInterface from './TokenGenerator/TokenGeneratorInterface';
+import TokenGeneratorInterface, {
+  TokenBodyReturn,
+} from './TokenGenerator/TokenGeneratorInterface';
 import {
   ErrorBody,
   Token,
@@ -157,10 +159,11 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
   }
 
   private async handleTokenResponse(
-    response: TokenBody<T> | TokenResponse<T>
+    responseOrBody: TokenBodyReturn<T> | TokenResponse<T>
   ): Promise<T> {
     let body: TokenBody<T>;
-    if (isResponse(response)) {
+    if (isResponse(responseOrBody)) {
+      const response = responseOrBody;
       try {
         body = await response.json();
 
@@ -179,7 +182,7 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
         throw err;
       }
     } else {
-      body = response;
+      body = responseOrBody;
 
       if (isOauthError(body)) {
         // throw error if response body is an oauth error

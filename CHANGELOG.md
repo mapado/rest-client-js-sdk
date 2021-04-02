@@ -5,8 +5,9 @@
 - Add Authorization code flow token generator
 - Better compatibility with the oauth spec: https://tools.ietf.org/html/rfc6749
 - handle oauth error even if the TokenGenerator does not extends `AbstractTokenGenator` or call `_manageOauthError`
-- [Minor BC] `TokenGenerator.generateToken` and `TokenGenerator.generateToken` might return a `Response` instead of a plain object. This should not break anything as the response is handled by the `TokenStorage` unless you call directly the `TokenGenerator` (which you should not)
+- [Minor BC] `TokenGenerator.generateToken` and `TokenGenerator.generateToken` might return a `Response` instead of a plain object. This should not break anything as the response is handled by the `TokenStorage` unless you call directly the `TokenGenerator` (which you should not). Returning an object has been deprecated and is only used in the `ProvidedTokenGenerator` (which is also deprecated)
 - [Minor BC] `OauthError.previousError` might be undefined
+- [Deprecation] Deprecate `ProvidedTokenGenerator`. You should use one of the oauth2 generator or implement your own custom generator.
 - [Deprecation] Calling `AbstractTokenGenerator._manageOauthError` is deprecated. You should return the `Response` instead :
 
 ```diff
