@@ -1,8 +1,7 @@
 /* eslint-disable camelcase */
-import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
-import { Token } from './types';
+import { Token, TokenResponse } from './types';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -23,12 +22,6 @@ type BaseParameters = {
   scope?: string;
 };
 
-type Parameters = BaseParameters & {
-  grant_type: 'client_credentials';
-  client_id: string;
-  client_secret: string;
-};
-
 interface ClientCredentialToken extends Token {
   access_token: string;
   token_type: string;
@@ -36,6 +29,8 @@ interface ClientCredentialToken extends Token {
   expires_in?: number;
   scope?: string;
 }
+
+type ClientCredentialResponse = TokenResponse<ClientCredentialToken>;
 
 class ClientCredentialsGenerator extends AbstractTokenGenerator<
   ClientCredentialToken,
@@ -48,45 +43,33 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator<
 
   generateToken(
     baseParameters: BaseParameters = {}
-  ): Promise<ClientCredentialToken> {
-    const parameters: Parameters = {
+  ): Promise<ClientCredentialResponse> {
+    const body = new URLSearchParams({
       grant_type: 'client_credentials',
       client_id: this.tokenGeneratorConfig.clientId,
       client_secret: this.tokenGeneratorConfig.clientSecret,
-    };
-
+    });
     if (baseParameters.scope) {
-      parameters.scope = baseParameters.scope;
+      body.append('scope', baseParameters.scope);
     } else if (this.tokenGeneratorConfig.scope) {
-      parameters.scope = this.tokenGeneratorConfig.scope;
+      body.append('scope', this.tokenGeneratorConfig.scope);
     }
 
-    const uri = new URI(
-      `${this.tokenGeneratorConfig.scheme}://${this.tokenGeneratorConfig.path}`
-    );
-
-    if (this.tokenGeneratorConfig.port) {
-      uri.port(this.tokenGeneratorConfig.port);
-    }
-
-    const url = uri.toString();
+    const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
     return fetch(url, {
       method: 'POST',
-      body: this.convertMapToFormData({ ...parameters }), // hack. See https://github.com/Microsoft/TypeScript/issues/15300
-    }).then((response) => {
-      if (response.status < 400) {
-        return response.json();
-      }
-
-      return this._manageOauthError(response);
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body,
     });
   }
 
   refreshToken(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     accessToken: null | ClientCredentialToken
-  ): Promise<ClientCredentialToken> {
+  ): Promise<ClientCredentialResponse> {
     return this.generateToken({});
   }
 

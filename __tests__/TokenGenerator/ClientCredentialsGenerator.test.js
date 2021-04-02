@@ -46,9 +46,9 @@ describe('ClientCredentialsGenerator tests', () => {
 
     return Promise.all([
       expect(typeof token).toBe('object'),
-      expect(token.then((a) => a.access_token)).resolves.toEqual(
-        oauthClientCredentialsMock.access_token
-      ),
+      expect(
+        token.then((r) => r.json()).then((a) => a.access_token)
+      ).resolves.toEqual(oauthClientCredentialsMock.access_token),
     ]);
   });
 
@@ -63,9 +63,9 @@ describe('ClientCredentialsGenerator tests', () => {
 
     return Promise.all([
       expect(typeof token).toBe('object'),
-      expect(token.then((a) => a.access_token)).resolves.toEqual(
-        oauthClientCredentialsMock.access_token
-      ),
+      expect(
+        token.then((r) => r.json()).then((a) => a.access_token)
+      ).resolves.toEqual(oauthClientCredentialsMock.access_token),
     ]);
   });
 

@@ -1,13 +1,21 @@
 /* eslint no-unused-vars: 0 */
+import URI from 'urijs';
 import {
   getHttpErrorFromResponse,
   InvalidGrantError,
   InvalidScopeError,
   OauthError,
 } from '../ErrorFactory';
-import TokenGeneratorInterface from './TokenGeneratorInterface';
-import { Token } from './types';
+import TokenGeneratorInterface, {
+  TokenBodyReturn,
+} from './TokenGeneratorInterface';
+import { ErrorBody, Token, TokenResponse } from './types';
 
+interface UrlConfig {
+  scheme: string;
+  path: string;
+  port?: string;
+}
 abstract class AbstractTokenGenerator<T extends Token, C>
   implements TokenGeneratorInterface<T> {
   readonly tokenGeneratorConfig: C;
@@ -19,16 +27,22 @@ abstract class AbstractTokenGenerator<T extends Token, C>
     }
   }
 
-  abstract generateToken(parameters: unknown): Promise<T>;
+  abstract generateToken(
+    parameters: unknown
+  ): Promise<TokenBodyReturn<T> | TokenResponse<T>>;
 
-  abstract refreshToken(accessToken: null | T): Promise<T>;
+  abstract refreshToken(
+    accessToken: null | T
+  ): Promise<TokenBodyReturn<T> | TokenResponse<T>>;
 
   abstract checkTokenGeneratorConfig(config: C): void;
 
+  /** @deprecated */
   protected _manageOauthError(response: Response): Promise<never> {
     return response
+      .clone()
       .json()
-      .then((body) => {
+      .then((body: ErrorBody) => {
         if (body.error === 'invalid_grant') {
           throw new InvalidGrantError(
             body.error,
@@ -52,22 +66,14 @@ abstract class AbstractTokenGenerator<T extends Token, C>
       });
   }
 
-  protected convertMapToFormData(parameters: {
-    [key: string]: undefined | string | Blob;
-  }): FormData {
-    const keys = Object.keys(parameters);
+  protected generateUrlFromConfig(config: UrlConfig): string {
+    const uri = new URI(`${config.scheme}://${config.path}`);
 
-    const formData = new FormData();
+    if (config.port) {
+      uri.port(config.port);
+    }
 
-    keys.forEach((key) => {
-      const value = parameters[key];
-
-      if (typeof value !== 'undefined') {
-        formData.append(key, value);
-      }
-    });
-
-    return formData;
+    return uri.toString();
   }
 }
 

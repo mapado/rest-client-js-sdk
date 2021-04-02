@@ -1,5 +1,33 @@
 # Changelog
 
+## 6.6.0
+
+- Add Authorization code flow token generator
+- Better compatibility with the oauth spec: https://tools.ietf.org/html/rfc6749
+- handle oauth error even if the TokenGenerator does not extends `AbstractTokenGenator` or call `_manageOauthError`
+- [Minor BC] `TokenGenerator.generateToken` and `TokenGenerator.generateToken` might return a `Response` instead of a plain object. This should not break anything as the response is handled by the `TokenStorage` unless you call directly the `TokenGenerator` (which you should not). Returning an object has been deprecated and is only used in the `ProvidedTokenGenerator` (which is also deprecated)
+- [Minor BC] `OauthError.previousError` might be undefined
+- [Deprecation] Deprecate `ProvidedTokenGenerator`. You should use one of the oauth2 generator or implement your own custom generator.
+- [Deprecation] Calling `AbstractTokenGenerator._manageOauthError` is deprecated. You should return the `Response` instead :
+
+```diff
+   generateToken() {
+     const body = // … generate body
+
+     return fetch(url, {
+       method: 'POST',
+       body,
++    });
+-    }).then((response) => {
+-      if (response.status < 400) {
+-        return response;
+-      }
+
+-      return this._manageOauthError(response);
+-    });
+   }
+```
+
 ## 6.5.2
 
 Fix regression from `6.5.1` : `TokenStorage.refreshToken` does now throws an Error anymore if there is no token stored in the storage.

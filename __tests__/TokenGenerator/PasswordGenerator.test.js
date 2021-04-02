@@ -5,7 +5,6 @@ import {
   InvalidGrantError,
   InvalidScopeError,
   OauthError,
-  ForbiddenError,
   BadRequestError,
   ResourceNotFoundError,
   UnauthorizedError,
@@ -37,7 +36,7 @@ describe('PasswordGenerator tests', () => {
     expect(createTokenGenerator(tokenConfig)).not.toThrowError('good config');
   });
 
-  test('test generateToken method', () => {
+  test('test generateToken method', async () => {
     fetch.mockResponse(JSON.stringify(oauthClientCredentialsMock));
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
@@ -46,48 +45,48 @@ describe('PasswordGenerator tests', () => {
     expect(() => tokenGenerator.generateToken({ foo: 'bar' })).toThrowError(
       RangeError
     );
-    const token = tokenGenerator.generateToken({
+    const response = await tokenGenerator.generateToken({
       username: 'foo',
       password: 'bar',
     });
-    expect(token).toBeInstanceOf(Promise);
+    expect(response).toBeInstanceOf(Response);
 
-    return Promise.all([
-      expect(typeof token).toBe('object'),
-      expect(token.then((a) => a.access_token)).resolves.toEqual(
-        oauthClientCredentialsMock.access_token
-      ),
-      expect(token.then((a) => a.refresh_token)).resolves.toEqual(
-        oauthClientCredentialsMock.refresh_token
-      ),
-      expect(fetch.mock.calls[0][0]).toEqual('https://oauth.me/'),
-    ]);
+    const token = await response.json();
+
+    expect(typeof token).toBe('object');
+    expect(token.access_token).toEqual(oauthClientCredentialsMock.access_token);
+    expect(token.refresh_token).toEqual(
+      oauthClientCredentialsMock.refresh_token
+    );
+    expect(fetch.mock.calls[0][0]).toEqual('https://oauth.me/');
   });
 
-  test('test that refreshToken refresh the token ;)', () => {
+  test('test that refreshToken refresh the token ;)', async () => {
+    expect.assertions(3);
     fetch.mockResponse(JSON.stringify(oauthClientCredentialsMock));
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
 
-    expect(() => tokenGenerator.refreshToken()).toThrowError(Error);
+    try {
+      tokenGenerator.refreshToken();
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error);
+      expect(err.message).toBe(
+        'refresh_token is not set. Did you called `generateToken` before ?'
+      );
+    }
 
-    const generateTokenPromise = tokenGenerator.generateToken({
+    const response = await tokenGenerator.generateToken({
       username: 'foo',
       password: 'bar',
     });
+    const accessToken = await response.json();
 
-    return Promise.all([
-      generateTokenPromise.then((accessToken) => {
-        expect(() => tokenGenerator.refreshToken(accessToken)).not.toThrowError(
-          Error
-        );
-        expect(
-          tokenGenerator
-            .refreshToken(accessToken)
-            .then((token) => token.access_token)
-        ).resolves.toEqual(oauthClientCredentialsMock.access_token);
-      }),
-    ]);
+    const refreshTokenResponse = await tokenGenerator.refreshToken(accessToken);
+    const refreshToken = await refreshTokenResponse.json();
+    expect(refreshToken.access_token).toEqual(
+      oauthClientCredentialsMock.access_token
+    );
   });
 
   test('test that refreshToken throws OauthError on 400 with no json body', () => {
@@ -102,20 +101,22 @@ describe('PasswordGenerator tests', () => {
 
     fetch.mockResponseOnce(null, { status: 400 });
 
-    return generateTokenPromise.then((accessToken) =>
-      tokenGenerator.refreshToken(accessToken).catch((err) => {
-        expect(err instanceof OauthError).toEqual(true);
-        expect(err.previousError instanceof BadRequestError).toEqual(true);
-      })
-    );
+    return generateTokenPromise
+      .then((r) => r.json())
+      .then((accessToken) =>
+        tokenGenerator.refreshToken(accessToken).catch((err) => {
+          expect(err instanceof OauthError).toEqual(true);
+          expect(err.previousError instanceof BadRequestError).toEqual(true);
+        })
+      );
   });
 
-  test('test that refreshToken throws OauthError on 400 with no oauth error', () => {
+  test('test that refreshToken throws OauthError on 400 with no oauth error', async () => {
     const tokenGenerator = new PasswordGenerator(tokenConfig);
 
     fetch.mockResponseOnce(JSON.stringify(oauthClientCredentialsMock));
 
-    const generateTokenPromise = tokenGenerator.generateToken({
+    const response = await tokenGenerator.generateToken({
       username: 'foo',
       password: 'bar',
     });
@@ -124,24 +125,27 @@ describe('PasswordGenerator tests', () => {
       status: 400,
     });
 
-    return generateTokenPromise.then((accessToken) =>
-      tokenGenerator.refreshToken(accessToken).catch((err) => {
-        expect(err instanceof OauthError).toEqual(true);
-        expect(err.previousError instanceof BadRequestError).toEqual(true);
-      })
-    );
+    const accessToken = await response.json();
+
+    const r2 = await tokenGenerator.refreshToken(accessToken);
+    expect(r2.status).toBe(400);
+    const body = await r2.json();
+    expect(body.error).toBe('dummy error');
   });
 
-  test('test that OauthError is thrown on 403', () => {
+  test('test that OauthError is thrown on 403', async () => {
     fetch.mockResponseOnce(null, { status: 403 });
 
     const tokenGenerator = new PasswordGenerator(tokenConfig);
-    return tokenGenerator
-      .generateToken({ password: 'foo', username: 'bar' })
-      .catch((err) => {
-        expect(err instanceof OauthError).toEqual(true);
-        expect(err.previousError instanceof ForbiddenError).toEqual(true);
-      });
+    const response = await tokenGenerator.generateToken({
+      password: 'foo',
+      username: 'bar',
+    });
+    expect(response.status).toBe(403);
+
+    //   expect(err instanceof OauthError).toEqual(true);
+    //   expect(err.previousError instanceof ForbiddenError).toEqual(true);
+    // });
   });
 
   test('test that OauthError is thrown on 404', () => {

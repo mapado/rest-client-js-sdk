@@ -5,13 +5,13 @@ import refreshedCredentials from './refreshedCredentials.json';
 
 class TokenGeneratorMock extends AbstractTokenGenerator {
   generateToken(parameters) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       resolve(oauthClientCredentialsMock);
     });
   }
 
   refreshToken(accessToken, parameters) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       resolve(refreshedCredentials);
     });
   }

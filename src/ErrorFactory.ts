@@ -4,6 +4,8 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
  */
 
+import { ErrorBody, Token, TokenBody } from './TokenGenerator/types';
+
 class HttpError extends Error {
   public baseResponse: Response;
 
@@ -24,9 +26,9 @@ class HttpError extends Error {
 }
 
 class OauthError extends Error {
-  public previousError: HttpError;
+  public previousError: HttpError | undefined;
 
-  constructor(message: null | string, previousError: HttpError) {
+  constructor(message: null | string, previousError?: HttpError) {
     super(message || 'Oauth error');
 
     // Set the prototype explicitly.
@@ -43,9 +45,9 @@ class OauthError extends Error {
 }
 
 class InvalidGrantError extends OauthError {
-  public previousError: HttpError;
+  public previousError: HttpError | undefined;
 
-  constructor(message: null | string, previousError: HttpError) {
+  constructor(message: null | string, previousError?: HttpError) {
     super(message || 'Invalid grant error', previousError);
 
     // Set the prototype explicitly.
@@ -62,9 +64,9 @@ class InvalidGrantError extends OauthError {
 }
 
 class InvalidScopeError extends OauthError {
-  public previousError: HttpError;
+  public previousError: HttpError | undefined;
 
-  constructor(message: null | string, previousError: HttpError) {
+  constructor(message: null | string, previousError?: HttpError) {
     super(message || 'Invalid scope error', previousError);
 
     // Set the prototype explicitly.
@@ -203,7 +205,8 @@ class InternalServerError extends HttpError {
 /**
  * @returns {HttpError}
  */
-function getHttpErrorFromResponse(response: Response): HttpError {
+function getHttpErrorFromResponse(originalResponse: Response): HttpError {
+  const response = originalResponse.clone();
   switch (true) {
     case response.status === 401:
       return new UnauthorizedError(null, response);
@@ -228,6 +231,10 @@ function getHttpErrorFromResponse(response: Response): HttpError {
   }
 }
 
+function isOauthError(body: TokenBody<Token>): body is ErrorBody {
+  return typeof (body as ErrorBody)?.error === 'string';
+}
+
 export {
   UnauthorizedError,
   BadRequestError,
@@ -240,4 +247,5 @@ export {
   OauthError,
   InvalidGrantError,
   InvalidScopeError,
+  isOauthError,
 };

@@ -1,8 +1,6 @@
 /* eslint-disable camelcase */
-import URI from 'urijs';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
-import { memoizePromise } from '../decorator';
-import { Token } from './types';
+import { Token, TokenResponse } from './types';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -23,80 +21,83 @@ type Config = {
   scope?: string;
 };
 
-type DefaultParameters = {
-  client_id: string;
-  client_secret: string;
-  grant_type: string;
-  scope?: string;
-};
-
 type GenerateTokenParameters = {
   username: string;
   password: string;
   scope?: string;
 };
 
-type RefreshTokenParameters = {
-  refresh_token: string;
-};
-
 interface PasswordToken extends Token {
   access_token: string;
   token_type: string;
-  refresh_token: never;
+  refresh_token?: string;
   expires_in?: number;
   scope?: string;
 }
 
-type CallParameters = DefaultParameters &
-  (GenerateTokenParameters | RefreshTokenParameters);
+type PasswordTokenResponse = TokenResponse<PasswordToken>;
 
 class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
-  constructor(props: Config) {
-    super(props);
-    this._doFetch = memoizePromise(this._doFetch);
-  }
-
   generateToken(
     baseParameters: GenerateTokenParameters
-  ): Promise<PasswordToken> {
+  ): Promise<PasswordTokenResponse> {
     this._checkGenerateParameters(baseParameters);
 
-    const parameters: CallParameters = {
-      ...baseParameters,
+    const body = new URLSearchParams({
       grant_type: 'password',
+      username: baseParameters.username,
+      password: baseParameters.password,
       client_id: this.tokenGeneratorConfig.clientId,
       client_secret: this.tokenGeneratorConfig.clientSecret,
-    };
+    });
 
-    if (this.tokenGeneratorConfig.scope && !parameters.scope) {
-      parameters.scope = this.tokenGeneratorConfig.scope;
+    if (baseParameters.scope) {
+      body.append('scope', baseParameters.scope);
+    } else if (this.tokenGeneratorConfig.scope) {
+      body.append('scope', this.tokenGeneratorConfig.scope);
     }
 
-    return this._doFetch(parameters).then((response) => response.json());
+    const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
+
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body,
+    });
   }
 
-  refreshToken(accessToken: null | PasswordToken): Promise<PasswordToken> {
-    if (!(accessToken && accessToken.refresh_token)) {
+  refreshToken(
+    accessToken: null | PasswordToken
+  ): Promise<PasswordTokenResponse> {
+    const refreshToken = accessToken?.refresh_token;
+    if (!refreshToken) {
       throw new Error(
         'refresh_token is not set. Did you called `generateToken` before ?'
       );
     }
 
-    const parameters: CallParameters = {
+    const body = new URLSearchParams({
       grant_type: 'refresh_token',
       client_id: this.tokenGeneratorConfig.clientId,
       client_secret: this.tokenGeneratorConfig.clientSecret,
-      refresh_token: accessToken.refresh_token,
-    };
+      refresh_token: refreshToken,
+    });
 
     if (this.tokenGeneratorConfig.scope) {
-      parameters.scope = this.tokenGeneratorConfig.scope;
+      body.append('scope', this.tokenGeneratorConfig.scope);
     }
 
-    return this._doFetch(parameters).then((response) =>
-      response.clone().json()
-    );
+    const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
+
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body,
+    });
   }
 
   checkTokenGeneratorConfig(config: Config): void {
@@ -111,29 +112,6 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
     if (!(config.clientId && config.clientSecret)) {
       throw new RangeError(ERROR_CONFIG_CLIENT_INFORMATIONS);
     }
-  }
-
-  _doFetch(parameters: CallParameters): Promise<Response> {
-    const uri = new URI(
-      `${this.tokenGeneratorConfig.scheme}://${this.tokenGeneratorConfig.path}`
-    );
-
-    if (this.tokenGeneratorConfig.port) {
-      uri.port(this.tokenGeneratorConfig.port);
-    }
-
-    const url = uri.toString();
-
-    return fetch(url, {
-      method: 'POST',
-      body: this.convertMapToFormData(parameters),
-    }).then((response) => {
-      if (response.status < 400) {
-        return response;
-      }
-
-      return this._manageOauthError(response);
-    });
   }
 
   _checkGenerateParameters(parameters: GenerateTokenParameters): void {
