@@ -1,5 +1,4 @@
-/* eslint-disable max-classes-per-file */
-/* eslint no-unused-vars: 0, no-underscore-dangle: 0 */
+/* eslint-disable max-classes-per-file, no-unused-vars, no-underscore-dangle */
 import fetchMock from 'fetch-mock';
 import * as errors from '../../src/ErrorFactory';
 import RestClientSdk, {

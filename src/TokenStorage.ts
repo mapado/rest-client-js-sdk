@@ -178,6 +178,7 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
   ): Promise<T> {
     if (isResponse(responseOrBody)) {
       const response = responseOrBody;
+      const originalResponse = response.clone();
       return response
         .json()
         .then((body) => {
@@ -186,14 +187,17 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
             manageOauthError(body, response);
           } else if (response.status >= 400) {
             // throw an error if response status code is an "error" status code
-            throw getHttpErrorFromResponse(response);
+            throw getHttpErrorFromResponse(originalResponse);
           }
 
           return body;
         })
         .catch((err) => {
           if (!(err instanceof OauthError)) {
-            throw new OauthError(err.type, getHttpErrorFromResponse(response));
+            throw new OauthError(
+              err.type,
+              getHttpErrorFromResponse(originalResponse)
+            );
           }
 
           throw err;

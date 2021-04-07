@@ -11,6 +11,10 @@ class Response {
   async json() {
     return this.body;
   }
+
+  clone() {
+    return new Response(this.body);
+  }
 }
 
 class TokenGeneratorMock extends AbstractTokenGenerator {

@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.6.2
+
+Fix issue with response body already consumed when an error occured while generating token
+
 ## 6.6.1
 
 Do not use async / await to avoid regeneratorRuntime issue
