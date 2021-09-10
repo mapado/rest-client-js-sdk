@@ -265,17 +265,19 @@ class AbstractClient<D extends MetadataDefinition> {
             response
           ) as D['list'];
 
-          // eslint-disable-next-line no-restricted-syntax
-          for (const decodedItem of itemList) {
-            const identifier = this._getEntityIdentifier(decodedItem);
-            const normalizedItem = this.serializer.normalizeItem(
-              decodedItem,
-              this.metadata
-            );
+          if (this.#isUnitOfWorkEnabled) {
+            // eslint-disable-next-line no-restricted-syntax
+            for (const decodedItem of itemList) {
+              const identifier = this._getEntityIdentifier(decodedItem);
+              const normalizedItem = this.serializer.normalizeItem(
+                decodedItem,
+                this.metadata
+              );
 
-            // then we register the re-normalized item
-            if (this.#isUnitOfWorkEnabled && identifier !== null) {
-              this.sdk.unitOfWork.registerClean(identifier, normalizedItem);
+              // then we register the re-normalized item
+              if (identifier !== null) {
+                this.sdk.unitOfWork.registerClean(identifier, normalizedItem);
+              }
             }
           }
 
