@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.0-rc.1
+
+### Update
+
+- [Breaking] If unitOfWork is disabled in the global configuration, then it will be disabled for all call to getRepository. [#111](https://github.com/mapado/rest-client-js-sdk/pull/111). Waiting to resolve issue with `create` and `update` to bump `7.0.0` version.
+
 ## 6.6.2
 
 Fix issue with response body already consumed when an error occured while generating token
