@@ -1450,4 +1450,18 @@ describe('Test unit of work', () => {
       );
     });
   });
+
+  test('Test disabled unit of work', async () => {
+    const withoutUnitOfWorkSdk = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: false },
+      unitOfWorkMapping
+    );
+
+    expect(() => {
+      withoutUnitOfWorkSdk.getRepository('carts').create({});
+    }).toThrowError(
+      'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
+    );
+  });
 });
