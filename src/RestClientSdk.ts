@@ -77,7 +77,11 @@ class RestClientSdk<M extends SdkMetadata>
       }
 
       // eslint-disable-next-line new-cap
-      this.#repositoryList[key] = generateRepository<M[K]>(this, metadata);
+      this.#repositoryList[key] = generateRepository<M[K]>(
+        this,
+        metadata,
+        this.config.unitOfWorkEnabled
+      );
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
