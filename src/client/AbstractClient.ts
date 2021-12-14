@@ -10,6 +10,7 @@ import type ClassMetadata from '../Mapping/ClassMetadata';
 import type SerializerInterface from '../serializer/SerializerInterface';
 import { Token } from '../TokenGenerator/types';
 import { generateRepository } from '../utils/repositoryGenerator';
+import { logResponse, logRequest, Logger } from '../utils/logging';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
@@ -24,11 +25,17 @@ class AbstractClient<D extends MetadataDefinition> {
 
   #isUnitOfWorkEnabled: boolean;
 
+  #logger?: Logger;
+
   constructor(
     sdk: RestClientSdk<SdkMetadata>,
     metadata: ClassMetadata,
-    isUnitOfWorkEnabled = true
+    isUnitOfWorkEnabled = true,
+    logger?: Logger
   ) {
+    if (logger) {
+      this.#logger = logger;
+    }
     this.sdk = sdk;
     this.#tokenStorage = sdk.tokenStorage;
     this.serializer = sdk.serializer;
@@ -38,7 +45,12 @@ class AbstractClient<D extends MetadataDefinition> {
 
   withUnitOfWork(enabled: boolean): AbstractClient<D> {
     // eslint-disable-next-line new-cap
-    return generateRepository<D>(this.sdk, this.metadata, enabled);
+    return generateRepository<D>(
+      this.sdk,
+      this.metadata,
+      enabled,
+      this.#logger
+    );
   }
 
   getDefaultParameters(): Record<string, unknown> {
@@ -491,8 +503,16 @@ class AbstractClient<D extends MetadataDefinition> {
       params.headers = removeUndefinedHeaders(params.headers);
     }
 
+    if (this.#logger) {
+      logRequest(this.#logger, { url: input, ...params });
+    }
+
     // eslint-disable-next-line consistent-return
     return fetch(input, params).then((response) => {
+      if (this.#logger) {
+        logResponse(this.#logger, response);
+      }
+
       if (response.status < 400) {
         return response;
       }

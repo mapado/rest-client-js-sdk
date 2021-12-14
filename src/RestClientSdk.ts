@@ -10,6 +10,7 @@ import type RestClientSdkInterface from './RestClientSdkInterface';
 // eslint-disable-next-line import/no-duplicates
 import type { Config } from './RestClientSdkInterface';
 import { generateRepository } from './utils/repositoryGenerator';
+import { Logger } from './utils/logging';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Entity = any;
@@ -38,13 +39,19 @@ class RestClientSdk<M extends SdkMetadata>
 
   #repositoryList: Partial<Record<keyof M, AbstractClient<M[keyof M]>>>;
 
+  #logger?: Logger;
+
   constructor(
     tokenStorage: TokenStorageInterface<Token>,
     config: Config,
     mapping: Mapping,
-    serializer: SerializerInterface = new JsSerializer()
+    serializer: SerializerInterface = new JsSerializer(),
+    logger?: Logger
   ) {
     this.checkConfigValidity(config);
+    if (logger) {
+      this.#logger = logger;
+    }
 
     if (!(mapping instanceof Mapping)) {
       throw new TypeError('mapping should be an instance of `Mapping`');
@@ -80,7 +87,8 @@ class RestClientSdk<M extends SdkMetadata>
       this.#repositoryList[key] = generateRepository<M[K]>(
         this,
         metadata,
-        this.config.unitOfWorkEnabled
+        this.config.unitOfWorkEnabled,
+        this.#logger
       );
     }
 

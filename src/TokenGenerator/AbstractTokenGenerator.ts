@@ -10,6 +10,7 @@ import TokenGeneratorInterface, {
   TokenBodyReturn,
 } from './TokenGeneratorInterface';
 import { ErrorBody, Token, TokenResponse } from './types';
+import { Logger } from '../utils/logging';
 
 interface UrlConfig {
   scheme: string;
@@ -20,7 +21,12 @@ abstract class AbstractTokenGenerator<T extends Token, C>
   implements TokenGeneratorInterface<T> {
   readonly tokenGeneratorConfig: C;
 
-  constructor(tokenGeneratorConfig: C) {
+  protected logger?: Logger;
+
+  constructor(tokenGeneratorConfig: C, logger?: Logger) {
+    if (logger) {
+      this.logger = logger;
+    }
     this.tokenGeneratorConfig = tokenGeneratorConfig;
     if (typeof this.checkTokenGeneratorConfig === 'function') {
       this.checkTokenGeneratorConfig(this.tokenGeneratorConfig);

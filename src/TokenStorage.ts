@@ -21,6 +21,7 @@ import {
   isOauthError,
   OauthError,
 } from './ErrorFactory';
+import { logResponse, Logger } from './utils/logging';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isResponse(response: any): response is Response {
@@ -52,11 +53,17 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
 
   #asyncStorage!: AsyncStorageInterface;
 
+  #logger?: Logger;
+
   constructor(
     tokenGenerator: TokenGeneratorInterface<T>,
     asyncStorage: AsyncStorageInterface,
-    accessTokenKey = 'rest_client_sdk.api.access_token'
+    accessTokenKey = 'rest_client_sdk.api.access_token',
+    logger?: Logger
   ) {
+    if (logger) {
+      this.#logger = logger;
+    }
     this.#tokenGenerator = tokenGenerator;
     this.#hasATokenBeenGenerated = false;
     this.setAsyncStorage(asyncStorage);
@@ -179,6 +186,11 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
     if (isResponse(responseOrBody)) {
       const response = responseOrBody;
       const originalResponse = response.clone();
+
+      if (this.#logger) {
+        logResponse(this.#logger, response);
+      }
+
       return response
         .json()
         .then((body) => {

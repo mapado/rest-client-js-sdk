@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { Token, TokenResponse } from './types';
+import { logRequest } from '../utils/logging';
 
 type AuthorizationCodeFlowTokenGeneratorConfig = {
   clientId: string;
@@ -46,7 +47,7 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
 
     const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
-    return fetch(url, {
+    const params = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -58,7 +59,13 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
         redirect_uri: this.tokenGeneratorConfig.redirectUri,
         code: parameters.code,
       }),
-    });
+    };
+
+    if (this.logger) {
+      logRequest(this.logger, { url, ...params });
+    }
+
+    return fetch(url, params);
   }
 
   /**
@@ -80,7 +87,7 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
 
     const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
-    return fetch(url, {
+    const params = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -91,7 +98,13 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
         client_secret: this.tokenGeneratorConfig.clientSecret,
         refresh_token: oldAccessToken.refresh_token,
       }),
-    });
+    };
+
+    if (this.logger) {
+      logRequest(this.logger, { url, ...params });
+    }
+
+    return fetch(url, params);
   }
 
   checkTokenGeneratorConfig(

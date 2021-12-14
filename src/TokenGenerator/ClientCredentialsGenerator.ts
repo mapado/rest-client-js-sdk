@@ -2,6 +2,7 @@
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
 import { Token, TokenResponse } from './types';
+import { logRequest } from '../utils/logging';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -55,15 +56,21 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator<
       body.append('scope', this.tokenGeneratorConfig.scope);
     }
 
-    const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
-
-    return fetch(url, {
+    const params = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body,
-    });
+    };
+
+    const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
+
+    if (this.logger) {
+      logRequest(this.logger, { url, ...params });
+    }
+
+    return fetch(url, params);
   }
 
   refreshToken(
