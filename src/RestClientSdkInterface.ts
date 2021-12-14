@@ -12,6 +12,7 @@ export type Config = {
   authorizationType?: string; // default to "Bearer", but can be "Basic" or anything
   useDefaultParameters?: boolean;
   unitOfWorkEnabled?: boolean;
+  loggerEnabled?: boolean;
 };
 
 export default interface RestClientSdkInterface<M extends SdkMetadata> {

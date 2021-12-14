@@ -1,7 +1,7 @@
-export type Logger = {
-  [key: string]: any;
-  log: (title: string, jsonContent: string) => void;
-};
+// export type Logger = {
+//   [key: string]: any;
+//   log: (title: string, jsonContent: string) => void;
+// };
 
 // eslint-disable-next-line import/prefer-default-export
 export function logResponse(logger: Logger, response: Response): void {
@@ -55,4 +55,11 @@ export function logRequest(
   params: { [key: string]: any }
 ): void {
   logger.log('Request', JSON.stringify(params, undefined, 2));
+}
+
+export class Logger {
+  log(title: string, jsonContent: string): void {
+    // eslint-disable-next-line no-console
+    console.log(`${title}\n${jsonContent}`);
+  }
 }

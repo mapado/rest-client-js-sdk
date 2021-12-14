@@ -39,19 +39,15 @@ class RestClientSdk<M extends SdkMetadata>
 
   #repositoryList: Partial<Record<keyof M, AbstractClient<M[keyof M]>>>;
 
-  #logger?: Logger;
+  public readonly logger?: Logger;
 
   constructor(
     tokenStorage: TokenStorageInterface<Token>,
     config: Config,
     mapping: Mapping,
-    serializer: SerializerInterface = new JsSerializer(),
-    logger?: Logger
+    serializer: SerializerInterface = new JsSerializer()
   ) {
     this.checkConfigValidity(config);
-    if (logger) {
-      this.#logger = logger;
-    }
 
     if (!(mapping instanceof Mapping)) {
       throw new TypeError('mapping should be an instance of `Mapping`');
@@ -66,6 +62,10 @@ class RestClientSdk<M extends SdkMetadata>
       this.mapping,
       this.config.unitOfWorkEnabled
     );
+
+    if (config.loggerEnabled) {
+      this.logger = new Logger();
+    }
 
     this.#repositoryList = {};
   }
@@ -87,8 +87,7 @@ class RestClientSdk<M extends SdkMetadata>
       this.#repositoryList[key] = generateRepository<M[K]>(
         this,
         metadata,
-        this.config.unitOfWorkEnabled,
-        this.#logger
+        this.config.unitOfWorkEnabled
       );
     }
 

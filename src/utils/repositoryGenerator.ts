@@ -5,19 +5,12 @@ import type ClassMetadata from '../Mapping/ClassMetadata';
 import type RestClientSdk from '../RestClientSdk';
 // eslint-disable-next-line import/no-duplicates
 import type { MetadataDefinition, SdkMetadata } from '../RestClientSdk';
-import { Logger } from './logging';
 
 export function generateRepository<D extends MetadataDefinition>(
   sdk: RestClientSdk<SdkMetadata>,
   metadata: ClassMetadata,
-  isUnitOfWorkEnabled = true,
-  logger?: Logger
+  isUnitOfWorkEnabled = true
 ): AbstractClient<D> {
   // eslint-disable-next-line new-cap
-  return new metadata.repositoryClass(
-    sdk,
-    metadata,
-    isUnitOfWorkEnabled,
-    logger
-  );
+  return new metadata.repositoryClass(sdk, metadata, isUnitOfWorkEnabled);
 }
