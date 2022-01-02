@@ -10,7 +10,6 @@ import type ClassMetadata from '../Mapping/ClassMetadata';
 import type SerializerInterface from '../serializer/SerializerInterface';
 import { Token } from '../TokenGenerator/types';
 import { generateRepository } from '../utils/repositoryGenerator';
-import { logResponse, logRequest } from '../utils/logging';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 
@@ -492,14 +491,15 @@ class AbstractClient<D extends MetadataDefinition> {
       params.headers = removeUndefinedHeaders(params.headers);
     }
 
+    let logId: undefined|string;
     if (this.sdk.logger) {
-      logRequest(this.sdk.logger, { url: input, ...params });
+      logId = this.sdk.logger.logRequest({ url: input, ...params });
     }
 
     // eslint-disable-next-line consistent-return
     return fetch(input, params).then((response) => {
       if (this.sdk.logger) {
-        logResponse(this.sdk.logger, response);
+        this.sdk.logger.logResponse(response, logId);
       }
 
       if (response.status < 400) {

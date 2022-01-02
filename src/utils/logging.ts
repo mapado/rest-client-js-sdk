@@ -1,65 +1,96 @@
-// export type Logger = {
-//   [key: string]: any;
-//   log: (title: string, jsonContent: string) => void;
-// };
+import { convertToRecord } from '../client/headerUtils';
+
+type SdkRequest = RequestInit & { url: string };
+
+// type SdkResponse = Partial<Response>;
+type SdkResponse = {
+  status: number;
+  headers: Record<string, string>;
+};
+
+const generateId = () =>
+  `rest-client-sdk|${Date.now()}-${
+    Math.floor(Math.random() * (9e12 - 1)) + 1e12
+  }`;
+
+export type SerializableRequest = {
+  url: string;
+  method?: string;
+  headers?: Record<string, string>;
+  body?: string;
+};
+
+export type Log = {
+  id: string;
+  request?: SerializableRequest;
+  response?: SdkResponse;
+  logTimes: {
+    request?: number;
+    response?: number;
+  };
+};
+
+export type LoggerHistory = Array<Log>;
+
+function serializeRequest(req: SdkRequest): SerializableRequest {
+  const request = { ...req }; // Make a clone, useful for doing destructive things
+  return {
+    method: request.method, // The Request Method, e.g. GET, POST, DELETE
+    url: request.url, // The URL
+    headers: request.headers ? convertToRecord(request.headers) : undefined,
+    body: typeof request.body === 'string' ? request.body : undefined,
+  };
+}
 
 // eslint-disable-next-line import/prefer-default-export
-export function logResponse(logger: Logger, response: Response): void {
-  const clonedResponse = response.clone();
-
-  const logContent = {
-    status: clonedResponse.status,
-    headers: Object.fromEntries(clonedResponse.headers),
-  };
-
-  const contentType = clonedResponse.headers.get('content-type');
-  if (contentType && contentType.indexOf('application/json') !== -1) {
-    clonedResponse.json().then((data) => {
-      logger.log(
-        'Response',
-        JSON.stringify(
-          {
-            ...logContent,
-            content: JSON.parse(data),
-          },
-          null,
-          2
-        )
-      );
-    });
-  } else {
-    clonedResponse.text().then((text) => {
-      let content = text;
-      try {
-        content = JSON.parse(text);
-      } catch (e) {
-        // ignore
-      }
-      logger.log(
-        'Response',
-        JSON.stringify(
-          {
-            ...logContent,
-            content,
-          },
-          null,
-          2
-        )
-      );
-    });
-  }
-}
-
-export function logRequest(
-  logger: Logger,
-  params: { [key: string]: any }
-): void {
-  logger.log('Request', JSON.stringify(params, undefined, 2));
-}
-
 export class Logger {
-  log(title: string, jsonContent: string): void {
-    // eslint-disable-next-line no-console
-    console.log(`${title}\n${jsonContent}`);
+  #history: LoggerHistory;
+
+  get history(): LoggerHistory {
+    return this.#history;
+  }
+
+  constructor() {
+    this.#history = [];
+  }
+
+  logRequest(params: SdkRequest): string {
+    const log: Log = {
+      id: generateId(),
+      request: serializeRequest(params),
+      logTimes: { request: Date.now() },
+    };
+
+    this.#history.push(log);
+
+    return log.id;
+  }
+
+  logResponse(response: Response, requestId?: undefined | string): string {
+    const id = requestId || generateId();
+
+    // console.log('clone');
+    // const clonedResponse = response.clone(); // THIS IS THE LINE THAT CAUSES THE PROBLEM
+    // console.log('after clone', clonedResponse.status);
+
+    const logContent: SdkResponse = {
+      status: response.status, // clonedResponse.status,
+      headers: Object.fromEntries(response.headers),
+    };
+
+    const foundLogIndex = this.#history.findIndex((log) => log.id === id);
+
+    if (foundLogIndex > -1) {
+      this.#history[foundLogIndex].response = logContent;
+      this.#history[foundLogIndex].logTimes.response = Date.now();
+    } else {
+      this.#history.push({
+        id,
+        response: logContent,
+        logTimes: { response: Date.now() },
+      });
+    }
+
+    return id;
   }
 }

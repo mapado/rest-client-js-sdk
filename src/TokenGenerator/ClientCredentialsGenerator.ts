@@ -2,7 +2,6 @@
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
 import { Token, TokenResponse } from './types';
-import { logRequest } from '../utils/logging';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -67,7 +66,7 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator<
     const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
     if (this.logger) {
-      logRequest(this.logger, { url, ...params });
+      this.logger.logRequest({ url, ...params });
     }
 
     return fetch(url, params);

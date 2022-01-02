@@ -1,7 +1,6 @@
 /* eslint-disable camelcase */
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { Token, TokenResponse } from './types';
-import { logRequest } from '../utils/logging';
 
 type AuthorizationCodeFlowTokenGeneratorConfig = {
   clientId: string;
@@ -62,7 +61,7 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
     };
 
     if (this.logger) {
-      logRequest(this.logger, { url, ...params });
+      this.logger.logRequest({ url, ...params });
     }
 
     return fetch(url, params);
@@ -101,7 +100,7 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
     };
 
     if (this.logger) {
-      logRequest(this.logger, { url, ...params });
+      this.logger.logRequest({ url, ...params });
     }
 
     return fetch(url, params);

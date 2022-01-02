@@ -21,7 +21,7 @@ import {
   isOauthError,
   OauthError,
 } from './ErrorFactory';
-import { logResponse, Logger } from './utils/logging';
+import { Logger } from './utils/logging';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isResponse(response: any): response is Response {
@@ -188,7 +188,7 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
       const originalResponse = response.clone();
 
       if (this.#logger) {
-        logResponse(this.#logger, response);
+        this.#logger.logResponse(response);
       }
 
       return response

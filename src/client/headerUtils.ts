@@ -39,3 +39,15 @@ export function removeUndefinedHeaders(headers: HeadersInit): HeadersInit {
 
   return Object.fromEntries(filterEntries(Object.entries(headers)));
 }
+
+export function convertToRecord(headers: HeadersInit): Record<string, string> {
+  if (headers instanceof Headers) {
+    return Object.fromEntries(headers.entries());
+  }
+
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+
+  return headers;
+}

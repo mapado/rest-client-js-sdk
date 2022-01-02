@@ -24,6 +24,8 @@ import Mapping from './Mapping';
 import ClassMetadata from './Mapping/ClassMetadata';
 import Attribute from './Mapping/Attribute';
 import Relation from './Mapping/Relation';
+import { Logger, Log, LoggerHistory } from './utils/logging';
+
 import type {
   Token,
   ErrorBody,
@@ -67,6 +69,7 @@ export {
   ClassMetadata,
   Attribute,
   Relation,
+  Logger,
 };
 export type {
   SerializerInterface,
@@ -82,4 +85,6 @@ export type {
   TokenGeneratorInterface,
   AsyncStorageInterface,
   MetadataDefinition,
+  LoggerHistory,
+  Log,
 };

@@ -1,7 +1,6 @@
 /* eslint-disable camelcase */
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { Token, TokenResponse } from './types';
-import { logRequest } from '../utils/logging';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';
 const ERROR_CONFIG_PATH_SCHEME =
@@ -69,7 +68,7 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
     };
 
     if (this.logger) {
-      logRequest(this.logger, { url, ...params });
+      this.logger.logRequest({ url, ...params });
     }
 
     return fetch(url, params);
@@ -107,7 +106,7 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
     };
 
     if (this.logger) {
-      logRequest(this.logger, { url, ...params });
+      this.logger.logRequest({ url, ...params });
     }
 
     return fetch(url, params);
