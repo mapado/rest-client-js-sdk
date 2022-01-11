@@ -491,8 +491,17 @@ class AbstractClient<D extends MetadataDefinition> {
       params.headers = removeUndefinedHeaders(params.headers);
     }
 
+    let logId: undefined|string;
+    if (this.sdk.logger) {
+      logId = this.sdk.logger.logRequest({ url: input, ...params });
+    }
+
     // eslint-disable-next-line consistent-return
     return fetch(input, params).then((response) => {
+      if (this.sdk.logger) {
+        this.sdk.logger.logResponse(response, logId);
+      }
+
       if (response.status < 400) {
         return response;
       }

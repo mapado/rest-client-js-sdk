@@ -10,6 +10,7 @@ import type RestClientSdkInterface from './RestClientSdkInterface';
 // eslint-disable-next-line import/no-duplicates
 import type { Config } from './RestClientSdkInterface';
 import { generateRepository } from './utils/repositoryGenerator';
+import { Logger } from './utils/logging';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Entity = any;
@@ -38,6 +39,8 @@ class RestClientSdk<M extends SdkMetadata>
 
   #repositoryList: Partial<Record<keyof M, AbstractClient<M[keyof M]>>>;
 
+  public readonly logger?: Logger;
+
   constructor(
     tokenStorage: TokenStorageInterface<Token>,
     config: Config,
@@ -59,6 +62,10 @@ class RestClientSdk<M extends SdkMetadata>
       this.mapping,
       this.config.unitOfWorkEnabled
     );
+
+    if (config.loggerEnabled) {
+      this.logger = new Logger();
+    }
 
     this.#repositoryList = {};
   }

@@ -55,15 +55,21 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator<
       body.append('scope', this.tokenGeneratorConfig.scope);
     }
 
-    const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
-
-    return fetch(url, {
+    const params = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body,
-    });
+    };
+
+    const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
+
+    if (this.logger) {
+      this.logger.logRequest({ url, ...params });
+    }
+
+    return fetch(url, params);
   }
 
   refreshToken(

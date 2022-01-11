@@ -59,13 +59,19 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
 
     const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
-    return fetch(url, {
+    const params = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body,
-    });
+    };
+
+    if (this.logger) {
+      this.logger.logRequest({ url, ...params });
+    }
+
+    return fetch(url, params);
   }
 
   refreshToken(
@@ -91,13 +97,19 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
 
     const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
-    return fetch(url, {
+    const params = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body,
-    });
+    };
+
+    if (this.logger) {
+      this.logger.logRequest({ url, ...params });
+    }
+
+    return fetch(url, params);
   }
 
   checkTokenGeneratorConfig(config: Config): void {
