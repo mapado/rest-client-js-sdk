@@ -1,5 +1,19 @@
 # Changelog
 
+## 7.0.0-rc.2
+
+- Start implementing a logger. You need to enable it with `config.loggerEnabled` if you want to log request:
+
+A possible interesting configuration is to activate the logger on dev environment.
+
+```js
+const sdk = new TicketingSdk(tokenStorage, {
+  path: process.env.API_DOMAIN,
+  scheme: 'https',
+  loggerEnabled: process.env.NODE_ENV === 'development',
+});
+```
+
 ## 7.0.0-rc.1
 
 ### Update
