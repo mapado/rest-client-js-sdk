@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.0.0-rc.3
+
+Fix issue with private logger in handleTokenResponse
+
 ## 7.0.0-rc.2
 
 - Start implementing a logger. You need to enable it with `config.loggerEnabled` if you want to log request:
