@@ -69,6 +69,8 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
     this.setAsyncStorage(asyncStorage);
     this.accessTokenKey = accessTokenKey;
 
+    this.handleTokenResponse = this.handleTokenResponse.bind(this);
+
     this.generateToken = memoizePromise(this.generateToken);
     this.refreshToken = memoizePromise(this.refreshToken);
   }
