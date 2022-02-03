@@ -3,6 +3,7 @@ import { SdkMetadata } from './RestClientSdk';
 import { Token } from './TokenGenerator/types';
 import TokenStorageInterface from './TokenStorageInterface';
 import Mapping from './Mapping';
+import { Logger } from '.';
 
 export type Config = {
   path: string;
@@ -18,6 +19,8 @@ export type Config = {
 export default interface RestClientSdkInterface<M extends SdkMetadata> {
   tokenStorage: TokenStorageInterface<Token>;
   mapping: Mapping;
+
+  readonly logger?: Logger;
 
   getRepository<K extends keyof M & string>(key: K): AbstractClient<M[K]>;
 }
