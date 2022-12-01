@@ -23,6 +23,10 @@ class HttpError extends Error {
     this.name = 'HttpError';
     this.baseResponse = baseResponse;
   }
+
+  public async getBaseResponseJson(): Promise<Record<string, unknown>> {
+    return this.baseResponse.json();
+  }
 }
 
 class OauthError extends Error {
