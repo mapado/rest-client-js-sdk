@@ -24,7 +24,7 @@ class HttpError extends Error {
     this.baseResponse = baseResponse;
   }
 
-  public async getBaseResponseJson(): Promise<Record<string, unknown>> {
+  public async responseJson(): Promise<Record<string, unknown>> {
     return this.baseResponse.json();
   }
 }
