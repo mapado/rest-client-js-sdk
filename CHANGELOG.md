@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.7.0
+
+Add a helper to get JSON of an HttpError [#122](https://github.com/mapado/rest-client-js-sdk/pull/122)
+
 ## 6.6.2
 
 Fix issue with response body already consumed when an error occured while generating token
