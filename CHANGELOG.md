@@ -1,5 +1,13 @@
 # Changelog
 
+## 7.0.0-rc.5
+
+Add a helper to get JSON of an HttpError [#122](https://github.com/mapado/rest-client-js-sdk/pull/122)
+
+## 7.0.0-rc.4
+
+Add Logger in RestClientSdkInterface
+
 ## 7.0.0-rc.3
 
 Fix issue with private logger in handleTokenResponse
