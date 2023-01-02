@@ -5,7 +5,11 @@ import { removeAuthorization, removeUndefinedHeaders } from './headerUtils';
 // eslint-disable-next-line import/no-duplicates
 import type RestClientSdk from '../RestClientSdk';
 // eslint-disable-next-line import/no-duplicates
-import type { MetadataDefinition, SdkMetadata } from '../RestClientSdk';
+import type {
+  MetadataDefinition,
+  PatchOp,
+  SdkMetadata,
+} from '../RestClientSdk';
 import type ClassMetadata from '../Mapping/ClassMetadata';
 import type SerializerInterface from '../serializer/SerializerInterface';
 import { Token } from '../TokenGenerator/types';
@@ -211,6 +215,32 @@ class AbstractClient<D extends MetadataDefinition> {
         method: 'PUT',
         body: this.serializer.encodeItem(newSerializedModel, this.metadata),
         ...requestParams,
+      }),
+      'item'
+    );
+  }
+
+  /**
+   * patch an entity by its id
+   *
+   * @param {string|number} id the entity identifier
+   * @param {ReadonlyArray<PatchOp>} body list of patch operations
+   * @param {Record<string, unknown>} pathParameters path parameters, will be pass to the `getPathBase` method
+   */
+  patch(
+    id: string | number,
+    body: ReadonlyArray<PatchOp> = [],
+    pathParameters: Record<string, unknown> = {}
+  ): Promise<D['entity']> {
+    const url = this._generateUrlFromParams({}, pathParameters, id);
+
+    return this.deserializeResponse(
+      this.authorizedFetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/merge-patch+json',
+        },
+        body: JSON.stringify(body),
       }),
       'item'
     );
@@ -491,7 +521,7 @@ class AbstractClient<D extends MetadataDefinition> {
       params.headers = removeUndefinedHeaders(params.headers);
     }
 
-    let logId: undefined|string;
+    let logId: undefined | string;
     if (this.sdk.logger) {
       logId = this.sdk.logger.logRequest({ url: input, ...params });
     }

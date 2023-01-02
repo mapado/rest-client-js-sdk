@@ -15,6 +15,14 @@ import { Logger } from './utils/logging';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Entity = any;
 
+type Op = 'replace' | 'add' | 'remove';
+
+export type PatchOp = {
+  op: Op;
+  path: string;
+  value: string | number | Record<string, unknown> | [];
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 // export type SdkMetadata = Record<string, [any, Iterable<any>, undefined | any]>;
 export type MetadataDefinition = {
