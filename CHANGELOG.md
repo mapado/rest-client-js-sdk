@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.0.0-rc.6
+
+Fixed makeUri method to handle more than one URI segment [#128](https://github.com/mapado/rest-client-js-sdk/pull/128)
+
 ## 7.0.0-rc.5
 
 Add a helper to get JSON of an HttpError [#122](https://github.com/mapado/rest-client-js-sdk/pull/122)
