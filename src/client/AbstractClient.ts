@@ -322,7 +322,8 @@ class AbstractClient<D extends MetadataDefinition> {
 
     if (this.sdk.mapping.idPrefix) {
       const segments = url.segment();
-      if (`/${segments[0]}` !== this.sdk.mapping.idPrefix) {
+
+      if (!url.pathname().startsWith(this.sdk.mapping.idPrefix)) {
         segments.unshift(this.sdk.mapping.idPrefix);
         url.segment(segments);
       }
@@ -491,7 +492,7 @@ class AbstractClient<D extends MetadataDefinition> {
       params.headers = removeUndefinedHeaders(params.headers);
     }
 
-    let logId: undefined|string;
+    let logId: undefined | string;
     if (this.sdk.logger) {
       logId = this.sdk.logger.logRequest({ url: input, ...params });
     }

@@ -461,6 +461,27 @@ describe('Fix bugs', () => {
     ).toEqual('https://api.me/v2/foo');
   });
 
+  test('generate good url when sdk mapping idPrefix contains long path', () => {
+    const mapping = new Mapping('/api/v2');
+    mapping.setMapping([testMetadata, defParamMetadata, noAtIdMetadata]);
+    mappingNoPrefix.setMapping([
+      testMetadata,
+      defParamMetadata,
+      noAtIdMetadata,
+    ]);
+
+    const SomeInnerSdk = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
+      mapping
+    );
+    SomeInnerSdk.tokenStorage.generateToken();
+
+    expect(
+      SomeInnerSdk.getRepository('test').makeUri('/api/v2/foo').toString()
+    ).toEqual('https://api.me/api/v2/foo');
+  });
+
   test('allow base header override', () => {
     fetchMock.mock(() => true, {
       '@id': '/v2/test/8',
