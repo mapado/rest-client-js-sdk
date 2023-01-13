@@ -320,7 +320,8 @@ class AbstractClient<D extends MetadataDefinition> {
 
     if (this.sdk.mapping.idPrefix) {
       const segments = url.segment();
-      if (`/${segments[0]}` !== this.sdk.mapping.idPrefix) {
+
+      if (!url.pathname().startsWith(this.sdk.mapping.idPrefix)) {
         segments.unshift(this.sdk.mapping.idPrefix);
         url.segment(segments);
       }
