@@ -64,7 +64,7 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body,
+      body: body.toString(),
     };
 
     if (this.logger) {
@@ -102,7 +102,7 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body,
+      body: body.toString(),
     };
 
     if (this.logger) {

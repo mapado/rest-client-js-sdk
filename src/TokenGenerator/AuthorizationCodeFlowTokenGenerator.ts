@@ -57,7 +57,7 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
         client_secret: this.tokenGeneratorConfig.clientSecret, // TODO : secure this ?
         redirect_uri: this.tokenGeneratorConfig.redirectUri,
         code: parameters.code,
-      }),
+      }).toString(),
     };
 
     if (this.logger) {
@@ -96,7 +96,7 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
         client_id: this.tokenGeneratorConfig.clientId,
         client_secret: this.tokenGeneratorConfig.clientSecret,
         refresh_token: oldAccessToken.refresh_token,
-      }),
+      }).toString(),
     };
 
     if (this.logger) {
