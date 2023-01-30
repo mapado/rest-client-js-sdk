@@ -44,20 +44,23 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
   ): Promise<AuthorizationCodeFlowResponse> {
     this._checkGenerateParameters(parameters);
 
+    const { code } = parameters;
+
+    const body = new FormData();
+    body.append('grant_type', 'authorization_code');
+    body.append('client_id', this.tokenGeneratorConfig.clientId);
+    body.append(
+      'client_secret',
+      this.tokenGeneratorConfig.clientSecret // TODO : secure this
+    );
+    body.append('redirect_uri', this.tokenGeneratorConfig.redirectUri);
+    body.append('code', code);
+
     const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
     const params = {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        client_id: this.tokenGeneratorConfig.clientId,
-        client_secret: this.tokenGeneratorConfig.clientSecret, // TODO : secure this ?
-        redirect_uri: this.tokenGeneratorConfig.redirectUri,
-        code: parameters.code,
-      }),
+      body,
     };
 
     if (this.logger) {
@@ -84,19 +87,17 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
       throw new Error('Unable to refreshToken as there are no refresh_token');
     }
 
+    const body = new FormData();
+    body.append('client_id', this.tokenGeneratorConfig.clientId);
+    body.append('client_secret', this.tokenGeneratorConfig.clientSecret);
+    body.append('grant_type', 'refresh_token');
+    body.append('refresh_token', oldAccessToken.refresh_token);
+
     const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
     const params = {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        client_id: this.tokenGeneratorConfig.clientId,
-        client_secret: this.tokenGeneratorConfig.clientSecret,
-        refresh_token: oldAccessToken.refresh_token,
-      }),
+      body,
     };
 
     if (this.logger) {

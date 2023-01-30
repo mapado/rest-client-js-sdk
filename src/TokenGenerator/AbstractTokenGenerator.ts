@@ -72,6 +72,24 @@ abstract class AbstractTokenGenerator<T extends Token, C>
       });
   }
 
+  protected convertMapToFormData(parameters: {
+    [key: string]: undefined | string | Blob;
+  }): FormData {
+    const keys = Object.keys(parameters);
+
+    const formData = new FormData();
+
+    keys.forEach((key) => {
+      const value = parameters[key];
+
+      if (typeof value !== 'undefined') {
+        formData.append(key, value);
+      }
+    });
+
+    return formData;
+  }
+
   protected generateUrlFromConfig(config: UrlConfig): string {
     const uri = new URI(`${config.scheme}://${config.path}`);
 

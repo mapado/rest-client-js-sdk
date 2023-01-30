@@ -18,6 +18,7 @@ import {
 global.fetch = require('jest-fetch-mock');
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error -- Form form data
+global.FormData = require('form-data');
 
 const tokenConfig = {
   path: 'oauth.me',

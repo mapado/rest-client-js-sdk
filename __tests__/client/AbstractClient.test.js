@@ -628,8 +628,7 @@ describe('Fix bugs', () => {
       .mock({
         name: 'generate_token',
         matcher: (url, opts) =>
-          url === 'https://oauth.me/' &&
-          opts.body.get('grant_type') === 'password',
+          url === 'https://oauth.me/' && opts.body._streams[7] === 'password',
         response: {
           body: {
             access_token: 'an_access_token',
@@ -643,12 +642,9 @@ describe('Fix bugs', () => {
       })
       .mock({
         name: 'refresh_token',
-        matcher: (url, opts) => {
-          return (
-            url === 'https://oauth.me/' &&
-            opts.body?.get('refresh_token') === 'refresh_token'
-          );
-        },
+        matcher: (url, opts) =>
+          url === 'https://oauth.me/' &&
+          opts.body._streams[1].match('refresh_token'),
         response: {
           body: {
             access_token: 'a_refreshed_token',
@@ -726,8 +722,7 @@ describe('Fix bugs', () => {
       .mock({
         name: 'generate_token',
         matcher: (url, opts) =>
-          url === 'https://oauth.me/' &&
-          opts.body.get('grant_type') === 'password',
+          url === 'https://oauth.me/' && opts.body._streams[7] === 'password',
         response: {
           body: {
             access_token: 'an_access_token',
@@ -743,7 +738,7 @@ describe('Fix bugs', () => {
         name: 'refresh_token',
         matcher: (url, opts) =>
           url === 'https://oauth.me/' &&
-          opts.body.get('refresh_token') === 'refresh_token',
+          opts.body._streams[1].match('refresh_token'),
         response: {
           body: {
             access_token: 'a_refreshed_token',
@@ -814,8 +809,7 @@ describe('Fix bugs', () => {
       .mock({
         name: 'generate_token',
         matcher: (url, opts) =>
-          url === 'https://oauth.me/' &&
-          opts.body.get('grant_type') === 'password',
+          url === 'https://oauth.me/' && opts.body._streams[7] === 'password',
         response: {
           body: {
             access_token: 'an_access_token',
@@ -831,7 +825,7 @@ describe('Fix bugs', () => {
         name: 'refresh_token',
         matcher: (url, opts) =>
           url === 'https://oauth.me/' &&
-          opts.body.get('refresh_token') === 'refresh_token',
+          opts.body._streams[1].match('refresh_token'),
         response: {
           body: {
             access_token: 'a_refreshed_token',
@@ -968,12 +962,12 @@ describe('Test unit of work', () => {
     const cart = await repo.find('/v12/carts/1');
     cart.status = 'foo';
 
-    await repo.update(cart);
+    let updatedCart = await repo.update(cart);
     expect(findLastOptions('put_cart').body).toEqual(
       JSON.stringify({ status: 'foo' })
     );
 
-    await repo.update(cart);
+    updatedCart = await repo.update(cart);
     expect(findLastOptions('put_cart').body).toEqual('{}');
   });
 
@@ -1013,7 +1007,7 @@ describe('Test unit of work', () => {
       });
 
     const repo = unitOfWorkSdk.getRepository('carts');
-    await repo.find('/v12/carts/1');
+    const cart = await repo.find('/v12/carts/1');
 
     await repo.update({ '@id': '/v12/carts/1', status: null });
     expect(findLastOptions('put_cart').body).toEqual(
@@ -1271,7 +1265,7 @@ describe('Test unit of work', () => {
     };
 
     const repo = unitOfWorkSdk.getRepository('carts');
-    await repo.create(cartToPost);
+    const cart = await repo.create(cartToPost);
 
     expect(fetchMock.lastOptions().body).toEqual(
       JSON.stringify({ order: { '@id': '/v12/orders/1', status: 'waiting' } })
@@ -1359,7 +1353,7 @@ describe('Test unit of work', () => {
 
       cartToPut.set('status', 'refunded');
 
-      await unitOfWorkSdk.getRepository('carts').update(cartToPut);
+      const cart = await unitOfWorkSdk.getRepository('carts').update(cartToPut);
 
       expect(fetchMock.lastOptions().body).toEqual(
         JSON.stringify({

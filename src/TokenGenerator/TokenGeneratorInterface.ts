@@ -1,4 +1,4 @@
-import { Token, TokenBody, TokenResponse } from './types';
+import { ErrorBody, Token, TokenBody, TokenResponse } from './types';
 
 /** @deprecated */
 export type TokenBodyReturn<T> = TokenBody<T>;

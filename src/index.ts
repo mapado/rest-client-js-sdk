@@ -31,6 +31,7 @@ import type {
   ErrorBody,
   TokenBody,
   TokenResponse,
+  RefreshTokenParameters,
 } from './TokenGenerator/types';
 
 import type { SdkMetadata, MetadataDefinition } from './RestClientSdk';
@@ -78,6 +79,7 @@ export type {
   TokenResponse,
   TokenBody,
   HasExpiresAt,
+  RefreshTokenParameters,
   Config,
   SdkMetadata,
   RestClientSdkInterface,

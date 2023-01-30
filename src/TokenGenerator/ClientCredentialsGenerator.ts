@@ -22,6 +22,12 @@ type BaseParameters = {
   scope?: string;
 };
 
+type Parameters = BaseParameters & {
+  grant_type: 'client_credentials';
+  client_id: string;
+  client_secret: string;
+};
+
 interface ClientCredentialToken extends Token {
   access_token: string;
   token_type: string;
@@ -44,26 +50,24 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator<
   generateToken(
     baseParameters: BaseParameters = {}
   ): Promise<ClientCredentialResponse> {
-    const body = new URLSearchParams({
+    const parameters: Parameters = {
       grant_type: 'client_credentials',
       client_id: this.tokenGeneratorConfig.clientId,
       client_secret: this.tokenGeneratorConfig.clientSecret,
-    });
+    };
+
     if (baseParameters.scope) {
-      body.append('scope', baseParameters.scope);
+      parameters.scope = baseParameters.scope;
     } else if (this.tokenGeneratorConfig.scope) {
-      body.append('scope', this.tokenGeneratorConfig.scope);
+      parameters.scope = this.tokenGeneratorConfig.scope;
     }
+
+    const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
     const params = {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body,
+      body: this.convertMapToFormData({ ...parameters }), // hack. See https://github.com/Microsoft/TypeScript/issues/15300
     };
-
-    const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
 
     if (this.logger) {
       this.logger.logRequest({ url, ...params });

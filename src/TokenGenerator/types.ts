@@ -31,3 +31,12 @@ export type TokenBody<T> = T | ErrorBody;
 export interface TokenResponse<T extends Token> extends Response {
   json(): Promise<TokenBody<T>>;
 }
+
+/**
+ * See {@link https://tools.ietf.org/html/rfc6749#section-6 Refreshing an access token}
+ */
+export type RefreshTokenParameters = {
+  grant_type: 'refresh_token';
+  refresh_token: string;
+  scope?: string;
+};
