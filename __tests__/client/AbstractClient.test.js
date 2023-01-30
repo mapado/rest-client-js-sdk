@@ -629,7 +629,7 @@ describe('Fix bugs', () => {
         name: 'generate_token',
         matcher: (url, opts) =>
           url === 'https://oauth.me/' &&
-          opts.body.get('grant_type') === 'password',
+          new URLSearchParams(opts.body).get('grant_type') === 'password',
         response: {
           body: {
             access_token: 'an_access_token',
@@ -646,7 +646,8 @@ describe('Fix bugs', () => {
         matcher: (url, opts) => {
           return (
             url === 'https://oauth.me/' &&
-            opts.body?.get('refresh_token') === 'refresh_token'
+            new URLSearchParams(opts.body || '').get('refresh_token') ===
+              'refresh_token'
           );
         },
         response: {
@@ -727,7 +728,7 @@ describe('Fix bugs', () => {
         name: 'generate_token',
         matcher: (url, opts) =>
           url === 'https://oauth.me/' &&
-          opts.body.get('grant_type') === 'password',
+          new URLSearchParams(opts.body).get('grant_type') === 'password',
         response: {
           body: {
             access_token: 'an_access_token',
@@ -743,7 +744,8 @@ describe('Fix bugs', () => {
         name: 'refresh_token',
         matcher: (url, opts) =>
           url === 'https://oauth.me/' &&
-          opts.body.get('refresh_token') === 'refresh_token',
+          new URLSearchParams(opts.body).get('refresh_token') ===
+            'refresh_token',
         response: {
           body: {
             access_token: 'a_refreshed_token',
@@ -815,7 +817,7 @@ describe('Fix bugs', () => {
         name: 'generate_token',
         matcher: (url, opts) =>
           url === 'https://oauth.me/' &&
-          opts.body.get('grant_type') === 'password',
+          new URLSearchParams(opts.body).get('grant_type') === 'password',
         response: {
           body: {
             access_token: 'an_access_token',
@@ -831,7 +833,8 @@ describe('Fix bugs', () => {
         name: 'refresh_token',
         matcher: (url, opts) =>
           url === 'https://oauth.me/' &&
-          opts.body.get('refresh_token') === 'refresh_token',
+          new URLSearchParams(opts.body).get('refresh_token') ===
+            'refresh_token',
         response: {
           body: {
             access_token: 'a_refreshed_token',
