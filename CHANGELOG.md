@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.0-rc.7
+
+### Fixed
+
+Call toString on URLSearchParams body to ensure ReactNative compatibility [#130](https://github.com/mapado/rest-client-js-sdk/pull/130)
+
 ## 7.0.0-rc.6
 
 Fixed makeUri method to handle more than one URI segment [#128](https://github.com/mapado/rest-client-js-sdk/pull/128)
