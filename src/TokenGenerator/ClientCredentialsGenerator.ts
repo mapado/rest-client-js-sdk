@@ -60,7 +60,7 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator<
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body,
+      body: body.toString(),
     };
 
     const url = this.generateUrlFromConfig(this.tokenGeneratorConfig);
