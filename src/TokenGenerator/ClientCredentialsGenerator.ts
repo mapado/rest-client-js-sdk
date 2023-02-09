@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
-import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { memoizePromise } from '../decorator';
+import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { Token, TokenResponse } from './types';
 
 const ERROR_CONFIG_EMPTY = 'TokenGenerator config must be set';

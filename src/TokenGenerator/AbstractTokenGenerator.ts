@@ -6,11 +6,11 @@ import {
   InvalidScopeError,
   OauthError,
 } from '../ErrorFactory';
+import { Logger } from '../utils/logging';
 import TokenGeneratorInterface, {
   TokenBodyReturn,
 } from './TokenGeneratorInterface';
 import { ErrorBody, Token, TokenResponse } from './types';
-import { Logger } from '../utils/logging';
 
 interface UrlConfig {
   scheme: string;

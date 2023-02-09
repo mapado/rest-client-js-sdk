@@ -1,16 +1,16 @@
-import JsSerializer from './serializer/JsSerializer';
-import UnitOfWork from './UnitOfWork';
 import Mapping from './Mapping';
-import TokenStorageInterface from './TokenStorageInterface';
-import SerializerInterface from './serializer/SerializerInterface';
-import AbstractClient from './client/AbstractClient';
-import { Token } from './TokenGenerator/types';
 // eslint-disable-next-line import/no-duplicates
 import type RestClientSdkInterface from './RestClientSdkInterface';
 // eslint-disable-next-line import/no-duplicates
 import type { Config } from './RestClientSdkInterface';
-import { generateRepository } from './utils/repositoryGenerator';
+import { Token } from './TokenGenerator/types';
+import TokenStorageInterface from './TokenStorageInterface';
+import UnitOfWork from './UnitOfWork';
+import AbstractClient from './client/AbstractClient';
+import JsSerializer from './serializer/JsSerializer';
+import SerializerInterface from './serializer/SerializerInterface';
 import { Logger } from './utils/logging';
+import { generateRepository } from './utils/repositoryGenerator';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Entity = any;

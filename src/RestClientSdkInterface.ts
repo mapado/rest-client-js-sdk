@@ -1,9 +1,9 @@
-import AbstractClient from './client/AbstractClient';
+import Mapping from './Mapping';
 import { SdkMetadata } from './RestClientSdk';
 import { Token } from './TokenGenerator/types';
 import TokenStorageInterface from './TokenStorageInterface';
-import Mapping from './Mapping';
-import { Logger } from '.';
+import AbstractClient from './client/AbstractClient';
+import { Logger } from './utils/logging';
 
 export type Config = {
   path: string;

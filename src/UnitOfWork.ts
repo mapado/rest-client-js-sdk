@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { diff } from 'deep-diff';
-import { isImmutable } from './isImmutable';
 import Mapping from './Mapping';
+import Attribute from './Mapping/Attribute';
 import ClassMetadata, {
   DefaultSerializedModelType,
 } from './Mapping/ClassMetadata';
-import Attribute from './Mapping/Attribute';
+import { isImmutable } from './isImmutable';
 
 type Id = string | number;
 type StringKeyObject = Record<string, any>;

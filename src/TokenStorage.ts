@@ -1,19 +1,5 @@
 /* eslint-disable camelcase */
-import TokenGeneratorInterface, {
-  TokenBodyReturn,
-} from './TokenGenerator/TokenGeneratorInterface';
-import {
-  ErrorBody,
-  Token,
-  TokenBody,
-  TokenResponse,
-} from './TokenGenerator/types';
 import AsyncStorageInterface from './AsyncStorageInterface';
-import { memoizePromise } from './decorator';
-// eslint-disable-next-line import/no-duplicates
-import type TokenStorageInterface from './TokenStorageInterface';
-// eslint-disable-next-line import/no-duplicates
-import type { HasExpiresAt } from './TokenStorageInterface';
 import {
   getHttpErrorFromResponse,
   InvalidGrantError,
@@ -21,6 +7,15 @@ import {
   isOauthError,
   OauthError,
 } from './ErrorFactory';
+import TokenGeneratorInterface, {
+  TokenBodyReturn,
+} from './TokenGenerator/TokenGeneratorInterface';
+import { ErrorBody, Token, TokenResponse } from './TokenGenerator/types';
+// eslint-disable-next-line import/no-duplicates
+import type TokenStorageInterface from './TokenStorageInterface';
+// eslint-disable-next-line import/no-duplicates
+import type { HasExpiresAt } from './TokenStorageInterface';
+import { memoizePromise } from './decorator';
 import { Logger } from './utils/logging';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
