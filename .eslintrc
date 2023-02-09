@@ -23,6 +23,33 @@
         "tsx": "never"
       }
     ],
+    // sort imports. see https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/order.md
+    // TLDR; sorted by : ['react', 'external packages', 'mapado packages', 'internal']
+    "import/order": [
+      "error",
+      {
+        "alphabetize": { "order": "asc" },
+        "pathGroups": [
+          {
+            "pattern": "react",
+            "group": "builtin",
+            "position": "before"
+          },
+          {
+            "pattern": "@mapado/**",
+            "group": "external",
+            "position": "after"
+          },
+          {
+            "pattern": "mapado-*",
+            "group": "external",
+            "position": "after"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": ["react"]
+      }
+    ],
+
     "class-methods-use-this": [0],
     "new-cap": [
       2,

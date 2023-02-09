@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import Serializer from './Serializer';
 import ClassMetadata from '../Mapping/ClassMetadata';
+import Serializer from './Serializer';
 
 class JsSerializer extends Serializer {
   encodeItem(

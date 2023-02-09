@@ -1,15 +1,15 @@
 import URI from 'urijs';
 import { OauthError, getHttpErrorFromResponse } from '../ErrorFactory';
-import TokenStorageInterface from '../TokenStorageInterface';
-import { removeAuthorization, removeUndefinedHeaders } from './headerUtils';
+import type ClassMetadata from '../Mapping/ClassMetadata';
 // eslint-disable-next-line import/no-duplicates
 import type RestClientSdk from '../RestClientSdk';
 // eslint-disable-next-line import/no-duplicates
 import type { MetadataDefinition, SdkMetadata } from '../RestClientSdk';
-import type ClassMetadata from '../Mapping/ClassMetadata';
-import type SerializerInterface from '../serializer/SerializerInterface';
 import { Token } from '../TokenGenerator/types';
+import TokenStorageInterface from '../TokenStorageInterface';
+import type SerializerInterface from '../serializer/SerializerInterface';
 import { generateRepository } from '../utils/repositoryGenerator';
+import { removeAuthorization, removeUndefinedHeaders } from './headerUtils';
 
 const EXPIRE_LIMIT_SECONDS = 300; // = 5 minutes
 

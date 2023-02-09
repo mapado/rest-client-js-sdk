@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import ClassMetadata from '../Mapping/ClassMetadata';
 import SerializerInterface, {
   Entity,
   NormalizedObject,
   NormalizedList,
   EntityList,
 } from './SerializerInterface';
-import ClassMetadata from '../Mapping/ClassMetadata';
 
 class Serializer implements SerializerInterface {
   /**
