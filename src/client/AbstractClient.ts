@@ -472,12 +472,6 @@ class AbstractClient<D extends MetadataDefinition> {
       baseHeaders.Authorization = `${this.sdk.config.authorizationType} ${accessToken}`;
     }
 
-    const currentUri =
-      typeof window === 'object' && window.location && window.location.href;
-    if (currentUri) {
-      baseHeaders.Referer = currentUri;
-    }
-
     if (params) {
       if (!params.headers) {
         params.headers = {};
