@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.0-rc.8
+
+### Fixed
+
+Remove referer as it is handled by the browser [#135](https://github.com/mapado/rest-client-js-sdk/pull/135) by [@jdeniau](https://github.com/jdeniau)
+
 ## 7.0.0-rc.7
 
 ### Fixed
