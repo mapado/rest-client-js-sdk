@@ -518,7 +518,6 @@ describe('Fix bugs', () => {
       .then(() => {
         expect(Object.keys(fetchMock.lastOptions().headers)).toEqual([
           'Authorization',
-          'Referer',
           'bar',
           'baz',
           'bad',
