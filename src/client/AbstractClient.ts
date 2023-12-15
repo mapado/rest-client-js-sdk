@@ -432,7 +432,8 @@ class AbstractClient<D extends MetadataDefinition> {
     if (authorizationHeader) {
       const invalidGrant = authorizationHeader.indexOf(
         'error = "invalid_grant"'
-      );
+      ) > -1;
+      
       if (invalidGrant && this.#tokenStorage) {
         return this._refreshTokenAndRefetch(input, requestParams);
       }
