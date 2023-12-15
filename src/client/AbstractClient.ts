@@ -430,10 +430,9 @@ class AbstractClient<D extends MetadataDefinition> {
     // https://tools.ietf.org/html/rfc2617#section-1.2
     const authorizationHeader = response.headers.get('www-authenticate');
     if (authorizationHeader) {
-      const invalidGrant = authorizationHeader.indexOf(
-        'error = "invalid_grant"'
-      ) > -1;
-      
+      const invalidGrant =
+        authorizationHeader.indexOf('error="invalid_grant"') > -1;
+
       if (invalidGrant && this.#tokenStorage) {
         return this._refreshTokenAndRefetch(input, requestParams);
       }
