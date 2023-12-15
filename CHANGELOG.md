@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.0.0-rc.10
+
+- remove useless async [#138](https://github.com/mapado/rest-client-js-sdk/pull/138) by [@jdeniau](https://github.com/jdeniau)
+
 ## 7.0.0-rc.9
 
 - Fix issue in handling 401 error with anything else than "invalid_grant" [#137](https://github.com/mapado/rest-client-js-sdk/pull/137) by [@jdeniau](https://github.com/jdeniau)
