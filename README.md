@@ -1,4 +1,4 @@
-# Rest Client JS SDK [![Build Status](https://travis-ci.org/mapado/rest-client-js-sdk.svg?branch=master)](https://travis-ci.org/mapado/rest-client-js-sdk)
+# Rest Client JS SDK
 
 Rest client SDK for API for Javascript usage.
 
