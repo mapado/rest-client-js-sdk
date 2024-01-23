@@ -461,10 +461,13 @@ class AbstractClient<D extends MetadataDefinition> {
     requestParams: RequestInit
   ): Promise<Response> {
     let params = requestParams;
+    let baseHeaders: HeadersInit = {};
 
-    const baseHeaders: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
+    if (params.method !== 'GET' || (params.method !== 'GET' && params.method !== 'DELETE')) {
+      baseHeaders = {
+        'Content-Type': 'application/json',
+      };
+    }
 
     if (accessToken) {
       baseHeaders.Authorization = `${this.sdk.config.authorizationType} ${accessToken}`;
