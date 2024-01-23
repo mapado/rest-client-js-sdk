@@ -465,7 +465,7 @@ class AbstractClient<D extends MetadataDefinition> {
     let params = requestParams;
     let baseHeaders: HeadersInit = {};
 
-    if (params.method !== 'GET') {
+    if (params.method !== 'GET' || (params.method !== 'GET' && params.method !== 'DELETE')) {
       baseHeaders = {
         'Content-Type': 'application/json',
       };
