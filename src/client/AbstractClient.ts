@@ -182,8 +182,6 @@ class AbstractClient<D extends MetadataDefinition> {
     queryParam: Record<string, unknown> = {},
     requestParams: Record<string, unknown> = {}
   ): Promise<D['entity']> {
-    this._throwIfUnitOfWorkIsDisabled();
-
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 

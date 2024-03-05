@@ -1023,6 +1023,59 @@ describe('Test unit of work', () => {
     );
   });
 
+  test('deactivating the unit of work should not register fetched entity', async () => {
+    fetchMock
+      .mock({
+        name: 'get_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'GET',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      })
+      .mock({
+        name: 'put_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'PUT',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+
+    const mockedRegisterClean = jest.fn();
+    unitOfWorkSdk.unitOfWork.registerClean = mockedRegisterClean;
+
+    const cart = await repo.find('/v12/carts/1');
+    expect(mockedRegisterClean.mock.calls.length).toBe(1);
+
+    expect(mockedRegisterClean.mock.calls[0][0]).toBe('/v12/carts/1');
+    expect(mockedRegisterClean.mock.calls[0][1]).toBe(cart);
+
+    cart.status = 'bar';
+
+    await repo.withUnitOfWork(false).update(cart);
+
+    // the number of call to registerClean should not have changed here
+    expect(mockedRegisterClean.mock.calls.length).toBe(1);
+
+    const updatedCart = await repo.update(cart);
+
+    expect(mockedRegisterClean.mock.calls.length).toBe(2);
+
+    expect(mockedRegisterClean.mock.calls[1][0]).toBe('/v12/carts/1');
+    expect(mockedRegisterClean.mock.calls[1][1]).toBe(updatedCart);
+  });
+
   test('find all register', async () => {
     fetchMock
       .mock({
@@ -1116,9 +1169,6 @@ describe('Test unit of work', () => {
     const repo = unitOfWorkSdk.getRepository('carts');
 
     expect(() => repo.withUnitOfWork(false).create({})).toThrowError(
-      'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
-    );
-    expect(() => repo.withUnitOfWork(false).update({})).toThrowError(
       'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
     );
   });
