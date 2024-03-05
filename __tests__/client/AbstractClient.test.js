@@ -1115,9 +1115,15 @@ describe('Test unit of work', () => {
 
     const repo = unitOfWorkSdk.getRepository('carts');
 
-    expect(() => repo.withUnitOfWork(false).create({})).toThrow();
-    expect(() => repo.withUnitOfWork(false).update({})).toThrow();
-    expect(() => repo.withUnitOfWork(false).delete({})).toThrow();
+    expect(() => repo.withUnitOfWork(false).create({})).toThrowError(
+      'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
+    );
+    expect(() => repo.withUnitOfWork(false).update({})).toThrowError(
+      'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
+    );
+    expect(() => repo.withUnitOfWork(false).delete({})).toThrowError(
+      'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
+    );
   });
 
   test('withUnitOfWork should return different instance', () => {
