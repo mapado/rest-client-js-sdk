@@ -931,6 +931,49 @@ describe('Test unit of work', () => {
       });
   });
 
+  test('creating an entity with disabled unit of work should not register it', async () => {
+    const cart = {
+      '@id': '/v2/carts/1',
+      status: null,
+      cartItemList: [
+        {
+          '@id': null,
+          quantity: 1,
+          cart: null,
+        },
+      ],
+    };
+
+    fetchMock.mock(() => true, {});
+
+    const mockedRegisterClean = jest.fn();
+    unitOfWorkSdk.unitOfWork.registerClean = mockedRegisterClean;
+
+    await unitOfWorkSdk
+      .getRepository('carts')
+      .withUnitOfWork(false)
+      .create(cart);
+
+    expect(mockedRegisterClean.mock.calls.length).toBe(0);
+  });
+
+  test('Test creating entity with globally disabled unit of work', async () => {
+    const withoutUnitOfWorkSdk = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: false },
+      unitOfWorkMapping
+    );
+
+    fetchMock.mock(() => true, {});
+
+    const mockedRegisterClean = jest.fn();
+    withoutUnitOfWorkSdk.unitOfWork.registerClean = mockedRegisterClean;
+
+    await withoutUnitOfWorkSdk.getRepository('carts').create({});
+
+    expect(mockedRegisterClean.mock.calls.length).toBe(0);
+  });
+
   test('updating data with unit of work', async () => {
     fetchMock
       .mock({
@@ -1161,16 +1204,6 @@ describe('Test unit of work', () => {
     await repo.findAll();
 
     expect(mockedRegisterClean.mock.calls.length).toBe(2);
-  });
-
-  test('deactivating the unit of work should not be possible on create / update / delete for now', async () => {
-    // see https://git.io/JkYTO
-
-    const repo = unitOfWorkSdk.getRepository('carts');
-
-    expect(() => repo.withUnitOfWork(false).create({})).toThrowError(
-      'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
-    );
   });
 
   test('withUnitOfWork should return different instance', () => {
@@ -1556,19 +1589,5 @@ describe('Test unit of work', () => {
         })
       );
     });
-  });
-
-  test('Test disabled unit of work', async () => {
-    const withoutUnitOfWorkSdk = new RestClientSdk(
-      tokenStorageMock,
-      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: false },
-      unitOfWorkMapping
-    );
-
-    expect(() => {
-      withoutUnitOfWorkSdk.getRepository('carts').create({});
-    }).toThrowError(
-      'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
-    );
   });
 });
