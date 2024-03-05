@@ -1121,9 +1121,6 @@ describe('Test unit of work', () => {
     expect(() => repo.withUnitOfWork(false).update({})).toThrowError(
       'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
     );
-    expect(() => repo.withUnitOfWork(false).delete({})).toThrowError(
-      'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
-    );
   });
 
   test('withUnitOfWork should return different instance', () => {
@@ -1233,6 +1230,37 @@ describe('Test unit of work', () => {
     expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeTruthy();
 
     const response = await repo.delete(cart);
+
+    expect(response).not.toBeUndefined();
+    expect(response.status).toEqual(204);
+    expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeUndefined();
+  });
+
+  test('delete entity with a disabled unit of work should still clear the unit of work', async () => {
+    fetchMock
+      .mock({
+        matcher: 'end:/v12/carts/1',
+        method: 'DELETE',
+        response: {
+          status: 204,
+          body: null,
+        },
+      })
+      .mock({
+        matcher: 'end:/v12/carts/1',
+        method: 'GET',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'foo',
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.find(1);
+
+    expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeTruthy();
+
+    const response = await repo.withUnitOfWork(false).delete(cart);
 
     expect(response).not.toBeUndefined();
     expect(response.status).toEqual(204);

@@ -223,8 +223,6 @@ class AbstractClient<D extends MetadataDefinition> {
    * @param {Record<string, unknown>} requestParams parameters that will be send as second parameter to the `fetch` call
    */
   delete(entity: D['entity'], requestParams = {}): Promise<Response> {
-    this._throwIfUnitOfWorkIsDisabled();
-
     const url = this.getEntityURI(entity);
     const identifier = this._getEntityIdentifier(entity);
 
