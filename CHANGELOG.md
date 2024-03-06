@@ -1,5 +1,35 @@
 # Changelog
 
+## 7.0.0
+
+### Changed
+
+- [Breaking] If unitOfWork is disabled in the global configuration, then it will be disabled for all call to getRepository. [#111](https://github.com/mapado/rest-client-js-sdk/pull/111). Waiting to resolve issue with `create` and `update` to bump `7.0.0` version.
+
+- Start implementing a logger. You need to enable it with `config.loggerEnabled` if you want to log request:
+
+A possible interesting configuration is to activate the logger on dev environment.
+
+```js
+const sdk = new TicketingSdk(tokenStorage, {
+  path: process.env.API_DOMAIN,
+  scheme: 'https',
+  loggerEnabled: process.env.NODE_ENV === 'development',
+});
+```
+
+- Add Logger in RestClientSdkInterface
+- Add a helper to get JSON of an HttpError [#122](https://github.com/mapado/rest-client-js-sdk/pull/122)
+- Fixed makeUri method to handle more than one URI segment [#128](https://github.com/mapado/rest-client-js-sdk/pull/128)
+- Call toString on URLSearchParams body to ensure ReactNative compatibility [#130](https://github.com/mapado/rest-client-js-sdk/pull/130)
+- Remove referer as it is handled by the browser [#135](https://github.com/mapado/rest-client-js-sdk/pull/135) by [@jdeniau](https://github.com/jdeniau)
+- Fix issue in handling 401 error with anything else than "invalid_grant" [#137](https://github.com/mapado/rest-client-js-sdk/pull/137) by [@jdeniau](https://github.com/jdeniau)
+- allow calling create, update, delete with a disabled unitOfWork [#140](https://github.com/mapado/rest-client-js-sdk/pull/140) by [@jdeniau](https://github.com/jdeniau)
+
+### Since 7.0.0-rc.10
+
+- allow calling create, update, delete with a disabled unitOfWork [#140](https://github.com/mapado/rest-client-js-sdk/pull/140) by [@jdeniau](https://github.com/jdeniau)
+
 ## 7.0.0-rc.10
 
 - remove useless async [#138](https://github.com/mapado/rest-client-js-sdk/pull/138) by [@jdeniau](https://github.com/jdeniau)
