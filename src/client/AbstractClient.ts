@@ -143,8 +143,6 @@ class AbstractClient<D extends MetadataDefinition> {
     pathParameters: Record<string, unknown> = {},
     requestParams: Record<string, unknown> = {}
   ): Promise<D['entity']> {
-    this._throwIfUnitOfWorkIsDisabled();
-
     const url = new URI(this.getPathBase(pathParameters));
     url.addSearch(queryParam);
 
@@ -182,8 +180,6 @@ class AbstractClient<D extends MetadataDefinition> {
     queryParam: Record<string, unknown> = {},
     requestParams: Record<string, unknown> = {}
   ): Promise<D['entity']> {
-    this._throwIfUnitOfWorkIsDisabled();
-
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
@@ -223,8 +219,6 @@ class AbstractClient<D extends MetadataDefinition> {
    * @param {Record<string, unknown>} requestParams parameters that will be send as second parameter to the `fetch` call
    */
   delete(entity: D['entity'], requestParams = {}): Promise<Response> {
-    this._throwIfUnitOfWorkIsDisabled();
-
     const url = this.getEntityURI(entity);
     const identifier = this._getEntityIdentifier(entity);
 
@@ -522,18 +516,6 @@ class AbstractClient<D extends MetadataDefinition> {
     // @ts-ignore
     return object[idKey];
   }
-
-  private _throwIfUnitOfWorkIsDisabled(): void {
-    if (!this.#isUnitOfWorkEnabled) {
-      throw new Error(
-        'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
-      );
-    }
-  }
 }
-
-type Headers = {
-  [key: string]: unknown;
-};
 
 export default AbstractClient;

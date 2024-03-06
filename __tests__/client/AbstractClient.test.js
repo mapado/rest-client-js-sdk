@@ -931,6 +931,49 @@ describe('Test unit of work', () => {
       });
   });
 
+  test('creating an entity with disabled unit of work should not register it', async () => {
+    const cart = {
+      '@id': '/v2/carts/1',
+      status: null,
+      cartItemList: [
+        {
+          '@id': null,
+          quantity: 1,
+          cart: null,
+        },
+      ],
+    };
+
+    fetchMock.mock(() => true, {});
+
+    const mockedRegisterClean = jest.fn();
+    unitOfWorkSdk.unitOfWork.registerClean = mockedRegisterClean;
+
+    await unitOfWorkSdk
+      .getRepository('carts')
+      .withUnitOfWork(false)
+      .create(cart);
+
+    expect(mockedRegisterClean.mock.calls.length).toBe(0);
+  });
+
+  test('Test creating entity with globally disabled unit of work', async () => {
+    const withoutUnitOfWorkSdk = new RestClientSdk(
+      tokenStorageMock,
+      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: false },
+      unitOfWorkMapping
+    );
+
+    fetchMock.mock(() => true, {});
+
+    const mockedRegisterClean = jest.fn();
+    withoutUnitOfWorkSdk.unitOfWork.registerClean = mockedRegisterClean;
+
+    await withoutUnitOfWorkSdk.getRepository('carts').create({});
+
+    expect(mockedRegisterClean.mock.calls.length).toBe(0);
+  });
+
   test('updating data with unit of work', async () => {
     fetchMock
       .mock({
@@ -1023,6 +1066,59 @@ describe('Test unit of work', () => {
     );
   });
 
+  test('deactivating the unit of work should not register fetched entity', async () => {
+    fetchMock
+      .mock({
+        name: 'get_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'GET',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      })
+      .mock({
+        name: 'put_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'PUT',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+
+    const mockedRegisterClean = jest.fn();
+    unitOfWorkSdk.unitOfWork.registerClean = mockedRegisterClean;
+
+    const cart = await repo.find('/v12/carts/1');
+    expect(mockedRegisterClean.mock.calls.length).toBe(1);
+
+    expect(mockedRegisterClean.mock.calls[0][0]).toBe('/v12/carts/1');
+    expect(mockedRegisterClean.mock.calls[0][1]).toBe(cart);
+
+    cart.status = 'bar';
+
+    await repo.withUnitOfWork(false).update(cart);
+
+    // the number of call to registerClean should not have changed here
+    expect(mockedRegisterClean.mock.calls.length).toBe(1);
+
+    const updatedCart = await repo.update(cart);
+
+    expect(mockedRegisterClean.mock.calls.length).toBe(2);
+
+    expect(mockedRegisterClean.mock.calls[1][0]).toBe('/v12/carts/1');
+    expect(mockedRegisterClean.mock.calls[1][1]).toBe(updatedCart);
+  });
+
   test('find all register', async () => {
     fetchMock
       .mock({
@@ -1108,16 +1204,6 @@ describe('Test unit of work', () => {
     await repo.findAll();
 
     expect(mockedRegisterClean.mock.calls.length).toBe(2);
-  });
-
-  test('deactivating the unit of work should not be possible on create / update / delete for now', async () => {
-    // see https://git.io/JkYTO
-
-    const repo = unitOfWorkSdk.getRepository('carts');
-
-    expect(() => repo.withUnitOfWork(false).create({})).toThrow();
-    expect(() => repo.withUnitOfWork(false).update({})).toThrow();
-    expect(() => repo.withUnitOfWork(false).delete({})).toThrow();
   });
 
   test('withUnitOfWork should return different instance', () => {
@@ -1227,6 +1313,37 @@ describe('Test unit of work', () => {
     expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeTruthy();
 
     const response = await repo.delete(cart);
+
+    expect(response).not.toBeUndefined();
+    expect(response.status).toEqual(204);
+    expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeUndefined();
+  });
+
+  test('delete entity with a disabled unit of work should still clear the unit of work', async () => {
+    fetchMock
+      .mock({
+        matcher: 'end:/v12/carts/1',
+        method: 'DELETE',
+        response: {
+          status: 204,
+          body: null,
+        },
+      })
+      .mock({
+        matcher: 'end:/v12/carts/1',
+        method: 'GET',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'foo',
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.find(1);
+
+    expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeTruthy();
+
+    const response = await repo.withUnitOfWork(false).delete(cart);
 
     expect(response).not.toBeUndefined();
     expect(response.status).toEqual(204);
@@ -1472,19 +1589,5 @@ describe('Test unit of work', () => {
         })
       );
     });
-  });
-
-  test('Test disabled unit of work', async () => {
-    const withoutUnitOfWorkSdk = new RestClientSdk(
-      tokenStorageMock,
-      { path: 'api.me', scheme: 'https', unitOfWorkEnabled: false },
-      unitOfWorkMapping
-    );
-
-    expect(() => {
-      withoutUnitOfWorkSdk.getRepository('carts').create({});
-    }).toThrowError(
-      'UnitOfWork can be deactivated only on find* methods (for now). If you think this should be authorized, please report in https://git.io/JkYTO'
-    );
   });
 });
