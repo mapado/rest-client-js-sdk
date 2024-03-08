@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.0.1
+
+- Migrate to type module [#141](https://github.com/mapado/rest-client-js-sdk/pull/141) by [@jdeniau](https://github.com/jdeniau)
+  (It should have been released in the 7.0.0 as it might be breaking, but I do not want to push a new major two just some days after the last one as this package is not widely used)
+
 ## 7.0.0
 
 ### Changed
