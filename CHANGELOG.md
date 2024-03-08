@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.0.2
+
+- use default export for deep-diff as named export may be buggy
+
 ## 7.0.1
 
 - Migrate to type module [#141](https://github.com/mapado/rest-client-js-sdk/pull/141) by [@jdeniau](https://github.com/jdeniau)

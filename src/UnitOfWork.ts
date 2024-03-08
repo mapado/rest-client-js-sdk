@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { diff } from 'deep-diff';
+import diff from 'deep-diff';
 import Mapping from './Mapping';
 import Attribute from './Mapping/Attribute';
 import ClassMetadata, {
