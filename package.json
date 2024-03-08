@@ -2,8 +2,11 @@
   "name": "rest-client-sdk",
   "version": "7.0.0",
   "description": "Rest Client SDK for API",
+  "type": "module",
   "main": "dist/index.js",
-  "module": "dist/index.es.js",
+  "exports": {
+    ".": "./dist/index.es.js"
+  },
   "types": "dist/types/index.d.ts",
   "files": [
     "dist",
