@@ -30,6 +30,6 @@ export default {
         urijs: 'URI',
       },
     },
-    { file: pkg.module, format: 'es', sourcemap: true },
+    { file: pkg.exports['.'], format: 'es', sourcemap: true },
   ],
 };
