@@ -437,7 +437,10 @@ class AbstractClient<D extends MetadataDefinition> {
       return response
         .json()
         .then((body) => {
-          if (this.#tokenStorage && body.error === 'invalid_grant') {
+          if (
+            this.#tokenStorage &&
+            (body.error === 'invalid_scope' || body.error === 'access_denied')
+          ) {
             return this._refreshTokenAndRefetch(input, requestParams);
           }
           throw error;
