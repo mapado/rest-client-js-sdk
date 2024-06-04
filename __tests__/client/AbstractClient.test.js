@@ -668,7 +668,7 @@ describe('Fix bugs', () => {
         response: {
           status: 401,
           body: {
-            error: 'invalid_grant',
+            error: 'access_denied',
             error_description: 'The access token provided has expired.',
           },
         },
