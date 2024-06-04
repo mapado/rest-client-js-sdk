@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.3
+
+### Fixes
+
+- [Minor BC] Handle error that should trigger a refresh token [#142](https://github.com/mapado/rest-client-js-sdk/pull/142)
+
 ## 7.0.2
 
 - use default export for deep-diff as named export may be buggy
