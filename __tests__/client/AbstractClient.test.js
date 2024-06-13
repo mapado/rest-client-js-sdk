@@ -885,6 +885,90 @@ describe('Fix bugs', () => {
         );
       });
   });
+
+  test('If a refresh token fail, we should call the `onRefreshTokenFailure` callback', () => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const onRefreshTokenFailure = jest.fn(() => {});
+
+    fetchMock
+      .mock({
+        name: 'generate_token',
+        matcher: (url, opts) =>
+          url === 'https://oauth.me/' &&
+          new URLSearchParams(opts.body).get('grant_type') === 'password',
+        response: {
+          body: {
+            access_token: 'an_access_token',
+            expires_in: 3600,
+            token_type: 'bearer',
+            scope: 'scope1 scope2',
+            refresh_token: 'refresh_token',
+          },
+          status: 200,
+        },
+      })
+      .mock({
+        name: 'refresh_token',
+        matcher: (url, opts) => {
+          return (
+            url === 'https://oauth.me/' &&
+            new URLSearchParams(opts.body || '').get('refresh_token') ===
+              'refresh_token'
+          );
+        },
+        response: {
+          body: {
+            error: 'invalid_grant',
+            error_description: 'The refresh token is invalid.',
+            hint: 'Token has been revoked',
+            message: 'The refresh token is invalid.',
+          },
+          status: 401,
+        },
+      })
+      .mock({
+        name: 'access_denied',
+        matcher: (url) => url.match(/test\/1$/),
+        response: {
+          status: 401,
+          body: {
+            error: 'access_denied',
+            error_description: 'The access token provided has expired.',
+          },
+        },
+      });
+
+    const tokenGenerator = new PasswordGenerator({
+      path: 'oauth.me',
+      scheme: 'https',
+      clientId: 'clientId',
+      clientSecret: 'clientSecret',
+    });
+
+    const storage = new MockStorage();
+
+    const SomeInnerSdk = new RestClientSdk(
+      new TokenStorage(tokenGenerator, storage),
+      {
+        path: 'api.me',
+        scheme: 'https',
+        unitOfWorkEnabled: true,
+        onRefreshTokenFailure,
+      },
+      mapping
+    );
+
+    return SomeInnerSdk.tokenStorage
+      .generateToken({
+        username: 'foo',
+        password: 'bar',
+      })
+      .then(() => SomeInnerSdk.getRepository('test').find(1))
+
+      .catch(() => {
+        expect(onRefreshTokenFailure).toHaveBeenCalled();
+      });
+  });
 });
 
 describe('Test unit of work', () => {

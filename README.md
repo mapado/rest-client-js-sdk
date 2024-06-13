@@ -119,6 +119,9 @@ const config = {
   authorizationType: 'Bearer', // default to "Bearer", but can be "Basic" or anything
   useDefaultParameters: true,
   unitOfWorkEnabled: true, // if key is missing, UnitOfWork will be disabled by default
+  onRefreshTokenFailure: () => {
+    // do something when the refresh token fails
+  },
 }; // path and scheme are mandatory
 
 const sdk = new RestClientSdk(tokenStorage, config, mapping);

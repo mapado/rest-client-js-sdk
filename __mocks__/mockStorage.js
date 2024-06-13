@@ -11,4 +11,8 @@ export default class Storage {
     // eslint-disable-next-line no-return-assign
     return Promise.resolve((this._map[key] = value));
   }
+
+  removeItem(key) {
+    return Promise.resolve(delete this._map[key]);
+  }
 }

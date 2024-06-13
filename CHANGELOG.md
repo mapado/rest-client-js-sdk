@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Add a `onRefreshTokenFailure` method to sdk config when refresh token triggers a 401 error. [#143](https://github.com/mapado/rest-client-js-sdk/pull/143)
+
 ## 7.0.3
 
 ### Fixes

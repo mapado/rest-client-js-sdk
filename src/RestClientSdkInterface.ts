@@ -14,6 +14,7 @@ export type Config = {
   useDefaultParameters?: boolean;
   unitOfWorkEnabled?: boolean;
   loggerEnabled?: boolean;
+  onRefreshTokenFailure?: (error: Error) => void;
 };
 
 export default interface RestClientSdkInterface<M extends SdkMetadata> {

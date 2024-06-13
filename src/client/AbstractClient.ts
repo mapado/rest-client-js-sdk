@@ -401,17 +401,30 @@ class AbstractClient<D extends MetadataDefinition> {
     input: string,
     requestParams: RequestInit = {}
   ): Promise<Response> {
-    return this.#tokenStorage.refreshToken().then(() => {
-      // eslint-disable-next-line prefer-const
-      let { headers, ...rest } = requestParams;
+    return this.#tokenStorage
+      .refreshToken()
+      .then(() => {
+        // eslint-disable-next-line prefer-const
+        let { headers, ...rest } = requestParams;
 
-      const updatedRequestParams: RequestInit = {
-        ...rest,
-        headers: removeAuthorization(headers),
-      };
+        const updatedRequestParams: RequestInit = {
+          ...rest,
+          headers: removeAuthorization(headers),
+        };
 
-      return this._fetchWithToken(input, updatedRequestParams);
-    });
+        return this._fetchWithToken(input, updatedRequestParams);
+      })
+      .catch((e) => {
+        if (e instanceof OauthError) {
+          this.#tokenStorage.logout().then(() => {
+            if (this.sdk.config.onRefreshTokenFailure) {
+              this.sdk.config.onRefreshTokenFailure(e);
+            }
+          });
+        }
+
+        throw e;
+      });
   }
 
   private _manageUnauthorized(
