@@ -193,7 +193,7 @@ class TokenStorage<T extends Token> implements TokenStorageInterface<T> {
         .then((body) => {
           if (isOauthError(body)) {
             // throw error if response body is an oauth error
-            manageOauthError(body, response);
+            manageOauthError(body, originalResponse);
           } else if (response.status >= 400) {
             // throw an error if response status code is an "error" status code
             throw getHttpErrorFromResponse(originalResponse);
