@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.1.1
+
+- Fix handling refresh token failure
+
 ## 7.1.0
 
 ### Added
