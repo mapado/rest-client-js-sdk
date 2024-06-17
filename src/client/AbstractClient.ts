@@ -386,7 +386,11 @@ class AbstractClient<D extends MetadataDefinition> {
               .refreshToken()
               .then(
                 (refreshedTokenObject) => refreshedTokenObject.access_token
-              );
+              ).catch((e) => {
+                this._handleRefreshTokenFailure(e);
+
+                throw e;
+              });
           }
 
           return this.#tokenStorage.getAccessToken();
@@ -415,13 +419,7 @@ class AbstractClient<D extends MetadataDefinition> {
         return this._fetchWithToken(input, updatedRequestParams);
       })
       .catch((e) => {
-        if (e instanceof OauthError) {
-          this.#tokenStorage.logout().then(() => {
-            if (this.sdk.config.onRefreshTokenFailure) {
-              this.sdk.config.onRefreshTokenFailure(e);
-            }
-          });
-        }
+        this._handleRefreshTokenFailure(e);
 
         throw e;
       });
@@ -531,6 +529,16 @@ class AbstractClient<D extends MetadataDefinition> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return object[idKey];
+  }
+
+  private _handleRefreshTokenFailure(error: Error): void {
+    if (error instanceof OauthError) {
+      this.#tokenStorage.logout().then(() => {
+        if (this.sdk.config.onRefreshTokenFailure) {
+          this.sdk.config.onRefreshTokenFailure(error);
+        }
+      });
+    }
   }
 }
 
