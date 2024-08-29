@@ -9,6 +9,7 @@ import UnitOfWork from './UnitOfWork';
 import AbstractClient from './client/AbstractClient';
 import JsSerializer from './serializer/JsSerializer';
 import SerializerInterface from './serializer/SerializerInterface';
+import { findClosestWord } from './utils/levenshtein';
 import { Logger } from './utils/logging';
 import { generateRepository } from './utils/repositoryGenerator';
 
@@ -80,7 +81,13 @@ class RestClientSdk<M extends SdkMetadata>
       const metadata = this.mapping.getClassMetadataByKey(key);
 
       if (!metadata) {
-        throw new Error(`Unable to get metadata for repository ${key}`);
+        const closeKey = findClosestWord(key, this.mapping.getMappingKeys(), 5);
+
+        const suggestions = closeKey ? ` Did you mean "${closeKey}"?` : '';
+
+        throw new Error(
+          `Unable to get metadata for repository "${key}".${suggestions}`
+        );
       }
 
       // eslint-disable-next-line new-cap
