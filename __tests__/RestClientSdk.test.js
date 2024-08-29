@@ -66,4 +66,16 @@ describe('Mapado Sdk tests', () => {
     expect(sdk.getRepository('test').getPathBase()).toBe('/test');
     expect(sdk.getRepository('test').sdk).toBe(sdk);
   });
+
+  test('Mapping not found', () => {
+    const sdk = new RestClientSdk(
+      tokenStorage,
+      { path: 'my.api.com', scheme: 'https' },
+      mapping
+    );
+
+    expect(() => sdk.getRepository('toast')).toThrowError(
+      'Unable to get metadata for repository toast'
+    );
+  });
 });
