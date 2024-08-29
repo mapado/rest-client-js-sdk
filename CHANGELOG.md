@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.2.0
+
+- DX: getRepository with wrong name should help the developper finding the best key [#145](https://github.com/mapado/rest-client-js-sdk/pull/145) by [@jdeniau](https://github.com/jdeniau)
+
 ## 7.1.1
 
 - Fix handling refresh token failure
