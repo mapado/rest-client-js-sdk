@@ -9,8 +9,17 @@ import tokenStorage from '../__mocks__/tokenStorage';
 
 const mapping = new Mapping('/v2');
 const testMetadata = new ClassMetadata('test');
+const cartMetadata = new ClassMetadata('cart');
+const cartItemMetadata = new ClassMetadata('cartItem');
+const orderMetadata = new ClassMetadata('order');
+
 testMetadata.setAttributeList([new Attribute('@id', '@id', 'string', true)]);
-mapping.setMapping([testMetadata]);
+mapping.setMapping([
+  testMetadata,
+  cartMetadata,
+  cartItemMetadata,
+  orderMetadata,
+]);
 
 describe('Mapado Sdk tests', () => {
   test('Test wrong SDK configuration', () => {
@@ -65,5 +74,30 @@ describe('Mapado Sdk tests', () => {
     expect(typeof sdk.getRepository('test').find).toBe('function');
     expect(sdk.getRepository('test').getPathBase()).toBe('/test');
     expect(sdk.getRepository('test').sdk).toBe(sdk);
+  });
+
+  test('Mapping not found', () => {
+    const sdk = new RestClientSdk(
+      tokenStorage,
+      { path: 'my.api.com', scheme: 'https' },
+      mapping
+    );
+
+    expect(() => sdk.getRepository('toast')).toThrowError(
+      'Unable to get metadata for repository "toast". Did you mean "test"?'
+    );
+
+    expect(() => sdk.getRepository('Cart')).toThrowError(
+      'Unable to get metadata for repository "Cart". Did you mean "cart"?'
+    );
+
+    expect(() => sdk.getRepository('cart_items')).toThrowError(
+      'Unable to get metadata for repository "cart_items". Did you mean "cartItem"?'
+    );
+
+    // word is too far from any other words
+    expect(() => sdk.getRepository('zargiblou')).toThrowError(
+      'Unable to get metadata for repository "zargiblou".'
+    );
   });
 });
