@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.2.1
+
+- [Minor BC] Do not bundle "src" directory with the build
+- Better package.json file [#146](https://github.com/mapado/rest-client-js-sdk/pull/146) by [@jdeniau](https://github.com/jdeniau)
+
 ## 7.2.0
 
 - DX: getRepository with wrong name should help the developper finding the best key [#145](https://github.com/mapado/rest-client-js-sdk/pull/145) by [@jdeniau](https://github.com/jdeniau)
