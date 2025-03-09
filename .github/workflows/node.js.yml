@@ -5,34 +5,33 @@ name: Lint & Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x, 20.x, 22.x]
+        node-version: [18.x, 20.x, 22.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/previous-releases
 
     steps:
-    - name: 'Enable corepack'
-      run: corepack enable
-      
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
+      - name: 'Enable corepack'
+        run: corepack enable
 
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'yarn'
-        
-    - run: yarn install --immutable
-    
-    - run: yarn lint
-    
-    - run: yarn test
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+
+      - run: yarn install --immutable
+
+      - run: yarn lint
+
+      - run: yarn test
