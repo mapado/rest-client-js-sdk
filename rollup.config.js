@@ -1,9 +1,9 @@
-import fs from 'fs';
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+import { readFileSync } from 'node:fs';
 import babel from 'rollup-plugin-babel';
+import commonjs from 'rollup-plugin-commonjs';
+import resolve from 'rollup-plugin-node-resolve';
 
-const pkg = JSON.parse(fs.readFileSync('./package.json'));
+const pkg = JSON.parse(readFileSync('./package.json'));
 
 const extensions = ['.ts', '.tsx', '.js', '.jsx'];
 
@@ -30,6 +30,6 @@ export default {
         urijs: 'URI',
       },
     },
-    { file: pkg.exports['.'], format: 'es', sourcemap: true },
+    { file: pkg.exports['.'].default, format: 'es', sourcemap: true },
   ],
 };
