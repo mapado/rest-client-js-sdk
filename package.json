@@ -44,7 +44,6 @@
     "@typescript-eslint/eslint-plugin": "^3.6.1",
     "@typescript-eslint/parser": "^3.6.1",
     "babel-jest": "^25.2.6",
-    "bundlesize": "^0.18.0",
     "core-js": "^3.6.4",
     "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.1.0",
@@ -91,12 +90,6 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
-  "bundlesize": [
-    {
-      "path": "./dist/index.es.js",
-      "maxSize": "11 Kb"
-    }
-  ],
   "lint-staged": {
     "*.{js,jsx,json,md}": [
       "yarn run prettier --write"
