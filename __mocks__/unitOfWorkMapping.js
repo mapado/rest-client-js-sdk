@@ -7,6 +7,7 @@ cartMetadata.setAttributeList([
   new Attribute('clientPhoneNumber', 'clientPhoneNumber', 'phone_number'),
   new Attribute('createdAt', 'createdAt', 'datetime'),
   new Attribute('data', 'data', 'object'),
+  new Attribute('codeList', 'codeList', 'array'),
 ]);
 cartMetadata.setRelationList([
   new Relation(
