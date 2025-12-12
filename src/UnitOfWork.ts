@@ -148,7 +148,7 @@ class UnitOfWork {
   ): StringKeyObject {
     const dirtyFields = dirtyFieldsParam;
 
-    if (attribute.type === 'object') {
+    if (attribute.type === 'object' || attribute.type === 'array') {
       if (oldValue === undefined || objectDiffers(oldValue, newValue)) {
         dirtyFields[key] = newValue;
       }

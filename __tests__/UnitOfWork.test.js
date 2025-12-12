@@ -110,49 +110,6 @@ describe('UnitOfWork', () => {
         cartMetadata
       )
     ).toEqual({ '@id': '/v12/carts/2', status: 'payed' });
-
-    expect(
-      unitOfWork.getDirtyData(
-        {
-          '@id': '/v12/carts/1',
-          status: 'payed',
-          data: {
-            foo: 'bar',
-            loo: 'baz',
-          },
-        },
-        {
-          '@id': '/v12/carts/1',
-          status: 'payed',
-          data: {
-            foo: 'bar',
-          },
-        },
-        cartMetadata
-      )
-    ).toEqual({ data: { foo: 'bar', loo: 'baz' } });
-
-    expect(
-      unitOfWork.getDirtyData(
-        {
-          '@id': '/v12/carts/1',
-          status: 'payed',
-          data: {
-            foo: 'bar',
-            bad: 'baz',
-          },
-        },
-        {
-          '@id': '/v12/carts/1',
-          status: 'payed',
-          data: {
-            foo: 'bar',
-            bad: 'baz',
-          },
-        },
-        cartMetadata
-      )
-    ).toEqual({});
   });
 
   test('get dirty data with more data', () => {
@@ -540,5 +497,134 @@ describe('UnitOfWork', () => {
         customerPaidAmount: 1500,
       },
     });
+  });
+
+  test('get dirty data with object data', () => {
+    expect(
+      unitOfWork.getDirtyData(
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          data: {
+            foo: 'bar',
+            loo: 'baz',
+          },
+        },
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          data: {
+            foo: 'bar',
+          },
+        },
+        cartMetadata
+      )
+    ).toEqual({ data: { foo: 'bar', loo: 'baz' } });
+
+    expect(
+      unitOfWork.getDirtyData(
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          data: {
+            foo: 'bar',
+            bad: 'baz',
+          },
+        },
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          data: {
+            foo: 'bar',
+            bad: 'baz',
+          },
+        },
+        cartMetadata
+      )
+    ).toEqual({});
+  });
+
+  test('get dirty data with array data', () => {
+    expect(
+      unitOfWork.getDirtyData(
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          codeList: ['bar', 'baz'],
+        },
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          codeList: ['bar'],
+        },
+        cartMetadata
+      )
+    ).toEqual({ codeList: ['bar', 'baz'] });
+
+    expect(
+      unitOfWork.getDirtyData(
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          codeList: ['bar', 'baz'],
+        },
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          codeList: ['bar', 'baz'],
+        },
+        cartMetadata
+      )
+    ).toEqual({});
+  });
+
+  test('get dirty data with complex array data', () => {
+    expect(
+      unitOfWork.getDirtyData(
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          codeList: [{ bar: 'bar' }, { baz: 'baz' }],
+        },
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          codeList: [{ bar: 'bar' }],
+        },
+        cartMetadata
+      )
+    ).toEqual({ codeList: [{ bar: 'bar' }, { baz: 'baz' }] });
+
+    expect(
+      unitOfWork.getDirtyData(
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          codeList: [{ bar: 'bar' }, { baz: 'baz' }],
+        },
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          codeList: [{ bar: 'bar' }, { baz: 'bad' }],
+        },
+        cartMetadata
+      )
+    ).toEqual({ codeList: [{ bar: 'bar' }, { baz: 'baz' }] });
+
+    expect(
+      unitOfWork.getDirtyData(
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          codeList: [{ bar: 'bar' }, { baz: 'baz' }],
+        },
+        {
+          '@id': '/v12/carts/1',
+          status: 'payed',
+          codeList: [{ bar: 'bar' }, { baz: 'baz' }],
+        },
+        cartMetadata
+      )
+    ).toEqual({});
   });
 });
