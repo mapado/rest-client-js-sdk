@@ -1,5 +1,13 @@
 # Changelog
 
+## 7.2.3
+
+- find diff for array values [#148](https://github.com/mapado/rest-client-js-sdk/pull/148) by [@jdeniau](https://github.com/jdeniau)
+
+# 7.2.2
+
+- Fix wrong "types" in exports
+
 ## 7.2.1
 
 - [Minor BC] Do not bundle "src" directory with the build
