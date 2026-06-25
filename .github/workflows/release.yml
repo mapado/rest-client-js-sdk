@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  workflow_dispatch: ~
+  release:
+    types: [published]
+
+permissions:
+  id-token: write  # Required for OIDC / npm
+  contents: read
+
+jobs:
+  build:
+    name: 'Build & Publish to NPM'
+    runs-on: ubuntu-latest
+
+    steps:
+      # maybe handled via setup-node action one day https://github.com/actions/setup-node/pull/901
+      - name: enable corepack
+        run: corepack enable
+
+      - uses: actions/checkout@v7
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'yarn'
+
+      # Ensure npm 11.5.1 or later is installed
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - run: yarn install --immutable
+
+      - run: yarn build
+
+      - name: 'Determine NPM tag: latest or next depending if we are on a prerelease or not (version with hyphen should be a prerelease)'
+        id: npm_tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [[ $VERSION == *-* ]]; then
+            echo "TAG=next" >> "$GITHUB_OUTPUT"
+          else
+            echo "TAG=latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - run: npm publish --tag ${{ steps.npm_tag.outputs.TAG }}
