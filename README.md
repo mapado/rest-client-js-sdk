@@ -207,12 +207,17 @@ sdk.getRepository('products').create(entity);
 
 sdk.getRepository('products').update(entity);
 
+sdk.getRepository('products').patch(entity);
+
 sdk.getRepository('products').delete(entity);
 ```
 
 All these methods returns promises.
-`create` and `update` returns a `Promise<Entity>` with the new entity.
+`create`, `update` and `patch` returns a `Promise<Entity>` with the new entity.
 `delete` returns `Promise<void>`.
+
+`update` and `patch` behave the same way (same arguments, same UnitOfWork
+dirty-field handling) but use the `PUT` and `PATCH` HTTP verbs respectively.
 
 ### Overriding repository
 

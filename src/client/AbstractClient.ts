@@ -180,6 +180,30 @@ class AbstractClient<D extends MetadataDefinition> {
     queryParam: Record<string, unknown> = {},
     requestParams: Record<string, unknown> = {}
   ): Promise<D['entity']> {
+    return this._update('PUT', entity, queryParam, requestParams);
+  }
+
+  /**
+   * partially update an entity using the `PATCH` HTTP verb
+   *
+   * @param {Record<string, unknown>} entity the entity to update
+   * @param {Record<string, unknown>} queryParam query parameters that will be added to the request
+   * @param {Record<string, unknown>} requestParams parameters that will be send as second parameter to the `fetch` call
+   */
+  patch(
+    entity: D['entity'],
+    queryParam: Record<string, unknown> = {},
+    requestParams: Record<string, unknown> = {}
+  ): Promise<D['entity']> {
+    return this._update('PATCH', entity, queryParam, requestParams);
+  }
+
+  private _update(
+    method: 'PUT' | 'PATCH',
+    entity: D['entity'],
+    queryParam: Record<string, unknown> = {},
+    requestParams: Record<string, unknown> = {}
+  ): Promise<D['entity']> {
     const url = new URI(this.getEntityURI(entity));
     url.addSearch(queryParam);
 
@@ -204,7 +228,7 @@ class AbstractClient<D extends MetadataDefinition> {
 
     return this.deserializeResponse(
       this.authorizedFetch(url, {
-        method: 'PUT',
+        method,
         body: this.serializer.encodeItem(newSerializedModel, this.metadata),
         ...requestParams,
       }),
