@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 /**
  * See {@link https://tools.ietf.org/html/rfc6749#section-5.1 Successful Response}
  */

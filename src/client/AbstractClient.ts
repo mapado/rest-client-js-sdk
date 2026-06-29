@@ -1,9 +1,9 @@
 import URI from 'urijs';
 import { OauthError, getHttpErrorFromResponse } from '../ErrorFactory';
 import type ClassMetadata from '../Mapping/ClassMetadata';
-// eslint-disable-next-line import/no-duplicates
+
 import type RestClientSdk from '../RestClientSdk';
-// eslint-disable-next-line import/no-duplicates
+
 import type { MetadataDefinition, SdkMetadata } from '../RestClientSdk';
 import { Token } from '../TokenGenerator/types';
 import TokenStorageInterface from '../TokenStorageInterface';
@@ -37,7 +37,6 @@ class AbstractClient<D extends MetadataDefinition> {
   }
 
   withUnitOfWork(enabled: boolean): AbstractClient<D> {
-    // eslint-disable-next-line new-cap
     return generateRepository<D>(this.sdk, this.metadata, enabled);
   }
 
@@ -284,7 +283,6 @@ class AbstractClient<D extends MetadataDefinition> {
           ) as D['list'];
 
           if (this.#isUnitOfWorkEnabled) {
-            // eslint-disable-next-line no-restricted-syntax
             for (const decodedItem of itemList) {
               const identifier = this._getEntityIdentifier(decodedItem);
               const normalizedItem = this.serializer.normalizeItem(
@@ -368,7 +366,7 @@ class AbstractClient<D extends MetadataDefinition> {
 
     const pathBase = this.getPathBase(pathParameters);
 
-    let url = null;
+    let url: URI;
     if (id) {
       const testPathBase = this.sdk.mapping.idPrefix
         ? `${this.sdk.mapping.idPrefix}${pathBase}`
@@ -528,7 +526,6 @@ class AbstractClient<D extends MetadataDefinition> {
       logId = this.sdk.logger.logRequest({ url: input, ...params });
     }
 
-    // eslint-disable-next-line consistent-return
     return fetch(input, params).then((response) => {
       if (this.sdk.logger) {
         this.sdk.logger.logResponse(response, logId);

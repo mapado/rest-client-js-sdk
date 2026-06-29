@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import TokenGeneratorInterface from './TokenGeneratorInterface';
 import { Token } from './types';
 
@@ -22,12 +21,10 @@ class ProvidedTokenGenerator implements TokenGeneratorInterface<Token> {
     this.#token = token;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   generateToken(): Promise<Token> {
     return Promise.resolve(this.#token);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   refreshToken(accessToken: null | Token): Promise<Token> {
     if (typeof this.#refreshTokenFunc === 'function') {
       return this.#refreshTokenFunc(accessToken);

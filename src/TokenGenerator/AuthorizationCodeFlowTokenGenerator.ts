@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { Token, TokenResponse } from './types';
 

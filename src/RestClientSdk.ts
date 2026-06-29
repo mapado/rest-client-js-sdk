@@ -1,7 +1,7 @@
 import Mapping from './Mapping';
-// eslint-disable-next-line import/no-duplicates
+
 import type RestClientSdkInterface from './RestClientSdkInterface';
-// eslint-disable-next-line import/no-duplicates
+
 import type { Config } from './RestClientSdkInterface';
 import { Token } from './TokenGenerator/types';
 import TokenStorageInterface from './TokenStorageInterface';
@@ -16,7 +16,6 @@ import { generateRepository } from './utils/repositoryGenerator';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Entity = any;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 // export type SdkMetadata = Record<string, [any, Iterable<any>, undefined | any]>;
 export type MetadataDefinition = {
   entity: Entity;
@@ -91,7 +90,6 @@ class RestClientSdk<
         );
       }
 
-      // eslint-disable-next-line new-cap
       this.#repositoryList[key] = generateRepository<M[K]>(
         this,
         metadata,
@@ -99,7 +97,6 @@ class RestClientSdk<
       );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.#repositoryList[key]! as unknown as AbstractClient<M[K]>;
   }
 

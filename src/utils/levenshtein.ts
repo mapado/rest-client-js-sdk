@@ -29,7 +29,6 @@ function levenshteinDistance(a: string, b: string): number {
   return matrix[b.length][a.length];
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export function findClosestWord(
   word: string,
   list: string[],
@@ -38,7 +37,6 @@ export function findClosestWord(
   let closestWord: string | null = null;
   let minDistance = Infinity;
 
-  // eslint-disable-next-line no-plusplus
   for (let i = 0; i < list.length; i += 1) {
     const candidate = list[i];
     const distance = levenshteinDistance(word, candidate);

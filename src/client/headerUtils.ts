@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 export function removeAuthorization(
   headers: undefined | HeadersInit
 ): undefined | HeadersInit {
@@ -11,7 +10,9 @@ export function removeAuthorization(
     return headers;
   }
 
-  const filterAuthorization = (entries: string[][]): string[][] =>
+  const filterAuthorization = (
+    entries: Array<[string, string]>
+  ): Array<[string, string]> =>
     entries.filter((header) => header[0] !== 'Authorization');
 
   if (Array.isArray(headers)) {
@@ -30,7 +31,7 @@ export function removeUndefinedHeaders(headers: HeadersInit): HeadersInit {
     return headers;
   }
 
-  const filterEntries = (entries: string[][]): string[][] =>
+  const filterEntries = (entries: Array<[string, string]>): Array<[string, string]> =>
     entries.filter((header) => header[1] !== undefined);
 
   if (Array.isArray(headers)) {

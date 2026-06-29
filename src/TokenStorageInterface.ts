@@ -1,5 +1,4 @@
 export interface HasExpiresAt {
-  // eslint-disable-next-line camelcase
   expires_at: null | number;
 }
 

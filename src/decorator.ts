@@ -1,5 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-
 // memoize promise returning function so that it returns
 // the same promise if called again before resolve / reject
 
