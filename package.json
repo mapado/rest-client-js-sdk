@@ -15,7 +15,7 @@
     "dist"
   ],
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "test": "yarn lint --quiet && jest",
     "build": "yarn clean && yarn build:types && yarn build:js",
     "build:types": "tsc --emitDeclarationOnly",
@@ -58,9 +58,8 @@
     "lint-staged": "^10.5.4",
     "pluralize": "^8.0.0",
     "prettier": "^3.9.1",
-    "regenerator-runtime": "^0.13.11",
-    "rimraf": "^3.0.0",
-    "rollup": "^2.80.0",
+    "regenerator-runtime": "^0.14.1",
+    "rollup": "^4.62.2",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
