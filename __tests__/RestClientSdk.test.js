@@ -1,11 +1,12 @@
 /* eslint no-unused-expressions: 0 */
+import { describe, expect, test } from 'vitest';
+import tokenStorage from '../__mocks__/tokenStorage';
 import RestClientSdk, {
   AbstractClient,
   Mapping,
   ClassMetadata,
   Attribute,
 } from '../src';
-import tokenStorage from '../__mocks__/tokenStorage';
 
 const mapping = new Mapping('/v2');
 const testMetadata = new ClassMetadata('test');

@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import Relation from '../../src/Mapping/Relation';
 
 describe('Test Attribute', () => {

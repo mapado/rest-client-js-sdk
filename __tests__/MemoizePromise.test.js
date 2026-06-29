@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import { memoizePromise } from '../src/decorator';
 
 let count;

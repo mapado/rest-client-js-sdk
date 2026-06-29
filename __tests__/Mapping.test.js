@@ -1,5 +1,6 @@
-import Mapping from '../src/Mapping';
+import { beforeEach, describe, expect, test } from 'vitest';
 import { Attribute, ClassMetadata, Relation } from '../src';
+import Mapping from '../src/Mapping';
 
 describe('test mapping', () => {
   test('default config', () => {

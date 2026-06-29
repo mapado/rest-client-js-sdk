@@ -1,5 +1,6 @@
-import { AbstractClient, ClassMetadata, Attribute } from '../../src/index';
+import { describe, expect, test } from 'vitest';
 import Relation from '../../src/Mapping/Relation';
+import { AbstractClient, ClassMetadata, Attribute } from '../../src/index';
 
 class ProductRepository extends AbstractClient {}
 

@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
-import fetchMock from 'fetch-mock';
+import { blockAllCalls, fetchMock, resetMocks } from 'metch-fock';
 import {
   AbstractTokenGenerator,
   OauthError,
