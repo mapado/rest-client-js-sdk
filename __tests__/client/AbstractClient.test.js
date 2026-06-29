@@ -596,6 +596,21 @@ describe('Fix bugs', () => {
       });
   });
 
+  test('allow passing request params in patch', () => {
+    const test = {
+      '@id': '/v2/tests/1',
+    };
+
+    fetchMock.mock(() => true, {});
+
+    return SomeSdk.getRepository('test')
+      .patch(test, {}, { headers: { foo: 'bar' } })
+      .then(() => {
+        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
+        expect(fetchMock.lastOptions().method).toEqual('PATCH');
+      });
+  });
+
   test('allow passing request params in delete', () => {
     fetchMock.mock(() => true, {});
     const test = {
@@ -1104,6 +1119,55 @@ describe('Test unit of work', () => {
 
     await repo.update(cart);
     expect(findLastOptions('put_cart').body).toEqual('{}');
+  });
+
+  test('patching data with unit of work', async () => {
+    fetchMock
+      .mock({
+        name: 'get_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'GET',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      })
+      .mock({
+        name: 'patch_cart',
+        matcher: 'end:/v12/carts/1',
+        method: 'PATCH',
+        response: JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'foo',
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+              cart: null,
+            },
+          ],
+        }),
+      });
+
+    const repo = unitOfWorkSdk.getRepository('carts');
+    const cart = await repo.find('/v12/carts/1');
+    cart.status = 'foo';
+
+    await repo.patch(cart);
+    expect(findLastOptions('patch_cart').method).toEqual('PATCH');
+    expect(findLastOptions('patch_cart').body).toEqual(
+      JSON.stringify({ status: 'foo' })
+    );
+
+    await repo.patch(cart);
+    expect(findLastOptions('patch_cart').body).toEqual('{}');
   });
 
   test('updating partial data with unit of work', async () => {
