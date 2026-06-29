@@ -42,7 +42,6 @@ function serializeRequest(req: SdkRequest): SerializableRequest {
   };
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export class Logger {
   #history: LoggerHistory;
 

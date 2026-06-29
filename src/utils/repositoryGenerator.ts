@@ -1,8 +1,7 @@
-/* eslint-disable import/prefer-default-export */
 import type ClassMetadata from '../Mapping/ClassMetadata';
-// eslint-disable-next-line import/no-duplicates
+
 import type RestClientSdk from '../RestClientSdk';
-// eslint-disable-next-line import/no-duplicates
+
 import type { MetadataDefinition, SdkMetadata } from '../RestClientSdk';
 import type AbstractClient from '../client/AbstractClient';
 

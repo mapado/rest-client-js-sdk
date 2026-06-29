@@ -73,15 +73,17 @@ class Mapping {
             const endsWithList = attribute.attributeName.endsWith('List');
 
             try {
-              // eslint-disable-next-line global-require, import/no-extraneous-dependencies, @typescript-eslint/no-var-requires
-              const pluralize = require('pluralize');
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
+              const pluralize = require('pluralize') as {
+                isPlural(word: string): boolean;
+              };
               if (
                 !endsWithList &&
                 !pluralize.isPlural(attribute.attributeName)
               ) {
                 return message;
               }
-            } catch (e) {
+            } catch {
               if (!endsWithList) {
                 return `${message}.\nIf your keys does not ends with "List", then you should install the "pluralize" package.`;
               }
@@ -105,7 +107,6 @@ class Mapping {
 
       const nbError = errorList.filter((error) => {
         if (error) {
-          // eslint-disable-next-line no-console
           console.warn(error);
         }
 

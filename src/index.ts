@@ -17,9 +17,9 @@ import ClassMetadata from './Mapping/ClassMetadata';
 import Relation from './Mapping/Relation';
 import RestClientSdk from './RestClientSdk';
 import type { SdkMetadata, MetadataDefinition } from './RestClientSdk';
-// eslint-disable-next-line import/no-duplicates
+
 import type RestClientSdkInterface from './RestClientSdkInterface';
-// eslint-disable-next-line import/no-duplicates
+
 import type { Config } from './RestClientSdkInterface';
 import AbstractTokenGenerator from './TokenGenerator/AbstractTokenGenerator';
 import AuthorizationCodeFlowTokenGenerator from './TokenGenerator/AuthorizationCodeFlowTokenGenerator';

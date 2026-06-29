@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import AsyncStorageInterface from './AsyncStorageInterface';
 import {
   getHttpErrorFromResponse,
@@ -11,9 +10,9 @@ import TokenGeneratorInterface, {
   TokenBodyReturn,
 } from './TokenGenerator/TokenGeneratorInterface';
 import { ErrorBody, Token, TokenResponse } from './TokenGenerator/types';
-// eslint-disable-next-line import/no-duplicates
+
 import type TokenStorageInterface from './TokenStorageInterface';
-// eslint-disable-next-line import/no-duplicates
+
 import type { HasExpiresAt } from './TokenStorageInterface';
 import { memoizePromise } from './decorator';
 import { Logger } from './utils/logging';

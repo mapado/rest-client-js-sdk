@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { memoizePromise } from '../decorator';
 import AbstractTokenGenerator from './AbstractTokenGenerator';
 import { Token, TokenResponse } from './types';

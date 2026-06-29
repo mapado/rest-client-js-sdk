@@ -28,7 +28,7 @@ CI (`.github/workflows/node.js.yml`) runs `yarn lint` + `yarn test` on Node 18/2
 
 ## Code style
 
-- TypeScript with native **private fields (`#field`)**, ESLint (airbnb + `@typescript-eslint` + prettier), Prettier with single quotes.
+- TypeScript with native **private fields (`#field`)**, ESLint **flat config** (`eslint.config.js`: `@eslint/js` recommended + `@typescript-eslint` recommended + `eslint-plugin-import` + `eslint-config-prettier`), Prettier with single quotes.
 - Import order is enforced (alphabetized, grouped: react → external → `@mapado/*` → internal). A pre-commit hook (husky + lint-staged) runs Prettier.
 
 ## Architecture
@@ -52,4 +52,4 @@ Entry point `src/index.ts` re-exports everything; `RestClientSdk` is the default
 - **`utils/logging`**: optional request/response `Logger`, enabled via `config.loggerEnabled`.
 
 ### TypeScript generics
-The SDK is parameterized by a metadata type: `new RestClientSdk<TSMetadata>(...)`, where `TSMetadata` is a `Record<key, { entity; list }>`. This is what makes `getRepository(key)` return a correctly-typed repository. Note `typescript@^3.9.6` is pinned (old) — avoid newer TS syntax.
+The SDK is parameterized by a metadata type: `new RestClientSdk<TSMetadata>(...)`, where `TSMetadata` is a `Record<key, { entity; list }>`. This is what makes `getRepository(key)` return a correctly-typed repository. The SDK builds on modern TypeScript (`typescript@^6`, `module`/`moduleResolution` set to `esnext`/`bundler`). It is isomorphic (browser + Node): it does **not** pull in `@types/node` — the few Node/V8-only globals it touches (`Error.captureStackTrace`, `require`) are declared as optional in `src/globals.d.ts` and guarded at runtime.
