@@ -2605,13 +2605,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^3.49.0":
-  version: 3.49.0
-  resolution: "core-js@npm:3.49.0"
-  checksum: 10c0/2e42edb47eda38fd5368380131623c8aa5d4a6b42164125b17744bdc08fa5ebbbdd06b4b4aa6ca3663470a560b0f2fba48e18f142dfe264b0039df85bc625694
-  languageName: node
-  linkType: hard
-
 "cosmiconfig@npm:^7.0.0":
   version: 7.1.0
   resolution: "cosmiconfig@npm:7.1.0"
@@ -4963,13 +4956,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"regenerator-runtime@npm:^0.14.1":
-  version: 0.14.1
-  resolution: "regenerator-runtime@npm:0.14.1"
-  checksum: 10c0/1b16eb2c4bceb1665c89de70dcb64126a22bc8eb958feef3cd68fe11ac6d2a4899b5cd1b80b0774c7c03591dc57d16631a7f69d2daa2ec98100e2f29f7ec4cc4
-  languageName: node
-  linkType: hard
-
 "regexp.prototype.flags@npm:^1.5.4":
   version: 1.5.4
   resolution: "regexp.prototype.flags@npm:1.5.4"
@@ -5065,7 +5051,6 @@ __metadata:
     "@types/urijs": "npm:^1.19.26"
     "@typescript-eslint/eslint-plugin": "npm:^8.62.0"
     "@typescript-eslint/parser": "npm:^8.62.0"
-    core-js: "npm:^3.49.0"
     deep-diff: "npm:^1.0.2"
     eslint: "npm:^10.6.0"
     eslint-config-prettier: "npm:^10.1.8"
@@ -5077,7 +5062,6 @@ __metadata:
     metch-fock: "npm:^1.3.1"
     pluralize: "npm:^8.0.0"
     prettier: "npm:^3.9.1"
-    regenerator-runtime: "npm:^0.14.1"
     rollup: "npm:^4.62.2"
     rollup-plugin-babel: "npm:^4.4.0"
     rollup-plugin-commonjs: "npm:^10.1.0"
