@@ -1501,7 +1501,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/deep-diff@npm:^1.0.0":
+"@types/deep-diff@npm:^1.0.5":
   version: 1.0.5
   resolution: "@types/deep-diff@npm:1.0.5"
   checksum: 10c0/8b6513fd91fe907699972fa3ee4f74dd1e608bfcf1110625b623ce33e879280c3c961f479bb142b7ca8d9729b149d4a67b5d6367904c7eb15fe9c3418e3a212d
@@ -1618,10 +1618,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/urijs@npm:^1.19.9":
-  version: 1.19.9
-  resolution: "@types/urijs@npm:1.19.9"
-  checksum: 10c0/ae7f2a09966a266cf4dd7751b297f7871ed036a16d8ee91c80950e07ec5e146a79a34fcd0b86ebaa79fcce940ef8a7f2368e567a1fa7b6d2393e81b6b376c3aa
+"@types/urijs@npm:^1.19.26":
+  version: 1.19.26
+  resolution: "@types/urijs@npm:1.19.26"
+  checksum: 10c0/8e7660cb5a316f9ddc636b4051ad44a7e437a733a5ac8c621bc4a6014805acdf9a54cb7828cff8e4d16556c8757ec34e1144e21da9a3224c212f886e8ae68833
   languageName: node
   linkType: hard
 
@@ -7349,9 +7349,9 @@ __metadata:
     "@babel/plugin-proposal-object-rest-spread": "npm:^7.10.4"
     "@babel/preset-env": "npm:^7.10.4"
     "@babel/preset-typescript": "npm:^7.10.4"
-    "@types/deep-diff": "npm:^1.0.0"
+    "@types/deep-diff": "npm:^1.0.5"
     "@types/jest": "npm:^26.0.22"
-    "@types/urijs": "npm:^1.19.9"
+    "@types/urijs": "npm:^1.19.26"
     "@typescript-eslint/eslint-plugin": "npm:^3.6.1"
     "@typescript-eslint/parser": "npm:^3.6.1"
     babel-jest: "npm:^25.2.6"
@@ -7380,7 +7380,7 @@ __metadata:
     rollup-plugin-commonjs: "npm:^10.1.0"
     rollup-plugin-node-resolve: "npm:^5.2.0"
     typescript: "npm:^3.9.6"
-    urijs: "npm:^1.19.2"
+    urijs: "npm:^1.19.11"
   dependenciesMeta:
     pluralize:
       optional: true
@@ -8749,10 +8749,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"urijs@npm:^1.19.2":
-  version: 1.19.6
-  resolution: "urijs@npm:1.19.6"
-  checksum: 10c0/0883a1c5f098ccd66a6f4118f3614beeb8a7210031afa881ef2307a68dc7285aeea964dbdce205e2931c07e227b5703b94382522dc5ea8db2ca322de5d543525
+"urijs@npm:^1.19.11":
+  version: 1.19.11
+  resolution: "urijs@npm:1.19.11"
+  checksum: 10c0/96e15eea5b41a99361d506e4d8fcc64dc43f334bd5fd34e08261467b6954b97a6b45929a8d6c79e2dc76aadfd6ca950e0f4bd7f3c0757a08978429634d07eda1
   languageName: node
   linkType: hard
 
