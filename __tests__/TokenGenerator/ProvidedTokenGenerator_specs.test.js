@@ -1,9 +1,8 @@
-import fetchMock from 'fetch-mock';
+import { fetchMock } from 'metch-fock';
+import { describe, expect, test } from 'vitest';
+import Storage from '../../__mocks__/mockStorage';
 import oauthClientCredentialsMock from '../../__mocks__/oauthClientCredentials.json';
 import { TokenStorage, ProvidedTokenGenerator } from '../../src/index';
-import Storage from '../../__mocks__/mockStorage';
-
-global.FormData = require('form-data');
 
 const providedToken = {
   access_token: oauthClientCredentialsMock.access_token,
@@ -11,8 +10,6 @@ const providedToken = {
 };
 
 describe('ProvidedTokenGenerator tests', () => {
-  afterEach(fetchMock.restore);
-
   test('test generateToken method', () => {
     const tokenGenerator = new ProvidedTokenGenerator(providedToken);
     const token = tokenGenerator.generateToken();
@@ -77,7 +74,7 @@ describe('ProvidedTokenGenerator tests', () => {
 
   test('refresh the token if the second parameter is set', () => {
     const newToken = { a: 'new token' };
-    fetchMock.mock('begin:http://foo.bar', newToken);
+    fetchMock.post('http://foo.bar', new Response(JSON.stringify(newToken)));
 
     const refreshFunc = () =>
       fetch('http://foo.bar', {

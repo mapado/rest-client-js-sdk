@@ -1,46 +1,36 @@
-/* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
-import { blockAllCalls, fetchMock, resetMocks } from 'metch-fock';
+import { describe, expect, test } from 'vitest';
+import NoTokenGeneratorMock from '../__mocks__/NoTokenGeneratorMock';
+import ObjectTokenGeneratorMock from '../__mocks__/ObjectTokenGeneratorMock';
+import ResponseTokenGeneratorMock from '../__mocks__/ResponseTokenGeneratorMock';
+import Storage from '../__mocks__/mockStorage';
+import oauthClientCredentialsMock from '../__mocks__/oauthClientCredentials.json';
+import refreshedCredentials from '../__mocks__/refreshedCredentials.json';
 import {
   AbstractTokenGenerator,
   OauthError,
   TokenStorage,
   BadRequestError,
 } from '../src';
-import ObjectTokenGeneratorMock from '../__mocks__/ObjectTokenGeneratorMock';
-import ResponseTokenGeneratorMock from '../__mocks__/ResponseTokenGeneratorMock';
-import NoTokenGeneratorMock from '../__mocks__/NoTokenGeneratorMock';
-import oauthClientCredentialsMock from '../__mocks__/oauthClientCredentials.json';
-import refreshedCredentials from '../__mocks__/refreshedCredentials.json';
-import Storage from '../__mocks__/mockStorage';
-
-global.FormData = require('form-data');
 
 const objectTokenGeneratorMock = new ObjectTokenGeneratorMock();
 const responseTokenGeneratorMock = new ResponseTokenGeneratorMock();
 
-afterEach(fetchMock.reset);
-
 describe('Token storage tests', () => {
-  test('handle empty token', async (done) => {
+  test('handle empty token', async () => {
     const oauth = new TokenStorage(new NoTokenGeneratorMock(), new Storage());
 
     const hasAccessToken = await oauth.hasAccessToken();
     expect(hasAccessToken).toBe(false);
 
-    return oauth
-      .getAccessToken()
-      .catch((e) => {
-        expect(e.message).toBe('No token has been generated yet.');
-      })
-      .then(async () => {
-        await oauth.generateToken();
-        const accessToken = await oauth.getAccessToken();
+    await expect(oauth.getAccessToken()).rejects.toThrow(
+      'No token has been generated yet.'
+    );
 
-        expect(accessToken).toBeNull();
+    await oauth.generateToken();
+    const accessToken = await oauth.getAccessToken();
 
-        done();
-      });
+    expect(accessToken).toBeNull();
   });
 
   test.each([[objectTokenGeneratorMock], [responseTokenGeneratorMock]])(
@@ -69,8 +59,6 @@ describe('Token storage tests', () => {
   test.each([[objectTokenGeneratorMock], [responseTokenGeneratorMock]])(
     'handle generating token',
     (tokenGeneratorMock) => {
-      fetchMock.mock(() => true, oauthClientCredentialsMock);
-
       const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
 
       const generatedToken = oauth.generateToken({
@@ -142,7 +130,6 @@ describe('Token storage tests', () => {
     'We can have the remaining validity time for a given token',
     async (tokenGeneratorMock) => {
       const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
-      fetchMock.once(() => true, oauthClientCredentialsMock);
 
       await oauth.generateToken({
         grant_type: 'client_credentials',
@@ -163,7 +150,6 @@ describe('Token storage tests', () => {
     'remaining validity time is null for a token with no expiresAt',
     async (tokenGeneratorMock) => {
       const oauth = new TokenStorage(tokenGeneratorMock, new Storage());
-      fetchMock.once(() => true, oauthClientCredentialsMock);
 
       await oauth._storeAccessToken({
         access_token:
@@ -199,9 +185,6 @@ describe('issue with expires_at when to token has been generated', () => {
 });
 
 describe('Oauth token generation error', () => {
-  /**
-   * TODO use a real Mock implementation like jest-fetch-mock or fetch-mock-jest to handle this
-   */
   class Response {
     constructor(status, body) {
       this.status = status;
