@@ -26,8 +26,9 @@ export type MetadataDefinition = {
 
 export type SdkMetadata = Record<string, MetadataDefinition>;
 
-class RestClientSdk<M extends SdkMetadata>
-  implements RestClientSdkInterface<M> {
+class RestClientSdk<
+  M extends SdkMetadata,
+> implements RestClientSdkInterface<M> {
   config: Config;
 
   public tokenStorage: TokenStorageInterface<Token>;
@@ -99,7 +100,7 @@ class RestClientSdk<M extends SdkMetadata>
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return (this.#repositoryList[key]! as unknown) as AbstractClient<M[K]>;
+    return this.#repositoryList[key]! as unknown as AbstractClient<M[K]>;
   }
 
   private _mergeWithBaseConfig(config: Config): Config {

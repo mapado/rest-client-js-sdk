@@ -408,9 +408,8 @@ class AbstractClient<D extends MetadataDefinition> {
           ) {
             return this.#tokenStorage
               .refreshToken()
-              .then(
-                (refreshedTokenObject) => refreshedTokenObject.access_token
-              ).catch((e) => {
+              .then((refreshedTokenObject) => refreshedTokenObject.access_token)
+              .catch((e) => {
                 this._handleRefreshTokenFailure(e);
 
                 throw e;
@@ -497,7 +496,10 @@ class AbstractClient<D extends MetadataDefinition> {
     let params = requestParams;
     let baseHeaders: HeadersInit = {};
 
-    if (params.method !== 'GET' || (params.method !== 'GET' && params.method !== 'DELETE')) {
+    if (
+      params.method !== 'GET' ||
+      (params.method !== 'GET' && params.method !== 'DELETE')
+    ) {
       baseHeaders = {
         'Content-Type': 'application/json',
       };

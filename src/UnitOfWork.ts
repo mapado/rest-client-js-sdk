@@ -319,8 +319,8 @@ class UnitOfWork {
         );
       }
 
-      const idSerializedKey = relationMetadata.getIdentifierAttribute()
-        .serializedKey;
+      const idSerializedKey =
+        relationMetadata.getIdentifierAttribute().serializedKey;
 
       // MANY_TO_ONE relation
       if (currentRelation.isRelationToOne()) {

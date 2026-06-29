@@ -17,8 +17,10 @@ interface UrlConfig {
   path: string;
   port?: string;
 }
-abstract class AbstractTokenGenerator<T extends Token, C>
-  implements TokenGeneratorInterface<T> {
+abstract class AbstractTokenGenerator<
+  T extends Token,
+  C,
+> implements TokenGeneratorInterface<T> {
   readonly tokenGeneratorConfig: C;
 
   protected logger?: Logger;
