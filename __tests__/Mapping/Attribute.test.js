@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import Attribute from '../../src/Mapping/Attribute';
 
 describe('Test Attribute', () => {

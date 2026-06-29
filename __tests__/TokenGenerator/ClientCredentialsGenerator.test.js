@@ -1,6 +1,6 @@
-import fetchMock from 'fetch-mock';
+import { fetchMock } from 'metch-fock';
+import { describe, expect, test } from 'vitest';
 import oauthClientCredentialsMock from '../../__mocks__/oauthClientCredentials.json';
-import { ClientCredentialsGenerator } from '../../src/index';
 import {
   BadRequestError,
   ForbiddenError,
@@ -9,8 +9,7 @@ import {
   OauthError,
   UnauthorizedError,
 } from '../../src/ErrorFactory';
-
-global.FormData = require('form-data');
+import { ClientCredentialsGenerator } from '../../src/index';
 
 const tokenConfig = {
   path: 'oauth.me',
@@ -20,8 +19,6 @@ const tokenConfig = {
 };
 
 describe('ClientCredentialsGenerator tests', () => {
-  afterEach(fetchMock.restore);
-
   test('test that config is properly checked', () => {
     function createTokenGenerator(config) {
       return () => new ClientCredentialsGenerator(config);
@@ -36,7 +33,10 @@ describe('ClientCredentialsGenerator tests', () => {
   });
 
   test('test generateToken method', () => {
-    fetchMock.mock(() => true, oauthClientCredentialsMock);
+    fetchMock.post(
+      'https://oauth.me/',
+      new Response(JSON.stringify(oauthClientCredentialsMock))
+    );
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
 
@@ -52,8 +52,11 @@ describe('ClientCredentialsGenerator tests', () => {
     ]);
   });
 
-  test('test thas refreshToken method does the same as generateToken', () => {
-    fetchMock.mock(() => true, oauthClientCredentialsMock);
+  test('test that refreshToken method does the same as generateToken', () => {
+    fetchMock.post(
+      'https://oauth.me/',
+      new Response(JSON.stringify(oauthClientCredentialsMock))
+    );
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
 
@@ -70,7 +73,7 @@ describe('ClientCredentialsGenerator tests', () => {
   });
 
   test('test that ForbiddenError is thrown', () => {
-    fetchMock.mock(() => true, 403);
+    fetchMock.post('https://oauth.me/', new Response(null, { status: 403 }));
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
     return tokenGenerator.generateToken().catch((err) => {
@@ -80,7 +83,7 @@ describe('ClientCredentialsGenerator tests', () => {
   });
 
   test('test that ResourceNotFoundError is thrown', () => {
-    fetchMock.mock(() => true, 404);
+    fetchMock.post('https://oauth.me/', new Response(null, { status: 404 }));
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
     return tokenGenerator.generateToken().catch((err) => {
@@ -90,7 +93,7 @@ describe('ClientCredentialsGenerator tests', () => {
   });
 
   test('test that BadRequestError is thrown', () => {
-    fetchMock.mock(() => true, 400);
+    fetchMock.post('https://oauth.me/', new Response(null, { status: 400 }));
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
     return tokenGenerator.generateToken().catch((err) => {
@@ -100,7 +103,7 @@ describe('ClientCredentialsGenerator tests', () => {
   });
 
   test('test that InternalServerError is thrown', () => {
-    fetchMock.mock(() => true, 500);
+    fetchMock.post('https://oauth.me/', new Response(null, { status: 500 }));
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
     return tokenGenerator.generateToken().catch((err) => {
@@ -110,7 +113,7 @@ describe('ClientCredentialsGenerator tests', () => {
   });
 
   test('test that unexpected error is thrown', () => {
-    fetchMock.mock(() => true, 401);
+    fetchMock.post('https://oauth.me/', new Response(null, { status: 401 }));
 
     const tokenGenerator = new ClientCredentialsGenerator(tokenConfig);
     return tokenGenerator.generateToken().catch((err) => {

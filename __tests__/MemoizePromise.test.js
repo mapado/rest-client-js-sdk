@@ -1,9 +1,10 @@
+import { describe, expect, test } from 'vitest';
 import { memoizePromise } from '../src/decorator';
 
 let count;
 function someFunctionReturningAPromise() {
   return new Promise((resolve) => {
-    count++; // eslint-disable-line no-plusplus
+    count++;
     return resolve(count);
   });
 }

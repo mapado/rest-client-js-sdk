@@ -1,5 +1,10 @@
-/* eslint-disable max-classes-per-file, no-unused-vars, no-underscore-dangle */
-import fetchMock from 'fetch-mock';
+/* eslint-disable no-underscore-dangle */
+import { fetchMock, getInputUrl } from 'metch-fock';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import MemberSerializer from '../../__mocks__/memberSerializer';
+import MockStorage from '../../__mocks__/mockStorage';
+import tokenStorageMock from '../../__mocks__/tokenStorage';
+import unitOfWorkMapping from '../../__mocks__/unitOfWorkMapping';
 import * as errors from '../../src/ErrorFactory';
 import RestClientSdk, {
   AbstractClient,
@@ -11,17 +16,6 @@ import RestClientSdk, {
   ClassMetadata,
   Attribute,
 } from '../../src/index';
-import tokenStorageMock from '../../__mocks__/tokenStorage';
-import MockStorage from '../../__mocks__/mockStorage';
-import unitOfWorkMapping from '../../__mocks__/unitOfWorkMapping';
-import MemberSerializer from '../../__mocks__/memberSerializer';
-
-// next function is required as the name matcher does not seems to work
-const findLastOptions = (name) =>
-  fetchMock
-    .calls()
-    .reverse()
-    .find((item) => item.identifier === name)[1];
 
 class WeirdSerializer extends Serializer {
   encodeItem(entity) {
@@ -90,35 +84,28 @@ const SomeSdk = new RestClientSdk(
 );
 SomeSdk.tokenStorage.generateToken();
 
-afterEach(fetchMock.restore);
 describe('Test Client', () => {
-  test('handle find query', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-    });
+  test('handle find query', async () => {
+    const getResponse = () =>
+      new Response(JSON.stringify({ '@id': '/v2/test/8' }));
 
-    return Promise.all([
-      SomeSdk.getRepository('test').find(8),
-      SomeSdk.getRepository('test').find(8, { q: 'test', foo: 'bar' }),
-      SomeSdk.getRepository('defParam').find(8),
-      SomeSdk.getRepository('defParam').find(8, { q: 'test', foo: 'bar' }),
-    ]).then(() => {
-      const url1 = fetchMock.calls()[0][0];
-      expect(url1).toEqual('https://api.me/v2/test/8');
+    fetchMock.get('https://api.me/v2/test/8', getResponse());
+    await SomeSdk.getRepository('test').find(8);
 
-      const url2 = fetchMock.calls()[1][0];
-      expect(url2).toEqual('https://api.me/v2/test/8?q=test&foo=bar');
+    fetchMock.get('https://api.me/v2/test/8?q=test&foo=bar', getResponse());
+    await SomeSdk.getRepository('test').find(8, { q: 'test', foo: 'bar' });
 
-      const url3 = fetchMock.calls()[2][0];
-      expect(url3).toEqual(
-        'https://api.me/v2/def_param/8?_groups=test_read%2Ctest_write&dp=df'
-      );
+    fetchMock.get(
+      'https://api.me/v2/def_param/8?_groups=test_read%2Ctest_write&dp=df',
+      getResponse()
+    );
+    await SomeSdk.getRepository('defParam').find(8);
 
-      const url4 = fetchMock.calls()[3][0];
-      expect(url4).toEqual(
-        'https://api.me/v2/def_param/8?q=test&foo=bar&_groups=test_read%2Ctest_write&dp=df'
-      );
-    });
+    fetchMock.get(
+      'https://api.me/v2/def_param/8?q=test&foo=bar&_groups=test_read%2Ctest_write&dp=df',
+      getResponse()
+    );
+    await SomeSdk.getRepository('defParam').find(8, { q: 'test', foo: 'bar' });
   });
 
   test('have multiple SDKs with different token keys', () => {
@@ -165,58 +152,39 @@ describe('Test Client', () => {
     });
   });
 
-  test('handle findBy query', () => {
-    fetchMock.mock({
-      matcher: '*',
-      response: {
-        body: [
-          {
-            '@id': '/v2/tests/8',
-          },
-        ],
-      },
-    });
+  test('handle findBy query', async () => {
+    const listResponse = () =>
+      new Response(JSON.stringify([{ '@id': '/v2/tests/8' }]));
 
-    return Promise.all([
-      SomeSdk.getRepository('test').findBy({ q: 'test', foo: 'bar' }),
-      SomeSdk.getRepository('defParam').findBy({ q: 'test', foo: 'bar' }),
-    ]).then(() => {
-      const url1 = fetchMock.calls()[0][0];
-      expect(url1).toEqual('https://api.me/v2/test?q=test&foo=bar');
+    fetchMock.get('https://api.me/v2/test?q=test&foo=bar', listResponse());
+    await SomeSdk.getRepository('test').findBy({ q: 'test', foo: 'bar' });
 
-      const url2 = fetchMock.calls()[1][0];
-      expect(url2).toEqual(
-        'https://api.me/v2/def_param?q=test&foo=bar&_groups=test_read%2Ctest_write&dp=df'
-      );
-    });
+    fetchMock.get(
+      'https://api.me/v2/def_param?q=test&foo=bar&_groups=test_read%2Ctest_write&dp=df',
+      listResponse()
+    );
+    await SomeSdk.getRepository('defParam').findBy({ q: 'test', foo: 'bar' });
   });
 
-  test('handle findAll query', () => {
-    fetchMock.mock(() => true, [
-      {
-        '@id': '/v2/test/8',
-      },
-    ]);
+  test('handle findAll query', async () => {
+    const listResponse = () =>
+      new Response(JSON.stringify([{ '@id': '/v2/test/8' }]));
 
-    return Promise.all([
-      SomeSdk.getRepository('test').findAll(),
-      SomeSdk.getRepository('defParam').findAll(),
-    ]).then(() => {
-      const url1 = fetchMock.calls()[0][0];
-      expect(url1).toEqual('https://api.me/v2/test');
+    fetchMock.get('https://api.me/v2/test', listResponse());
+    await SomeSdk.getRepository('test').findAll();
 
-      const url2 = fetchMock.calls()[1][0];
-      expect(url2).toEqual(
-        'https://api.me/v2/def_param?_groups=test_read%2Ctest_write&dp=df'
-      );
-    });
+    fetchMock.get(
+      'https://api.me/v2/def_param?_groups=test_read%2Ctest_write&dp=df',
+      listResponse()
+    );
+    await SomeSdk.getRepository('defParam').findAll();
   });
 
   test('handle entityFactory', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-      name: 'foo',
-    });
+    fetchMock.get(
+      'https://api.me/v2/test/8',
+      new Response(JSON.stringify({ '@id': '/v2/test/8', name: 'foo' }))
+    );
 
     return SomeSdk.getRepository('test')
       .find(8)
@@ -229,7 +197,7 @@ describe('Test Client', () => {
       );
   });
 
-  test('handle entityFactory with a custom serializer', () => {
+  test('handle entityFactory with a custom serializer', async () => {
     const EntityFactorySdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
@@ -237,103 +205,60 @@ describe('Test Client', () => {
       new WeirdSerializer()
     );
 
-    fetchMock
-      .mock('https://api.me/v2/test/8', {
-        '@id': '/v2/test/8',
-        name: 'foo',
-      })
-      .mock('https://api.me/v2/test', [
-        {
-          '@id': '/v2/test/8',
-          name: 'foo',
-        },
-        {
-          '@id': '/v2/test/9',
-          name: 'bar',
-        },
-      ]);
+    fetchMock.get(
+      'https://api.me/v2/test/8',
+      new Response(JSON.stringify({ '@id': '/v2/test/8', name: 'foo' }))
+    );
+    const item = await EntityFactorySdk.getRepository('test').find(8);
+    expect(typeof item).toBe('object');
+    expect(item.name).toBe('foo');
+    expect(item.customName).toBe('foofoo');
 
-    return Promise.all([
-      EntityFactorySdk.getRepository('test')
-        .find(8)
-        .then((item) =>
-          Promise.all([
-            expect(typeof item).toBe('object'),
-            expect(item.name).toBe('foo'),
-            expect(item.customName).toBe('foofoo'),
-          ])
-        ),
-      EntityFactorySdk.getRepository('test')
-        .findAll()
-        .then((itemList) =>
-          Promise.all([
-            expect(Array.isArray(itemList)).toBe(true),
-            expect(itemList[0].name).toBe('foo'),
-            expect(itemList[0].customName).toBe('foofoo'),
-          ])
-        ),
-    ]);
+    fetchMock.get(
+      'https://api.me/v2/test',
+      new Response(
+        JSON.stringify([
+          { '@id': '/v2/test/8', name: 'foo' },
+          { '@id': '/v2/test/9', name: 'bar' },
+        ])
+      )
+    );
+    const itemList = await EntityFactorySdk.getRepository('test').findAll();
+    expect(Array.isArray(itemList)).toBe(true);
+    expect(itemList[0].name).toBe('foo');
+    expect(itemList[0].customName).toBe('foofoo');
   });
 
-  test('handle getPathBase with custom path parameters', () => {
-    fetchMock
-      .mock({
-        matcher: 'end:/foo',
-        response: {
-          body: [
-            {
-              '@id': '/v2/tests/8',
-            },
-          ],
-        },
-      })
-      .mock({
-        matcher: 'end:/foo?q=test&foo=bar',
-        response: {
-          body: [
-            {
-              '@id': '/v2/tests/8',
-            },
-          ],
-        },
-      })
-      .mock({
-        matcher: 'end:/foo/8',
-        response: {
-          body: {
-            '@id': '/v2/tests/8',
-          },
-        },
-      });
-
+  test('handle getPathBase with custom path parameters', async () => {
     const SomeSdkNoPrefix = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
       mappingNoPrefix
     );
 
-    return Promise.all([
-      SomeSdkNoPrefix.getRepository('test').find(8, {}, { basePath: '/foo' }),
-      SomeSdkNoPrefix.getRepository('test').findBy(
-        { q: 'test', foo: 'bar' },
-        { basePath: '/foo' }
-      ),
-      SomeSdkNoPrefix.getRepository('test').findAll({}, { basePath: '/foo' }),
-    ]).then(() => {
-      const url1 = fetchMock.calls()[0][0];
-      expect(url1).toEqual('https://api.me/foo/8');
-      const url2 = fetchMock.calls()[1][0];
-      expect(url2).toEqual('https://api.me/foo?q=test&foo=bar');
-      const url3 = fetchMock.calls()[2][0];
-      expect(url3).toEqual('https://api.me/foo');
-    });
+    fetchMock.get(
+      'https://api.me/foo/8',
+      new Response(JSON.stringify({ '@id': '/v2/tests/8' }))
+    );
+    await SomeSdkNoPrefix.getRepository('test').find(8, {}, { basePath: '/foo' });
+
+    fetchMock.get(
+      'https://api.me/foo?q=test&foo=bar',
+      new Response(JSON.stringify([{ '@id': '/v2/tests/8' }]))
+    );
+    await SomeSdkNoPrefix.getRepository('test').findBy(
+      { q: 'test', foo: 'bar' },
+      { basePath: '/foo' }
+    );
+
+    fetchMock.get(
+      'https://api.me/foo',
+      new Response(JSON.stringify([{ '@id': '/v2/tests/8' }]))
+    );
+    await SomeSdkNoPrefix.getRepository('test').findAll({}, { basePath: '/foo' });
   });
 
-  test('handle Authorization header', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-    });
-
+  test('handle Authorization header', async () => {
     const BasicAuthSdk = new RestClientSdk(
       tokenStorageMock,
       {
@@ -346,21 +271,24 @@ describe('Test Client', () => {
     );
     BasicAuthSdk.tokenStorage.generateToken();
 
-    return Promise.all([
-      SomeSdk.getRepository('test').find(8),
-      BasicAuthSdk.getRepository('test').find(8),
-    ]).then(() => {
-      const authHeader = fetchMock.calls()[0][1].headers.Authorization;
-      expect(authHeader).toContain('Bearer ');
-      const basicAuthHeader = fetchMock.calls()[1][1].headers.Authorization;
-      expect(basicAuthHeader).toContain('Basic ');
-    });
+    fetchMock((input, options) => {
+      expect(options.headers.Authorization).toContain('Bearer ');
+      return true;
+    }, new Response(JSON.stringify({ '@id': '/v2/test/8' })));
+    await SomeSdk.getRepository('test').find(8);
+
+    fetchMock((input, options) => {
+      expect(options.headers.Authorization).toContain('Basic ');
+      return true;
+    }, new Response(JSON.stringify({ '@id': '/v2/test/8' })));
+    await BasicAuthSdk.getRepository('test').find(8);
   });
 
-  test('Sdk with no tokenStorage should not add Authorization header', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-    });
+  test('Sdk with no tokenStorage should not add Authorization header', async () => {
+    fetchMock((input, options) => {
+      expect(options.headers.Authorization).toBe(undefined);
+      return true;
+    }, new Response(JSON.stringify({ '@id': '/v2/test/8' })));
 
     const NoAuthSdk = new RestClientSdk(
       null,
@@ -373,59 +301,52 @@ describe('Test Client', () => {
       mapping
     );
 
-    return NoAuthSdk.getRepository('test')
-      .find(8)
-      .then((json) => {
-        const authHeader = fetchMock.calls()[0][1].headers.Authorization;
-        expect(authHeader).toBe(undefined);
-        expect(json).toEqual({ '@id': '/v2/test/8' });
-      });
+    const json = await NoAuthSdk.getRepository('test').find(8);
+    expect(json).toEqual({ '@id': '/v2/test/8' });
   });
 });
 
 describe('Test errors', () => {
-  test('handle 401 and 403 errors', () => {
-    fetchMock
-      .mock(/400$/, 400)
-      .mock(/401$/, 401)
-      .mock(/403$/, 403)
-      .mock(/404$/, 404)
-      .mock(/410$/, 410)
-      .mock(/500$/, 500);
+  test('handle 401 and 403 errors', async () => {
+    fetchMock.get(/\/400$/, new Response(null, { status: 400 }));
+    await expect(
+      SomeSdk.getRepository('test').find(400)
+    ).rejects.toBeInstanceOf(errors.BadRequestError);
 
-    return Promise.all([
-      expect(SomeSdk.getRepository('test').find(400)).rejects.toBeInstanceOf(
-        errors.BadRequestError
-      ),
-      expect(SomeSdk.getRepository('test').find(401)).rejects.toBeInstanceOf(
-        errors.UnauthorizedError
-      ),
-      expect(SomeSdk.getRepository('test').find(403)).rejects.toBeInstanceOf(
-        errors.ForbiddenError
-      ),
-      expect(SomeSdk.getRepository('test').find(404)).rejects.toBeInstanceOf(
-        errors.ResourceNotFoundError
-      ),
-      expect(SomeSdk.getRepository('test').find(404)).rejects.toBeInstanceOf(
-        errors.BadRequestError
-      ),
-      expect(SomeSdk.getRepository('test').find(410)).rejects.toBeInstanceOf(
-        errors.BadRequestError
-      ),
-      expect(SomeSdk.getRepository('test').find(500)).rejects.toBeInstanceOf(
-        errors.InternalServerError
-      ),
-    ]);
+    fetchMock.get(/\/401$/, new Response(null, { status: 401 }));
+    await expect(
+      SomeSdk.getRepository('test').find(401)
+    ).rejects.toBeInstanceOf(errors.UnauthorizedError);
+
+    fetchMock.get(/\/403$/, new Response(null, { status: 403 }));
+    await expect(
+      SomeSdk.getRepository('test').find(403)
+    ).rejects.toBeInstanceOf(errors.ForbiddenError);
+
+    fetchMock.get(/\/404$/, new Response(null, { status: 404 }));
+    await expect(
+      SomeSdk.getRepository('test').find(404)
+    ).rejects.toBeInstanceOf(errors.ResourceNotFoundError);
+
+    fetchMock.get(/\/404$/, new Response(null, { status: 404 }));
+    await expect(
+      SomeSdk.getRepository('test').find(404)
+    ).rejects.toBeInstanceOf(errors.BadRequestError);
+
+    fetchMock.get(/\/410$/, new Response(null, { status: 410 }));
+    await expect(
+      SomeSdk.getRepository('test').find(410)
+    ).rejects.toBeInstanceOf(errors.BadRequestError);
+
+    fetchMock.get(/\/500$/, new Response(null, { status: 500 }));
+    await expect(
+      SomeSdk.getRepository('test').find(500)
+    ).rejects.toBeInstanceOf(errors.InternalServerError);
   });
 });
 
 describe('Update and delete function trigger the good urls', () => {
-  test('handle updating and deleting entities with @ids', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-      foo: 'bar',
-    });
-
+  test('handle updating and deleting entities with @ids', async () => {
     const data = {
       '@id': '/v2/test/8',
       foo: 'foo',
@@ -436,15 +357,14 @@ describe('Update and delete function trigger the good urls', () => {
       foo: 'foo',
     };
 
-    return Promise.all([
-      SomeSdk.getRepository('test').update(data),
-      SomeSdk.getRepository('noAtId').update(dataNoArobase),
-    ]).then(() => {
-      const url1 = fetchMock.calls()[0][0];
-      expect(url1).toEqual('https://api.me/v2/test/8');
-      const url2 = fetchMock.calls()[1][0];
-      expect(url2).toEqual('https://api.me/v2/no-at-id/9');
-    });
+    const putResponse = () =>
+      new Response(JSON.stringify({ '@id': '/v2/test/8', foo: 'bar' }));
+
+    fetchMock.put('https://api.me/v2/test/8', putResponse());
+    await SomeSdk.getRepository('test').update(data);
+
+    fetchMock.put('https://api.me/v2/no-at-id/9', putResponse());
+    await SomeSdk.getRepository('noAtId').update(dataNoArobase);
   });
 });
 describe('Fix bugs', () => {
@@ -462,18 +382,14 @@ describe('Fix bugs', () => {
   });
 
   test('generate good url when sdk mapping idPrefix contains long path', () => {
-    const mapping = new Mapping('/api/v2');
-    mapping.setMapping([testMetadata, defParamMetadata, noAtIdMetadata]);
-    mappingNoPrefix.setMapping([
-      testMetadata,
-      defParamMetadata,
-      noAtIdMetadata,
-    ]);
+    const longPathMapping = new Mapping('/api/v2');
+    longPathMapping.setMapping([testMetadata, defParamMetadata, noAtIdMetadata]);
+    mappingNoPrefix.setMapping([testMetadata, defParamMetadata, noAtIdMetadata]);
 
     const SomeInnerSdk = new RestClientSdk(
       tokenStorageMock,
       { path: 'api.me', scheme: 'https', unitOfWorkEnabled: true },
-      mapping
+      longPathMapping
     );
     SomeInnerSdk.tokenStorage.generateToken();
 
@@ -482,224 +398,213 @@ describe('Fix bugs', () => {
     ).toEqual('https://api.me/api/v2/foo');
   });
 
-  test('allow base header override', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-      foo: 'bar',
-    });
+  test('allow base header override', async () => {
+    fetchMock((input, options) => {
+      expect(options.headers['Content-Type']).toEqual('multipart/form-data');
+      return true;
+    }, new Response(JSON.stringify({ '@id': '/v2/test/8', foo: 'bar' })));
 
-    return SomeSdk.getRepository('test')
-      .authorizedFetch('foo', {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      .then(() => {
-        expect(fetchMock.lastOptions().headers['Content-Type']).toEqual(
-          'multipart/form-data'
-        );
-      });
+    await SomeSdk.getRepository('test').authorizedFetch('foo', {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
   });
 
-  test('allow removing base header', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-      foo: 'bar',
-    });
+  test('allow removing base header', async () => {
+    fetchMock((input, options) => {
+      expect(Object.keys(options.headers)).toEqual([
+        'Authorization',
+        'bar',
+        'baz',
+        'bad',
+      ]);
+      return true;
+    }, new Response(JSON.stringify({ '@id': '/v2/test/8', foo: 'bar' })));
 
-    return SomeSdk.getRepository('test')
-      .authorizedFetch('foo', {
-        headers: {
-          'Content-Type': undefined,
-          foo: undefined,
-          bar: null,
-          baz: '',
-          bad: 0,
-        },
-      })
-      .then(() => {
-        expect(Object.keys(fetchMock.lastOptions().headers)).toEqual([
-          'Authorization',
-          'bar',
-          'baz',
-          'bad',
-        ]);
-      });
-  });
-
-  test('allow passing request params in find', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-      foo: 'bar',
-    });
-
-    return SomeSdk.getRepository('test')
-      .find('/v2/test/8', {}, {}, { headers: { foo: 'bar' } })
-      .then(() => {
-        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
-      });
-  });
-
-  test('allow passing request params in findBy', () => {
-    fetchMock.mock(() => true, [
-      {
-        '@id': '/v2/test/8',
-        foo: 'bar',
+    await SomeSdk.getRepository('test').authorizedFetch('foo', {
+      headers: {
+        'Content-Type': undefined,
+        foo: undefined,
+        bar: null,
+        baz: '',
+        bad: 0,
       },
-    ]);
-
-    return SomeSdk.getRepository('test')
-      .findBy({ id: '/v2/test/8' }, {}, { headers: { foo: 'bar' } })
-      .then(() => {
-        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
-      });
-  });
-
-  test('allow passing request params in findAll', () => {
-    fetchMock.mock(() => true, [
-      {
-        '@id': '/v2/test/8',
-        foo: 'bar',
-      },
-    ]);
-
-    return SomeSdk.getRepository('test')
-      .findAll({ id: '/v2/test/8' }, {}, { headers: { foo: 'bar' } })
-      .then(() => {
-        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
-      });
-  });
-
-  test('allow passing request params in create', () => {
-    const test = {
-      '@id': '/v2/tests/1',
-    };
-
-    fetchMock.mock(() => true, {});
-
-    return SomeSdk.getRepository('test')
-      .create(test, {}, {}, { headers: { foo: 'bar' } })
-      .then(() => {
-        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
-      });
-  });
-
-  test('allow passing request params in update', () => {
-    const test = {
-      '@id': '/v2/tests/1',
-    };
-
-    fetchMock.mock(() => true, {});
-
-    return SomeSdk.getRepository('test')
-      .update(test, {}, { headers: { foo: 'bar' } })
-      .then(() => {
-        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
-      });
-  });
-
-  test('allow passing request params in patch', () => {
-    const test = {
-      '@id': '/v2/tests/1',
-    };
-
-    fetchMock.mock(() => true, {});
-
-    return SomeSdk.getRepository('test')
-      .patch(test, {}, { headers: { foo: 'bar' } })
-      .then(() => {
-        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
-        expect(fetchMock.lastOptions().method).toEqual('PATCH');
-      });
-  });
-
-  test('allow passing request params in delete', () => {
-    fetchMock.mock(() => true, {});
-    const test = {
-      '@id': '/v2/tests/1',
-    };
-
-    return SomeSdk.getRepository('test')
-      .delete(test, { headers: { foo: 'bar' } })
-      .then(() => {
-        expect(fetchMock.lastOptions().headers.foo).toEqual('bar');
-      });
-  });
-
-  test('allow overriding request params', () => {
-    fetchMock.mock(() => true, {
-      '@id': '/v2/test/8',
-      foo: 'bar',
     });
-
-    return SomeSdk.getRepository('test')
-      .find('/v2/test/8', {}, {}, { method: 'POST' })
-      .then(() => {
-        expect(fetchMock.lastOptions().method).toEqual('POST');
-      });
   });
 
-  test('check that the request done after refreshing a token contains the refreshed token', () => {
-    fetchMock
-      .mock({
-        name: 'generate_token',
-        matcher: (url, opts) =>
-          url === 'https://oauth.me/' &&
-          new URLSearchParams(opts.body).get('grant_type') === 'password',
-        response: {
-          body: {
-            access_token: 'an_access_token',
-            expires_in: 3600,
-            token_type: 'bearer',
-            scope: 'scope1 scope2',
-            refresh_token: 'refresh_token',
-          },
-          status: 200,
-        },
-      })
-      .mock({
-        name: 'refresh_token',
-        matcher: (url, opts) => {
-          return (
-            url === 'https://oauth.me/' &&
-            new URLSearchParams(opts.body || '').get('refresh_token') ===
-              'refresh_token'
-          );
-        },
-        response: {
-          body: {
-            access_token: 'a_refreshed_token',
-            expires_in: 3600,
-            token_type: 'bearer',
-            scope: 'scope1 scope2',
-            refresh_token: 're_refresh_token',
-          },
-          status: 200,
-        },
-      })
-      .mock({
-        name: 'access_denied',
-        matcher: (url, opts) =>
-          url.match(/\/1$/) &&
-          opts.headers.Authorization !== 'Bearer a_refreshed_token',
-        response: {
-          status: 401,
-          body: {
-            error: 'access_denied',
-            error_description: 'The access token provided has expired.',
-          },
-        },
-      })
-      .mock({
-        name: 'success',
-        matcher: (url, opts) =>
-          url.match(/\/1$/) &&
-          opts.headers.Authorization === 'Bearer a_refreshed_token',
-        response: {
-          status: 200,
-          body: {
-            foofoo: 'barbarbar',
-          },
-        },
-      });
+  test('allow passing request params in find', async () => {
+    fetchMock((input, options) => {
+      expect(options.headers.foo).toEqual('bar');
+      return true;
+    }, new Response(JSON.stringify({ '@id': '/v2/test/8', foo: 'bar' })));
+
+    await SomeSdk.getRepository('test').find(
+      '/v2/test/8',
+      {},
+      {},
+      { headers: { foo: 'bar' } }
+    );
+  });
+
+  test('allow passing request params in findBy', async () => {
+    fetchMock((input, options) => {
+      expect(options.headers.foo).toEqual('bar');
+      return true;
+    }, new Response(JSON.stringify([{ '@id': '/v2/test/8', foo: 'bar' }])));
+
+    await SomeSdk.getRepository('test').findBy(
+      { id: '/v2/test/8' },
+      {},
+      { headers: { foo: 'bar' } }
+    );
+  });
+
+  test('allow passing request params in findAll', async () => {
+    fetchMock((input, options) => {
+      expect(options.headers.foo).toEqual('bar');
+      return true;
+    }, new Response(JSON.stringify([{ '@id': '/v2/test/8', foo: 'bar' }])));
+
+    await SomeSdk.getRepository('test').findAll(
+      { id: '/v2/test/8' },
+      {},
+      { headers: { foo: 'bar' } }
+    );
+  });
+
+  test('allow passing request params in create', async () => {
+    const testEntity = {
+      '@id': '/v2/tests/1',
+    };
+
+    fetchMock((input, options) => {
+      expect(options.headers.foo).toEqual('bar');
+      return true;
+    }, new Response(JSON.stringify({})));
+
+    await SomeSdk.getRepository('test').create(
+      testEntity,
+      {},
+      {},
+      { headers: { foo: 'bar' } }
+    );
+  });
+
+  test('allow passing request params in update', async () => {
+    const testEntity = {
+      '@id': '/v2/tests/1',
+    };
+
+    fetchMock((input, options) => {
+      expect(options.headers.foo).toEqual('bar');
+      return true;
+    }, new Response(JSON.stringify({})));
+
+    await SomeSdk.getRepository('test').update(
+      testEntity,
+      {},
+      { headers: { foo: 'bar' } }
+    );
+  });
+
+  test('allow passing request params in patch', async () => {
+    const testEntity = {
+      '@id': '/v2/tests/1',
+    };
+
+    fetchMock((input, options) => {
+      expect(options.headers.foo).toEqual('bar');
+      expect(options.method).toEqual('PATCH');
+      return true;
+    }, new Response(JSON.stringify({})));
+
+    await SomeSdk.getRepository('test').patch(
+      testEntity,
+      {},
+      { headers: { foo: 'bar' } }
+    );
+  });
+
+  test('allow passing request params in delete', async () => {
+    fetchMock((input, options) => {
+      expect(options.headers.foo).toEqual('bar');
+      return true;
+    }, new Response(JSON.stringify({})));
+    const testEntity = {
+      '@id': '/v2/tests/1',
+    };
+
+    await SomeSdk.getRepository('test').delete(testEntity, {
+      headers: { foo: 'bar' },
+    });
+  });
+
+  test('allow overriding request params', async () => {
+    fetchMock((input, options) => {
+      expect(options.method).toEqual('POST');
+      return true;
+    }, new Response(JSON.stringify({ '@id': '/v2/test/8', foo: 'bar' })));
+
+    await SomeSdk.getRepository('test').find(
+      '/v2/test/8',
+      {},
+      {},
+      { method: 'POST' }
+    );
+  });
+
+  test('check that the request done after refreshing a token contains the refreshed token', async () => {
+    fetchMock(
+      (input, options) =>
+        getInputUrl(input) === 'https://oauth.me/' &&
+        new URLSearchParams(options.body).get('grant_type') === 'password',
+      new Response(
+        JSON.stringify({
+          access_token: 'an_access_token',
+          expires_in: 3600,
+          token_type: 'bearer',
+          scope: 'scope1 scope2',
+          refresh_token: 'refresh_token',
+        })
+      )
+    );
+    fetchMock(
+      (input, options) =>
+        getInputUrl(input) === 'https://oauth.me/' &&
+        new URLSearchParams(options.body || '').get('refresh_token') ===
+          'refresh_token',
+      new Response(
+        JSON.stringify({
+          access_token: 'a_refreshed_token',
+          expires_in: 3600,
+          token_type: 'bearer',
+          scope: 'scope1 scope2',
+          refresh_token: 're_refresh_token',
+        })
+      )
+    );
+    // the first request to the entity is done with the (still valid) access
+    // token, and gets rejected
+    fetchMock((input, options) => {
+      if (
+        !getInputUrl(input).match(/\/1$/) ||
+        options.headers.Authorization === 'Bearer a_refreshed_token'
+      ) {
+        return false;
+      }
+      expect(options.headers.Authorization).toEqual('Bearer an_access_token');
+      return true;
+    }, new Response(JSON.stringify({ error: 'access_denied', error_description: 'The access token provided has expired.' }), { status: 401 }));
+    // the request is retried with the refreshed token
+    fetchMock((input, options) => {
+      if (
+        !getInputUrl(input).match(/\/1$/) ||
+        options.headers.Authorization !== 'Bearer a_refreshed_token'
+      ) {
+        return false;
+      }
+      expect(options.headers.Authorization).toEqual('Bearer a_refreshed_token');
+      return true;
+    }, new Response(JSON.stringify({ foofoo: 'barbarbar' }), { status: 200 }));
 
     const tokenGenerator = new PasswordGenerator({
       path: 'oauth.me',
@@ -716,83 +621,68 @@ describe('Fix bugs', () => {
       mapping
     );
 
-    return SomeInnerSdk.tokenStorage
-      .generateToken({
-        username: 'foo',
-        password: 'bar',
-      })
-      .then(() => SomeInnerSdk.getRepository('test').find(1))
-      .then(() => {
-        expect(findLastOptions('access_denied').headers.Authorization).toEqual(
-          'Bearer an_access_token'
-        );
-        expect(findLastOptions('success').headers.Authorization).toEqual(
-          'Bearer a_refreshed_token'
-        );
-      });
+    await SomeInnerSdk.tokenStorage.generateToken({
+      username: 'foo',
+      password: 'bar',
+    });
+    await SomeInnerSdk.getRepository('test').find(1);
   });
 
-  test('check that the request done after refreshing a token contains the refreshed token, headers version', () => {
+  test('check that the request done after refreshing a token contains the refreshed token, headers version', async () => {
     const oauthHeaders = {
       'www-authenticate':
         'Bearer realm="Service", error="invalid_grant", error_description="The access token provided has expired."',
     };
-    fetchMock
-      .mock({
-        name: 'generate_token',
-        matcher: (url, opts) =>
-          url === 'https://oauth.me/' &&
-          new URLSearchParams(opts.body).get('grant_type') === 'password',
-        response: {
-          body: {
-            access_token: 'an_access_token',
-            expires_in: 3600,
-            token_type: 'bearer',
-            scope: 'scope1 scope2',
-            refresh_token: 'refresh_token',
-          },
-          status: 200,
-        },
-      })
-      .mock({
-        name: 'refresh_token',
-        matcher: (url, opts) =>
-          url === 'https://oauth.me/' &&
-          new URLSearchParams(opts.body).get('refresh_token') ===
-            'refresh_token',
-        response: {
-          body: {
-            access_token: 'a_refreshed_token',
-            expires_in: 3600,
-            token_type: 'bearer',
-            scope: 'scope1 scope2',
-            refresh_token: 're_refresh_token',
-          },
-          status: 200,
-        },
-      })
-      .mock({
-        name: 'access_denied',
-        matcher: (url, opts) =>
-          url.match(/\/1$/) &&
-          opts.headers.Authorization !== 'Bearer a_refreshed_token',
-        response: {
-          status: 401,
-          headers: oauthHeaders,
-        },
-      })
-      .mock({
-        name: 'success',
-        matcher: (url, opts) =>
-          url.match(/\/1$/) &&
-          opts.headers.Authorization === 'Bearer a_refreshed_token',
-        response: {
-          status: 200,
-          body: {
-            foofoo: 'barbarbar',
-          },
-        },
-      });
+
+    fetchMock(
+      (input, options) =>
+        getInputUrl(input) === 'https://oauth.me/' &&
+        new URLSearchParams(options.body).get('grant_type') === 'password',
+      new Response(
+        JSON.stringify({
+          access_token: 'an_access_token',
+          expires_in: 3600,
+          token_type: 'bearer',
+          scope: 'scope1 scope2',
+          refresh_token: 'refresh_token',
+        })
+      )
+    );
+    fetchMock(
+      (input, options) =>
+        getInputUrl(input) === 'https://oauth.me/' &&
+        new URLSearchParams(options.body).get('refresh_token') ===
+          'refresh_token',
+      new Response(
+        JSON.stringify({
+          access_token: 'a_refreshed_token',
+          expires_in: 3600,
+          token_type: 'bearer',
+          scope: 'scope1 scope2',
+          refresh_token: 're_refresh_token',
+        })
+      )
+    );
+    fetchMock((input, options) => {
+      if (
+        !getInputUrl(input).match(/\/1$/) ||
+        options.headers.Authorization === 'Bearer a_refreshed_token'
+      ) {
+        return false;
+      }
+      expect(options.headers.Authorization).toEqual('Bearer an_access_token');
+      return true;
+    }, new Response(null, { status: 401, headers: oauthHeaders }));
+    fetchMock((input, options) => {
+      if (
+        !getInputUrl(input).match(/\/1$/) ||
+        options.headers.Authorization !== 'Bearer a_refreshed_token'
+      ) {
+        return false;
+      }
+      expect(options.headers.Authorization).toEqual('Bearer a_refreshed_token');
+      return true;
+    }, new Response(JSON.stringify({ foofoo: 'barbarbar' }), { status: 200 }));
 
     const tokenGenerator = new PasswordGenerator({
       path: 'oauth.me',
@@ -809,69 +699,53 @@ describe('Fix bugs', () => {
       mapping
     );
 
-    return SomeInnerSdk.tokenStorage
-      .generateToken({
-        username: 'foo',
-        password: 'bar',
-      })
-      .then(() => SomeInnerSdk.getRepository('test').find(1))
-      .then(() => {
-        expect(findLastOptions('access_denied').headers.Authorization).toEqual(
-          'Bearer an_access_token'
-        );
-        expect(findLastOptions('success').headers.Authorization).toEqual(
-          'Bearer a_refreshed_token'
-        );
-      });
+    await SomeInnerSdk.tokenStorage.generateToken({
+      username: 'foo',
+      password: 'bar',
+    });
+    await SomeInnerSdk.getRepository('test').find(1);
   });
 
-  test('If the token is close to expiration, it should automatically refresh', () => {
-    fetchMock
-      .mock({
-        name: 'generate_token',
-        matcher: (url, opts) =>
-          url === 'https://oauth.me/' &&
-          new URLSearchParams(opts.body).get('grant_type') === 'password',
-        response: {
-          body: {
-            access_token: 'an_access_token',
-            expires_in: -1,
-            token_type: 'bearer',
-            scope: 'scope1 scope2',
-            refresh_token: 'refresh_token',
-          },
-          status: 200,
-        },
-      })
-      .mock({
-        name: 'refresh_token',
-        matcher: (url, opts) =>
-          url === 'https://oauth.me/' &&
-          new URLSearchParams(opts.body).get('refresh_token') ===
-            'refresh_token',
-        response: {
-          body: {
-            access_token: 'a_refreshed_token',
-            expires_in: 3600,
-            token_type: 'bearer',
-            scope: 'scope1 scope2',
-            refresh_token: 're_refresh_token',
-          },
-          status: 200,
-        },
-      })
-      .mock({
-        name: 'success',
-        matcher: (url, opts) =>
-          url.match(/\/1$/) &&
-          opts.headers.Authorization === 'Bearer a_refreshed_token',
-        response: {
-          status: 200,
-          body: {
-            foofoo: 'barbarbar',
-          },
-        },
-      });
+  test('If the token is close to expiration, it should automatically refresh', async () => {
+    fetchMock(
+      (input, options) =>
+        getInputUrl(input) === 'https://oauth.me/' &&
+        new URLSearchParams(options.body).get('grant_type') === 'password',
+      new Response(
+        JSON.stringify({
+          access_token: 'an_access_token',
+          expires_in: -1,
+          token_type: 'bearer',
+          scope: 'scope1 scope2',
+          refresh_token: 'refresh_token',
+        })
+      )
+    );
+    fetchMock(
+      (input, options) =>
+        getInputUrl(input) === 'https://oauth.me/' &&
+        new URLSearchParams(options.body).get('refresh_token') ===
+          'refresh_token',
+      new Response(
+        JSON.stringify({
+          access_token: 'a_refreshed_token',
+          expires_in: 3600,
+          token_type: 'bearer',
+          scope: 'scope1 scope2',
+          refresh_token: 're_refresh_token',
+        })
+      )
+    );
+    fetchMock((input, options) => {
+      if (
+        !getInputUrl(input).match(/\/1$/) ||
+        options.headers.Authorization !== 'Bearer a_refreshed_token'
+      ) {
+        return false;
+      }
+      expect(options.headers.Authorization).toEqual('Bearer a_refreshed_token');
+      return true;
+    }, new Response(JSON.stringify({ foofoo: 'barbarbar' }), { status: 200 }));
 
     const tokenGenerator = new PasswordGenerator({
       path: 'oauth.me',
@@ -888,70 +762,49 @@ describe('Fix bugs', () => {
       mapping
     );
 
-    return SomeInnerSdk.tokenStorage
-      .generateToken({
-        username: 'foo',
-        password: 'bar',
-      })
-      .then(() => SomeInnerSdk.getRepository('test').find(1))
-      .then(() => {
-        expect(findLastOptions('success').headers.Authorization).toEqual(
-          'Bearer a_refreshed_token'
-        );
-      });
+    await SomeInnerSdk.tokenStorage.generateToken({
+      username: 'foo',
+      password: 'bar',
+    });
+    await SomeInnerSdk.getRepository('test').find(1);
   });
 
-  test('If a refresh token fail, we should call the `onRefreshTokenFailure` callback', () => {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const onRefreshTokenFailure = jest.fn(() => {});
+  test('If a refresh token fail, we should call the `onRefreshTokenFailure` callback', async () => {
+    const onRefreshTokenFailure = vi.fn(() => {});
 
-    fetchMock
-      .mock({
-        name: 'generate_token',
-        matcher: (url, opts) =>
-          url === 'https://oauth.me/' &&
-          new URLSearchParams(opts.body).get('grant_type') === 'password',
-        response: {
-          body: {
-            access_token: 'an_access_token',
-            expires_in: 3600,
-            token_type: 'bearer',
-            scope: 'scope1 scope2',
-            refresh_token: 'refresh_token',
-          },
-          status: 200,
-        },
-      })
-      .mock({
-        name: 'refresh_token',
-        matcher: (url, opts) => {
-          return (
-            url === 'https://oauth.me/' &&
-            new URLSearchParams(opts.body || '').get('refresh_token') ===
-              'refresh_token'
-          );
-        },
-        response: {
-          body: {
-            error: 'invalid_grant',
-            error_description: 'The refresh token is invalid.',
-            hint: 'Token has been revoked',
-            message: 'The refresh token is invalid.',
-          },
-          status: 401,
-        },
-      })
-      .mock({
-        name: 'access_denied',
-        matcher: (url) => url.match(/test\/1$/),
-        response: {
-          status: 401,
-          body: {
-            error: 'access_denied',
-            error_description: 'The access token provided has expired.',
-          },
-        },
-      });
+    fetchMock(
+      (input, options) =>
+        getInputUrl(input) === 'https://oauth.me/' &&
+        new URLSearchParams(options.body).get('grant_type') === 'password',
+      new Response(
+        JSON.stringify({
+          access_token: 'an_access_token',
+          expires_in: 3600,
+          token_type: 'bearer',
+          scope: 'scope1 scope2',
+          refresh_token: 'refresh_token',
+        })
+      )
+    );
+    fetchMock(
+      (input, options) =>
+        getInputUrl(input) === 'https://oauth.me/' &&
+        new URLSearchParams(options.body || '').get('refresh_token') ===
+          'refresh_token',
+      new Response(
+        JSON.stringify({
+          error: 'invalid_grant',
+          error_description: 'The refresh token is invalid.',
+          hint: 'Token has been revoked',
+          message: 'The refresh token is invalid.',
+        }),
+        { status: 401 }
+      )
+    );
+    fetchMock(
+      (input) => Boolean(getInputUrl(input).match(/test\/1$/)),
+      new Response(JSON.stringify({ error: 'access_denied', error_description: 'The access token provided has expired.' }), { status: 401 })
+    );
 
     const tokenGenerator = new PasswordGenerator({
       path: 'oauth.me',
@@ -973,13 +826,13 @@ describe('Fix bugs', () => {
       mapping
     );
 
-    return SomeInnerSdk.tokenStorage
-      .generateToken({
-        username: 'foo',
-        password: 'bar',
-      })
-      .then(() => SomeInnerSdk.getRepository('test').find(1))
+    await SomeInnerSdk.tokenStorage.generateToken({
+      username: 'foo',
+      password: 'bar',
+    });
 
+    await SomeInnerSdk.getRepository('test')
+      .find(1)
       .catch(() => {
         expect(onRefreshTokenFailure).toHaveBeenCalled();
       });
@@ -997,7 +850,7 @@ describe('Test unit of work', () => {
     );
   });
 
-  test('posting data with unit of work', () => {
+  test('posting data with unit of work', async () => {
     const cart = {
       '@id': '/v2/carts/1',
       status: null,
@@ -1010,24 +863,22 @@ describe('Test unit of work', () => {
       ],
     };
 
-    fetchMock.mock(() => true, {});
+    fetchMock((input, options) => {
+      expect(options.body).toEqual(
+        JSON.stringify({
+          '@id': '/v2/carts/1',
+          cartItemList: [
+            {
+              '@id': null,
+              quantity: 1,
+            },
+          ],
+        })
+      );
+      return true;
+    }, new Response(JSON.stringify({})));
 
-    return unitOfWorkSdk
-      .getRepository('carts')
-      .create(cart)
-      .then(() => {
-        expect(fetchMock.lastOptions().body).toEqual(
-          JSON.stringify({
-            '@id': '/v2/carts/1',
-            cartItemList: [
-              {
-                '@id': null,
-                quantity: 1,
-              },
-            ],
-          })
-        );
-      });
+    await unitOfWorkSdk.getRepository('carts').create(cart);
   });
 
   test('creating an entity with disabled unit of work should not register it', async () => {
@@ -1043,9 +894,9 @@ describe('Test unit of work', () => {
       ],
     };
 
-    fetchMock.mock(() => true, {});
+    fetchMock(() => true, new Response(JSON.stringify({})));
 
-    const mockedRegisterClean = jest.fn();
+    const mockedRegisterClean = vi.fn();
     unitOfWorkSdk.unitOfWork.registerClean = mockedRegisterClean;
 
     await unitOfWorkSdk
@@ -1063,9 +914,9 @@ describe('Test unit of work', () => {
       unitOfWorkMapping
     );
 
-    fetchMock.mock(() => true, {});
+    fetchMock(() => true, new Response(JSON.stringify({})));
 
-    const mockedRegisterClean = jest.fn();
+    const mockedRegisterClean = vi.fn();
     withoutUnitOfWorkSdk.unitOfWork.registerClean = mockedRegisterClean;
 
     await withoutUnitOfWorkSdk.getRepository('carts').create({});
@@ -1074,178 +925,133 @@ describe('Test unit of work', () => {
   });
 
   test('updating data with unit of work', async () => {
-    fetchMock
-      .mock({
-        name: 'get_cart',
-        matcher: 'end:/v12/carts/1',
-        method: 'GET',
-        response: JSON.stringify({
+    const repo = unitOfWorkSdk.getRepository('carts');
+
+    fetchMock.get.endsWith(
+      '/v12/carts/1',
+      new Response(
+        JSON.stringify({
           '@id': '/v12/carts/1',
           status: null,
-          cartItemList: [
-            {
-              '@id': null,
-              quantity: 1,
-              cart: null,
-            },
-          ],
-        }),
-      })
-      .mock({
-        name: 'put_cart',
-        matcher: 'end:/v12/carts/1',
-        method: 'PUT',
-        response: JSON.stringify({
-          '@id': '/v12/carts/1',
-          status: 'foo',
-          cartItemList: [
-            {
-              '@id': null,
-              quantity: 1,
-              cart: null,
-            },
-          ],
-        }),
-      });
-
-    const repo = unitOfWorkSdk.getRepository('carts');
+          cartItemList: [{ '@id': null, quantity: 1, cart: null }],
+        })
+      )
+    );
     const cart = await repo.find('/v12/carts/1');
     cart.status = 'foo';
 
-    await repo.update(cart);
-    expect(findLastOptions('put_cart').body).toEqual(
-      JSON.stringify({ status: 'foo' })
-    );
+    const putResponse = () =>
+      new Response(
+        JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'foo',
+          cartItemList: [{ '@id': null, quantity: 1, cart: null }],
+        })
+      );
+    const assertPutBody = (expectedBody) => (input, options) => {
+      if (options.method !== 'PUT') {
+        return false;
+      }
+      expect(options.body).toEqual(expectedBody);
+      return true;
+    };
 
+    fetchMock(assertPutBody(JSON.stringify({ status: 'foo' })), putResponse());
     await repo.update(cart);
-    expect(findLastOptions('put_cart').body).toEqual('{}');
+
+    fetchMock(assertPutBody('{}'), putResponse());
+    await repo.update(cart);
   });
 
   test('patching data with unit of work', async () => {
-    fetchMock
-      .mock({
-        name: 'get_cart',
-        matcher: 'end:/v12/carts/1',
-        method: 'GET',
-        response: JSON.stringify({
+    const repo = unitOfWorkSdk.getRepository('carts');
+
+    fetchMock.get.endsWith(
+      '/v12/carts/1',
+      new Response(
+        JSON.stringify({
           '@id': '/v12/carts/1',
           status: null,
-          cartItemList: [
-            {
-              '@id': null,
-              quantity: 1,
-              cart: null,
-            },
-          ],
-        }),
-      })
-      .mock({
-        name: 'patch_cart',
-        matcher: 'end:/v12/carts/1',
-        method: 'PATCH',
-        response: JSON.stringify({
-          '@id': '/v12/carts/1',
-          status: 'foo',
-          cartItemList: [
-            {
-              '@id': null,
-              quantity: 1,
-              cart: null,
-            },
-          ],
-        }),
-      });
-
-    const repo = unitOfWorkSdk.getRepository('carts');
+          cartItemList: [{ '@id': null, quantity: 1, cart: null }],
+        })
+      )
+    );
     const cart = await repo.find('/v12/carts/1');
     cart.status = 'foo';
 
-    await repo.patch(cart);
-    expect(findLastOptions('patch_cart').method).toEqual('PATCH');
-    expect(findLastOptions('patch_cart').body).toEqual(
-      JSON.stringify({ status: 'foo' })
-    );
+    const patchResponse = () =>
+      new Response(
+        JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: 'foo',
+          cartItemList: [{ '@id': null, quantity: 1, cart: null }],
+        })
+      );
+    const assertPatchBody = (expectedBody) => (input, options) => {
+      if (options.method !== 'PATCH') {
+        return false;
+      }
+      expect(options.method).toEqual('PATCH');
+      expect(options.body).toEqual(expectedBody);
+      return true;
+    };
 
+    fetchMock(
+      assertPatchBody(JSON.stringify({ status: 'foo' })),
+      patchResponse()
+    );
     await repo.patch(cart);
-    expect(findLastOptions('patch_cart').body).toEqual('{}');
+
+    fetchMock(assertPatchBody('{}'), patchResponse());
+    await repo.patch(cart);
   });
 
   test('updating partial data with unit of work', async () => {
-    fetchMock
-      .mock({
-        name: 'get_cart',
-        matcher: 'end:/v12/carts/1',
-        method: 'GET',
-        response: JSON.stringify({
+    const repo = unitOfWorkSdk.getRepository('carts');
+
+    fetchMock.get.endsWith(
+      '/v12/carts/1',
+      new Response(
+        JSON.stringify({
           '@id': '/v12/carts/1',
           status: 'foo',
-          cartItemList: [
-            {
-              '@id': null,
-              quantity: 1,
-              cart: null,
-            },
-          ],
-        }),
-      })
-      .mock({
-        name: 'put_cart',
-        matcher: 'end:/v12/carts/1',
-        method: 'PUT',
-        response: JSON.stringify({
-          '@id': '/v12/carts/1',
-          status: null,
-          cartItemList: [
-            {
-              '@id': null,
-              quantity: 1,
-              cart: null,
-            },
-          ],
-        }),
-      });
-
-    const repo = unitOfWorkSdk.getRepository('carts');
+          cartItemList: [{ '@id': null, quantity: 1, cart: null }],
+        })
+      )
+    );
     await repo.find('/v12/carts/1');
 
+    fetchMock((input, options) => {
+      if (options.method !== 'PUT') {
+        return false;
+      }
+      expect(options.body).toEqual(JSON.stringify({ status: null }));
+      return true;
+    }, new Response(JSON.stringify({
+      '@id': '/v12/carts/1',
+      status: null,
+      cartItemList: [{ '@id': null, quantity: 1, cart: null }],
+    })));
+
     await repo.update({ '@id': '/v12/carts/1', status: null });
-    expect(findLastOptions('put_cart').body).toEqual(
-      JSON.stringify({ status: null })
-    );
   });
 
   test('deactivating the unit of work should not register fetched entity', async () => {
-    fetchMock
-      .mock({
-        name: 'get_cart',
-        matcher: 'end:/v12/carts/1',
-        method: 'GET',
-        response: JSON.stringify({
-          '@id': '/v12/carts/1',
-          status: null,
-          cartItemList: [
-            {
-              '@id': null,
-              quantity: 1,
-              cart: null,
-            },
-          ],
-        }),
-      })
-      .mock({
-        name: 'put_cart',
-        matcher: 'end:/v12/carts/1',
-        method: 'PUT',
-        response: JSON.stringify({
-          '@id': '/v12/carts/1',
-        }),
-      });
-
     const repo = unitOfWorkSdk.getRepository('carts');
 
-    const mockedRegisterClean = jest.fn();
+    const mockedRegisterClean = vi.fn();
     unitOfWorkSdk.unitOfWork.registerClean = mockedRegisterClean;
 
+    fetchMock.get.endsWith(
+      '/v12/carts/1',
+      new Response(
+        JSON.stringify({
+          '@id': '/v12/carts/1',
+          status: null,
+          cartItemList: [{ '@id': null, quantity: 1, cart: null }],
+        })
+      )
+    );
     const cart = await repo.find('/v12/carts/1');
     expect(mockedRegisterClean.mock.calls.length).toBe(1);
 
@@ -1254,11 +1060,16 @@ describe('Test unit of work', () => {
 
     cart.status = 'bar';
 
+    const putResponse = () =>
+      new Response(JSON.stringify({ '@id': '/v12/carts/1' }));
+
+    fetchMock((input, options) => options.method === 'PUT', putResponse());
     await repo.withUnitOfWork(false).update(cart);
 
     // the number of call to registerClean should not have changed here
     expect(mockedRegisterClean.mock.calls.length).toBe(1);
 
+    fetchMock((input, options) => options.method === 'PUT', putResponse());
     const updatedCart = await repo.update(cart);
 
     expect(mockedRegisterClean.mock.calls.length).toBe(2);
@@ -1268,89 +1079,67 @@ describe('Test unit of work', () => {
   });
 
   test('find all register', async () => {
-    fetchMock
-      .mock({
-        name: 'get_carts',
-        matcher: 'end:/v12/carts',
-        method: 'GET',
-        response: JSON.stringify([
+    const repo = unitOfWorkSdk.getRepository('carts');
+
+    fetchMock.get.endsWith(
+      '/v12/carts',
+      new Response(
+        JSON.stringify([
           {
             '@id': '/v12/carts/1',
             status: 'foo',
-            cartItemList: [
-              {
-                '@id': null,
-                quantity: 1,
-                cart: null,
-              },
-            ],
+            cartItemList: [{ '@id': null, quantity: 1, cart: null }],
           },
-        ]),
-      })
-      .mock({
-        name: 'put_cart',
-        matcher: 'end:/v12/carts/1',
-        method: 'PUT',
-        response: JSON.stringify({
-          '@id': '/v12/carts/1',
-          status: null,
-          cartItemList: [
-            {
-              '@id': null,
-              quantity: 1,
-              cart: null,
-            },
-          ],
-        }),
-      });
-
-    const repo = unitOfWorkSdk.getRepository('carts');
+        ])
+      )
+    );
     const cartList = await repo.findAll();
     const cart = cartList[0];
 
     cart.status = 'bar';
 
+    fetchMock((input, options) => {
+      if (options.method !== 'PUT') {
+        return false;
+      }
+      expect(options.body).toEqual(JSON.stringify({ status: 'bar' }));
+      return true;
+    }, new Response(JSON.stringify({
+      '@id': '/v12/carts/1',
+      status: null,
+      cartItemList: [{ '@id': null, quantity: 1, cart: null }],
+    })));
+
     await repo.update(cart);
-    expect(findLastOptions('put_cart').body).toEqual(
-      JSON.stringify({ status: 'bar' })
-    );
   });
 
   test('deactivating the unit of work should not register once', async () => {
-    fetchMock.mock({
-      name: 'get_carts',
-      matcher: 'end:/v12/carts',
-      method: 'GET',
-      response: JSON.stringify([
-        {
-          '@id': '/v12/carts/1',
-          status: 'foo',
-          cartItemList: [
-            {
-              '@id': null,
-              quantity: 1,
-              cart: null,
-            },
-          ],
-        },
-      ]),
-    });
-
     const repo = unitOfWorkSdk.getRepository('carts');
 
-    const mockedRegisterClean = jest.fn();
+    const mockedRegisterClean = vi.fn();
     unitOfWorkSdk.unitOfWork.registerClean = mockedRegisterClean;
 
-    await repo.findAll();
+    const listResponse = () =>
+      new Response(
+        JSON.stringify([
+          {
+            '@id': '/v12/carts/1',
+            status: 'foo',
+            cartItemList: [{ '@id': null, quantity: 1, cart: null }],
+          },
+        ])
+      );
 
+    fetchMock.get.endsWith('/v12/carts', listResponse());
+    await repo.findAll();
     expect(mockedRegisterClean.mock.calls.length).toBe(1);
 
+    fetchMock.get.endsWith('/v12/carts', listResponse());
     await repo.withUnitOfWork(false).findAll();
-
     expect(mockedRegisterClean.mock.calls.length).toBe(1);
 
+    fetchMock.get.endsWith('/v12/carts', listResponse());
     await repo.findAll();
-
     expect(mockedRegisterClean.mock.calls.length).toBe(2);
   });
 
@@ -1384,82 +1173,59 @@ describe('Test unit of work', () => {
 
   test('find all with object as response', async () => {
     unitOfWorkSdk.serializer = new MemberSerializer();
-    fetchMock
-      .mock({
-        name: 'get_carts',
-        matcher: 'end:/v12/carts',
-        method: 'GET',
-        response: JSON.stringify({
+    const repo = unitOfWorkSdk.getRepository('carts');
+
+    fetchMock.get.endsWith(
+      '/v12/carts',
+      new Response(
+        JSON.stringify({
           members: [
             {
               '@id': '/v12/carts/1',
               status: 'foo',
               phone_number: '01234',
-              cartItemList: [
-                {
-                  '@id': null,
-                  quantity: 1,
-                  cart: null,
-                },
-              ],
+              cartItemList: [{ '@id': null, quantity: 1, cart: null }],
             },
           ],
-        }),
-      })
-      .mock({
-        name: 'put_cart',
-        matcher: 'end:/v12/carts/1',
-        method: 'PUT',
-        response: JSON.stringify({
-          '@id': '/v12/carts/1',
-          status: null,
-          phone_number: '01234',
-          cartItemList: [
-            {
-              '@id': null,
-              quantity: 1,
-              cart: null,
-            },
-          ],
-        }),
-      });
-
-    const repo = unitOfWorkSdk.getRepository('carts');
+        })
+      )
+    );
     const cartList = await repo.findAll();
     const cart = cartList.members[0];
 
     cart.status = 'bar';
 
+    fetchMock((input, options) => {
+      if (options.method !== 'PUT') {
+        return false;
+      }
+      expect(options.body).toEqual(JSON.stringify({ status: 'bar' }));
+      return true;
+    }, new Response(JSON.stringify({
+      '@id': '/v12/carts/1',
+      status: null,
+      phone_number: '01234',
+      cartItemList: [{ '@id': null, quantity: 1, cart: null }],
+    })));
+
     await repo.update(cart);
-    expect(findLastOptions('put_cart').body).toEqual(
-      JSON.stringify({ status: 'bar' })
-    );
   });
 
   test('delete entity will clear the unit of work', async () => {
-    fetchMock
-      .mock({
-        matcher: 'end:/v12/carts/1',
-        method: 'DELETE',
-        response: {
-          status: 204,
-          body: null,
-        },
-      })
-      .mock({
-        matcher: 'end:/v12/carts/1',
-        method: 'GET',
-        response: JSON.stringify({
-          '@id': '/v12/carts/1',
-          status: 'foo',
-        }),
-      });
-
     const repo = unitOfWorkSdk.getRepository('carts');
+
+    fetchMock.get.endsWith(
+      '/v12/carts/1',
+      new Response(JSON.stringify({ '@id': '/v12/carts/1', status: 'foo' }))
+    );
     const cart = await repo.find(1);
 
     expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeTruthy();
 
+    fetchMock(
+      (input, options) => options.method === 'DELETE',
+      new Response(null, { status: 204 })
+    );
     const response = await repo.delete(cart);
 
     expect(response).not.toBeUndefined();
@@ -1468,29 +1234,20 @@ describe('Test unit of work', () => {
   });
 
   test('delete entity with a disabled unit of work should still clear the unit of work', async () => {
-    fetchMock
-      .mock({
-        matcher: 'end:/v12/carts/1',
-        method: 'DELETE',
-        response: {
-          status: 204,
-          body: null,
-        },
-      })
-      .mock({
-        matcher: 'end:/v12/carts/1',
-        method: 'GET',
-        response: JSON.stringify({
-          '@id': '/v12/carts/1',
-          status: 'foo',
-        }),
-      });
-
     const repo = unitOfWorkSdk.getRepository('carts');
+
+    fetchMock.get.endsWith(
+      '/v12/carts/1',
+      new Response(JSON.stringify({ '@id': '/v12/carts/1', status: 'foo' }))
+    );
     const cart = await repo.find(1);
 
     expect(repo.sdk.unitOfWork.getDirtyEntity('/v12/carts/1')).toBeTruthy();
 
+    fetchMock(
+      (input, options) => options.method === 'DELETE',
+      new Response(null, { status: 204 })
+    );
     const response = await repo.withUnitOfWork(false).delete(cart);
 
     expect(response).not.toBeUndefined();
@@ -1499,14 +1256,13 @@ describe('Test unit of work', () => {
   });
 
   test('posting a many-to-one with only the id', async () => {
-    fetchMock.mock({
-      matcher: 'end:/v12/carts',
-      method: 'POST',
-      response: {
-        status: 201,
-        body: { '@id': '/v1/carts/3', order: '/v12/orders/1' },
-      },
-    });
+    fetchMock((input, options) => {
+      if (options.method !== 'POST') {
+        return false;
+      }
+      expect(options.body).toEqual(JSON.stringify({ order: '/v12/orders/1' }));
+      return true;
+    }, new Response(JSON.stringify({ '@id': '/v1/carts/3', order: '/v12/orders/1' }), { status: 201 }));
     const cartToPost = {
       order: '/v12/orders/1',
     };
@@ -1515,20 +1271,18 @@ describe('Test unit of work', () => {
     const cart = await repo.create(cartToPost);
 
     expect(cart.order).toEqual('/v12/orders/1');
-    expect(fetchMock.lastOptions().body).toEqual(
-      JSON.stringify({ order: '/v12/orders/1' })
-    );
   });
 
   test('posting a many-to-one with an object', async () => {
-    fetchMock.mock({
-      matcher: 'end:/v12/carts',
-      method: 'POST',
-      response: {
-        status: 201,
-        body: { '@id': '/v1/carts/3', order: '/v12/orders/1' },
-      },
-    });
+    fetchMock((input, options) => {
+      if (options.method !== 'POST') {
+        return false;
+      }
+      expect(options.body).toEqual(
+        JSON.stringify({ order: { '@id': '/v12/orders/1', status: 'waiting' } })
+      );
+      return true;
+    }, new Response(JSON.stringify({ '@id': '/v1/carts/3', order: '/v12/orders/1' }), { status: 201 }));
     const cartToPost = {
       order: {
         '@id': '/v12/orders/1',
@@ -1539,10 +1293,6 @@ describe('Test unit of work', () => {
 
     const repo = unitOfWorkSdk.getRepository('carts');
     await repo.create(cartToPost);
-
-    expect(fetchMock.lastOptions().body).toEqual(
-      JSON.stringify({ order: { '@id': '/v12/orders/1', status: 'waiting' } })
-    );
   });
 
   describe('Test unit of work with entity conversion', () => {
@@ -1586,22 +1336,23 @@ describe('Test unit of work', () => {
     test('create an entity using an entity conversion', async () => {
       unitOfWorkSdk.serializer = new EntitySerializer();
 
-      fetchMock
-        .mock({
-          matcher: 'end:/v12/carts/1',
-          response: {
-            status: 200,
-            body: { '@id': '/v12/carts/1', status: 'payed' },
-          },
+      const assertBody = (method, expectedBody) => (input, options) => {
+        if (options.method !== method) {
+          return false;
+        }
+        expect(options.body).toEqual(expectedBody);
+        return true;
+      };
+
+      fetchMock(
+        assertBody(
+          'POST',
+          JSON.stringify({ '@id': '/v12/carts/1', status: 'payed' })
+        ),
+        new Response(JSON.stringify({ '@id': '/v12/carts/1', status: 'payed' }), {
+          status: 201,
         })
-        .mock({
-          matcher: 'end:/v12/carts',
-          method: 'POST',
-          response: {
-            status: 201,
-            body: { '@id': '/v12/carts/1', status: 'payed' },
-          },
-        });
+      );
 
       const cartToPost = new TestEntity({
         '@id': '/v12/carts/1',
@@ -1614,56 +1365,28 @@ describe('Test unit of work', () => {
         .getRepository('carts')
         .create(cartToPost);
 
-      expect(fetchMock.lastOptions().body).toEqual(
-        JSON.stringify({
-          '@id': '/v12/carts/1',
-          status: 'payed',
-        })
-      );
-
       expect(cartToPut.toJSON()['@id']).toEqual('/v12/carts/1');
       expect(cartToPut.toJSON().status).toEqual('payed');
 
       cartToPut.set('status', 'refunded');
 
-      await unitOfWorkSdk.getRepository('carts').update(cartToPut);
-
-      expect(fetchMock.lastOptions().body).toEqual(
-        JSON.stringify({
-          status: 'refunded',
+      fetchMock(
+        assertBody('PUT', JSON.stringify({ status: 'refunded' })),
+        new Response(JSON.stringify({ '@id': '/v12/carts/1', status: 'payed' }), {
+          status: 200,
         })
       );
+      await unitOfWorkSdk.getRepository('carts').update(cartToPut);
     });
 
     test('data not present in the API response', async () => {
-      fetchMock
-        .mock({
-          matcher: 'end:/v12/carts/1',
-          method: 'GET',
-          response: {
-            status: 200,
-            body: { '@id': '/v12/carts/1', status: 'payed' },
-          },
-        })
-        .mock({
-          name: 'put_cart',
-          matcher: 'end:/v12/carts/1',
-          method: 'PUT',
-          response: {
-            status: 200,
-            body: {
-              '@id': '/v12/carts/1',
-              status: 'foo',
-              cartItemList: [
-                {
-                  '@id': '/v12/carts/1',
-                  status: 'refunded',
-                  data: null,
-                },
-              ],
-            },
-          },
-        });
+      fetchMock.get.endsWith(
+        '/v12/carts/1',
+        new Response(
+          JSON.stringify({ '@id': '/v12/carts/1', status: 'payed' }),
+          { status: 200 }
+        )
+      );
 
       const cart = await unitOfWorkSdk
         .getRepository('carts')
@@ -1674,24 +1397,37 @@ describe('Test unit of work', () => {
       cart.status = 'refunded';
       cart.data = null;
 
-      await unitOfWorkSdk.getRepository('carts').update(cart);
+      fetchMock((input, options) => {
+        if (options.method !== 'PUT') {
+          return false;
+        }
+        expect(options.body).toEqual(
+          JSON.stringify({
+            status: 'refunded',
+            data: null,
+          })
+        );
+        return true;
+      }, new Response(JSON.stringify({
+        '@id': '/v12/carts/1',
+        status: 'foo',
+        cartItemList: [{ '@id': '/v12/carts/1', status: 'refunded', data: null }],
+      }), { status: 200 }));
 
-      expect(fetchMock.lastOptions().body).toEqual(
-        JSON.stringify({
-          status: 'refunded',
-          data: null,
-        })
-      );
+      await unitOfWorkSdk.getRepository('carts').update(cart);
     });
 
     test('many-to-one relation with null value in newValue', async () => {
-      fetchMock.mock({
-        matcher: 'end:/v12/carts/1',
-        response: {
-          status: 200,
-          body: { '@id': '/v12/carts/1', order: { '@id': '/v12/orders/1' } },
-        },
-      });
+      fetchMock.get.endsWith(
+        '/v12/carts/1',
+        new Response(
+          JSON.stringify({
+            '@id': '/v12/carts/1',
+            order: { '@id': '/v12/orders/1' },
+          }),
+          { status: 200 }
+        )
+      );
 
       const cart = await unitOfWorkSdk
         .getRepository('carts')
@@ -1701,28 +1437,38 @@ describe('Test unit of work', () => {
 
       cart.order = null;
 
+      fetchMock((input, options) => {
+        if (options.method !== 'PUT') {
+          return false;
+        }
+        expect(options.body).toEqual(
+          JSON.stringify({
+            order: null,
+          })
+        );
+        return true;
+      }, new Response(JSON.stringify({
+        '@id': '/v12/carts/1',
+        order: { '@id': '/v12/orders/1' },
+      }), { status: 200 }));
+
       await unitOfWorkSdk.getRepository('carts').update(cart);
-      expect(fetchMock.lastOptions().body).toEqual(
-        JSON.stringify({
-          order: null,
-        })
-      );
     });
 
     test('one-to-many with objects as old model and string as new model', async () => {
-      fetchMock.mock({
-        matcher: 'end:/v12/carts/1',
-        response: {
-          status: 200,
-          body: {
+      fetchMock.get.endsWith(
+        '/v12/carts/1',
+        new Response(
+          JSON.stringify({
             '@id': '/v12/carts/1',
             cartItemList: [
               { '@id': '/v12/cart_items/1' },
               { '@id': '/v12/cart_items/2' },
             ],
-          },
-        },
-      });
+          }),
+          { status: 200 }
+        )
+      );
 
       const cart = await unitOfWorkSdk
         .getRepository('carts')
@@ -1730,12 +1476,25 @@ describe('Test unit of work', () => {
 
       cart.cartItemList = ['/v1/cart_items/2'];
 
+      fetchMock((input, options) => {
+        if (options.method !== 'PUT') {
+          return false;
+        }
+        expect(options.body).toEqual(
+          JSON.stringify({
+            cartItemList: ['/v1/cart_items/2'],
+          })
+        );
+        return true;
+      }, new Response(JSON.stringify({
+        '@id': '/v12/carts/1',
+        cartItemList: [
+          { '@id': '/v12/cart_items/1' },
+          { '@id': '/v12/cart_items/2' },
+        ],
+      }), { status: 200 }));
+
       await unitOfWorkSdk.getRepository('carts').update(cart);
-      expect(fetchMock.lastOptions().body).toEqual(
-        JSON.stringify({
-          cartItemList: ['/v1/cart_items/2'],
-        })
-      );
     });
   });
 });
