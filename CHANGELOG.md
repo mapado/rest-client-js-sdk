@@ -1,5 +1,17 @@
 # Changelog
 
+## 7.4.0
+
+- Update direct dependencies #151 (including urijs that contains CVE fix)
+
+### Internal
+
+- Upgrade dev deps #152
+- upgrade prettier #153
+- Upgrade typescript + eslint #154
+- upgrade rollup #155
+- Migrate from jest to vitest #156
+
 ## 7.3.0
 
 - Add patch method using the PATCH HTTP verb [#150](https://github.com/mapado/rest-client-js-sdk/pull/150)
