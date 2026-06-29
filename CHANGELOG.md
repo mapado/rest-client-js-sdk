@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.3.0
+
+- Add patch method using the PATCH HTTP verb [#150](https://github.com/mapado/rest-client-js-sdk/pull/150)
+
 ## 7.2.3
 
 - find diff for array values [#148](https://github.com/mapado/rest-client-js-sdk/pull/148) by [@jdeniau](https://github.com/jdeniau)
