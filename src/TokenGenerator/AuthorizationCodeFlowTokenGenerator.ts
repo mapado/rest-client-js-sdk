@@ -3,7 +3,7 @@ import { Token, TokenResponse } from './types';
 
 type AuthorizationCodeFlowTokenGeneratorConfig = {
   clientId: string;
-  clientSecret: string;
+  clientSecret?: string; // absent for a public client
   path: string;
   scheme: string;
   redirectUri: string;
@@ -14,6 +14,7 @@ type AuthorizationCodeFlowTokenGeneratorConfig = {
 type GenerateTokenParameters = {
   code: string;
   state?: string;
+  codeVerifier?: string; // PKCE (RFC 7636)
 };
 
 interface AuthorizationCodeToken extends Token {
@@ -53,9 +54,12 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         client_id: this.tokenGeneratorConfig.clientId,
-        client_secret: this.tokenGeneratorConfig.clientSecret, // TODO : secure this ?
+        ...this._clientSecretParameter(),
         redirect_uri: this.tokenGeneratorConfig.redirectUri,
         code: parameters.code,
+        ...(parameters.codeVerifier
+          ? { code_verifier: parameters.codeVerifier }
+          : {}),
       }).toString(),
     };
 
@@ -93,7 +97,7 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
       body: new URLSearchParams({
         grant_type: 'refresh_token',
         client_id: this.tokenGeneratorConfig.clientId,
-        client_secret: this.tokenGeneratorConfig.clientSecret,
+        ...this._clientSecretParameter(),
         refresh_token: oldAccessToken.refresh_token,
       }).toString(),
     };
@@ -118,9 +122,9 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
       );
     }
 
-    if (!(config.clientId && config.clientSecret)) {
+    if (!config.clientId) {
       throw new RangeError(
-        'TokenGenerator config is not valid, it should contain a "clientId", a "clientSecret" parameter'
+        'TokenGenerator config is not valid, it should contain a "clientId" parameter'
       );
     }
 
@@ -129,6 +133,12 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
         'TokenGenerator config is not valid, it should contain a "redirectUri" parameter'
       );
     }
+  }
+
+  private _clientSecretParameter(): { client_secret?: string } {
+    const { clientSecret } = this.tokenGeneratorConfig;
+
+    return clientSecret ? { client_secret: clientSecret } : {};
   }
 
   private _checkGenerateParameters(parameters: GenerateTokenParameters): void {
