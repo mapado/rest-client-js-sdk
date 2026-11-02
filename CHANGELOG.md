@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.5.0
+
+- Add PKCE support to AuthorizationCodeFlowTokenGenerator (codeVerifier), clientSecret is now optional for public clients #157
+
 ## 7.4.0
 
 - Update direct dependencies #151 (including urijs that contains CVE fix)
