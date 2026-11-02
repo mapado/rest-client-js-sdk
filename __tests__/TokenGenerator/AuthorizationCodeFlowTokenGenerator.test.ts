@@ -1,10 +1,7 @@
 import { fetchMock } from 'metch-fock';
 import { describe, expect, test } from 'vitest';
 import mockToken from '../../__mocks__/passwordCredentials.json';
-import {
-  AuthorizationCodeFlowTokenGenerator,
-  Token,
-} from '../../src/index';
+import { AuthorizationCodeFlowTokenGenerator, Token } from '../../src/index';
 
 // `generateToken` and `refreshToken` both POST to the same URL, so we match on
 // the request body `grant_type` to return a distinct `Response` per call.
@@ -14,11 +11,30 @@ const grantTypeIs =
     new URLSearchParams(options?.body as string).get('grant_type') ===
     grantType;
 
+// Records the body of every matched request so tests can assert on what is sent.
+const recordBodies =
+  (grantType: string, bodies: URLSearchParams[]) =>
+  (input: URL | RequestInfo, options: RequestInit | undefined): boolean => {
+    const body = new URLSearchParams(options?.body as string);
+    if (body.get('grant_type') !== grantType) {
+      return false;
+    }
+    bodies.push(body);
+    return true;
+  };
+
 const tokenConfig = {
   path: 'oauth.me',
   scheme: 'https',
   clientId: '8',
   clientSecret: 'keep me secret',
+  redirectUri: 'https://client.app',
+};
+
+const publicClientConfig = {
+  path: 'oauth.me',
+  scheme: 'https',
+  clientId: '8',
   redirectUri: 'https://client.app',
 };
 
@@ -35,6 +51,63 @@ describe('AuthorizationCodeFlowTokenGenerator', () => {
       createTokenGenerator({ path: 'oauth.me', scheme: 'https' })
     ).toThrowError(RangeError);
     expect(createTokenGenerator(tokenConfig)).not.toThrowError();
+    expect(createTokenGenerator(publicClientConfig)).not.toThrowError();
+    expect(
+      createTokenGenerator({ ...publicClientConfig, clientId: undefined })
+    ).toThrowError(RangeError);
+  });
+
+  test('generateToken sends code_verifier only when passed', async () => {
+    const bodies: URLSearchParams[] = [];
+    fetchMock(
+      recordBodies('authorization_code', bodies),
+      new Response(JSON.stringify(mockToken))
+    );
+
+    const tokenGenerator = new AuthorizationCodeFlowTokenGenerator(tokenConfig);
+
+    await tokenGenerator.generateToken({
+      code: 'abcdef',
+      codeVerifier: 'verifier',
+    });
+    await tokenGenerator.generateToken({ code: 'abcdef' });
+
+    expect(bodies[0].get('code_verifier')).toBe('verifier');
+    expect(bodies[0].get('client_secret')).toBe('keep me secret');
+    expect(bodies[1].has('code_verifier')).toBe(false);
+  });
+
+  test('public client sends no client_secret', async () => {
+    const bodies: URLSearchParams[] = [];
+    fetchMock(
+      recordBodies('authorization_code', bodies),
+      new Response(JSON.stringify(mockToken))
+    );
+    fetchMock(
+      recordBodies('refresh_token', bodies),
+      new Response(JSON.stringify(mockToken))
+    );
+
+    const tokenGenerator = new AuthorizationCodeFlowTokenGenerator(
+      publicClientConfig
+    );
+
+    const response = await tokenGenerator.generateToken({
+      code: 'abcdef',
+      codeVerifier: 'verifier',
+    });
+    const accessToken = (await response.json()) as Token & {
+      refresh_token: string;
+    };
+    await tokenGenerator.refreshToken(accessToken);
+
+    expect(bodies.map((body) => body.get('grant_type'))).toEqual([
+      'authorization_code',
+      'refresh_token',
+    ]);
+    expect(bodies[0].has('client_secret')).toBe(false);
+    expect(bodies[1].has('client_secret')).toBe(false);
+    expect(bodies[0].get('client_id')).toBe('8');
   });
 
   test('test generateToken method', async () => {

@@ -106,6 +106,27 @@ browser environment and
 [React Native AsyncStorage](https://facebook.github.io/react-native/docs/asyncstorage.html)
 for React Native.
 
+##### Authorization code flow with PKCE
+
+`AuthorizationCodeFlowTokenGenerator` supports [PKCE](https://datatracker.ietf.org/doc/html/rfc7636). The SDK does not generate the `code_verifier` nor the `code_challenge`: generate them before redirecting to the authorize endpoint, then pass the verifier with the received `code`. `clientSecret` is optional, omit it for a public client.
+
+```js
+import {
+  AuthorizationCodeFlowTokenGenerator,
+  TokenStorage,
+} from 'rest-client-sdk';
+
+const tokenGenerator = new AuthorizationCodeFlowTokenGenerator({
+  path: 'oauth.me/token',
+  scheme: 'https',
+  clientId: 'my-client-id',
+  redirectUri: 'https://my.app/callback',
+});
+const tokenStorage = new TokenStorage(tokenGenerator, storage);
+
+await tokenStorage.generateToken({ code, codeVerifier });
+```
+
 #### Configure the SDK
 
 ```js
