@@ -409,6 +409,18 @@ describe('Fix bugs', () => {
     });
   });
 
+  test('does not set a JSON Content-Type on a FormData body', async () => {
+    fetchMock((input, options) => {
+      expect(Object.keys(options.headers)).not.toContain('Content-Type');
+      return true;
+    }, new Response(JSON.stringify({ '@id': '/v2/test/8', foo: 'bar' })));
+
+    await SomeSdk.getRepository('test').authorizedFetch('foo', {
+      method: 'POST',
+      body: new FormData(),
+    });
+  });
+
   test('allow removing base header', async () => {
     fetchMock((input, options) => {
       expect(Object.keys(options.headers)).toEqual([
