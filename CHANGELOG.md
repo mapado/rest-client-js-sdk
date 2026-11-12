@@ -2,7 +2,7 @@
 
 ## 7.6.0
 
-- Add a `fetch` option to the `RestClientSdk` config and to the token generators config, to use a custom `fetch` implementation instead of the global one
+- Add a `fetch` option to the `RestClientSdk` config and to the token generators config, to use a custom `fetch` implementation instead of the global one #161
 
 ## 7.5.0
 
