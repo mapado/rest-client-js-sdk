@@ -494,9 +494,15 @@ class AbstractClient<D extends MetadataDefinition> {
     let params = requestParams;
     let baseHeaders: HeadersInit = {};
 
+    // a FormData body must let fetch set the Content-Type itself,
+    // with the multipart/form-data boundary
+    const isFormDataBody =
+      FormData !== undefined && params.body instanceof FormData;
+
     if (
-      params.method !== 'GET' ||
-      (params.method !== 'GET' && params.method !== 'DELETE')
+      (params.method !== 'GET' ||
+        (params.method !== 'GET' && params.method !== 'DELETE')) &&
+      !isFormDataBody
     ) {
       baseHeaders = {
         'Content-Type': 'application/json',
