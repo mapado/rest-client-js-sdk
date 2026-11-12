@@ -19,6 +19,16 @@ The package manager is **Yarn 4** via Corepack (`packageManager: yarn@4.7.0`). R
 
 CI (`.github/workflows/node.js.yml`) runs `yarn lint` + `yarn test` on Node 18/20/22/24. Releases are tag-driven via `bump2version` (`.bumpversion.cfg`); do not hand-edit the version in `package.json`.
 
+## Releasing
+
+`main` only accepts changes through a pull request, so a release goes through one:
+
+1. On a branch from `origin/main`, add a `## X.Y.Z` section at the top of `CHANGELOG.md` and commit it alone (`update changelog for X.Y.Z`): `bump2version` refuses a dirty working tree.
+2. `bump2version patch|minor|major` commits `Bump version: …` and creates the annotated tag `vX.Y.Z` on that commit.
+3. Push the branch and open the PR, then merge it with a merge commit: a squash or a rebase rewrites the bump commit and leaves the tag outside `main`.
+4. Push the tag: `git push origin vX.Y.Z`.
+5. Publish a GitHub Release on the tag (`gh release create vX.Y.Z --verify-tag --generate-notes --title vX.Y.Z`). Its `release: published` event runs `.github/workflows/release.yml`, which publishes to npm under `latest`, or `next` for a version with a hyphen. Pushing the tag alone publishes nothing.
+
 ## Testing notes
 
 - Tests live in `__tests__/` (mirroring `src/` structure), **separate** from source. Most are `.js`, some `.ts`.
