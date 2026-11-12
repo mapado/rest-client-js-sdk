@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.6.0
+
+- Add a `fetch` option to the `RestClientSdk` config and to the token generators config, to use a custom `fetch` implementation instead of the global one
+
 ## 7.5.0
 
 - Add PKCE support to AuthorizationCodeFlowTokenGenerator (codeVerifier), clientSecret is now optional for public clients #157

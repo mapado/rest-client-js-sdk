@@ -526,7 +526,7 @@ class AbstractClient<D extends MetadataDefinition> {
       logId = this.sdk.logger.logRequest({ url: input, ...params });
     }
 
-    return fetch(input, params).then((response) => {
+    return this._fetch(input, params).then((response) => {
       if (this.sdk.logger) {
         this.sdk.logger.logResponse(response, logId);
       }
@@ -542,6 +542,12 @@ class AbstractClient<D extends MetadataDefinition> {
       const httpError = getHttpErrorFromResponse(response);
       throw httpError;
     });
+  }
+
+  protected _fetch(input: string, init: RequestInit): Promise<Response> {
+    // eslint-disable-next-line no-restricted-globals -- default for the injectable fetch
+    const fetchFn = this.sdk.config.fetch ?? fetch;
+    return fetchFn(input, init);
   }
 
   private _getEntityIdentifier(

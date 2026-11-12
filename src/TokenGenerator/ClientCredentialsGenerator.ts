@@ -15,6 +15,7 @@ type Config = {
   scheme: string;
   port?: string;
   scope?: string;
+  fetch?: typeof fetch;
 };
 
 type BaseParameters = {
@@ -68,7 +69,7 @@ class ClientCredentialsGenerator extends AbstractTokenGenerator<
       this.logger.logRequest({ url, ...params });
     }
 
-    return fetch(url, params);
+    return this._fetch(url, params);
   }
 
   refreshToken(

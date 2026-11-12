@@ -15,6 +15,7 @@ export type Config = {
   unitOfWorkEnabled?: boolean;
   loggerEnabled?: boolean;
   onRefreshTokenFailure?: (error: Error) => void;
+  fetch?: typeof fetch;
 };
 
 export default interface RestClientSdkInterface<M extends SdkMetadata> {

@@ -88,6 +88,19 @@ export default [
     },
   },
   {
+    files: ['src/**/*'],
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message:
+            'Use the injectable fetch: AbstractTokenGenerator._fetch or AbstractClient._fetch (see CLAUDE.md).',
+        },
+      ],
+    },
+  },
+  {
     files: ['__tests__/**/*'],
     languageOptions: {
       globals: {

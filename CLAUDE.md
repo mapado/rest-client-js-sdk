@@ -10,10 +10,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The package manager is **Yarn 4** via Corepack (`packageManager: yarn@4.7.0`). Run `corepack enable` if `yarn` is missing.
 
-- `yarn test` — runs lint first (`yarn lint --quiet`) **then** Jest. Lint failures abort the test run.
-- `yarn jest <path-or-pattern>` — run a single test file or pattern **without** the lint gate (e.g. `yarn jest UnitOfWork`, `yarn jest __tests__/client/AbstractClient.test.js`).
-- `yarn jest -t "<test name>"` — run tests matching a name.
-- `yarn lint` — `lint:types` (`tsc --noEmit`) + `lint:eslint`. Run this before considering a change done.
+- `yarn test` — runs lint first (`yarn lint --quiet`) **then** Vitest. Lint failures abort the test run.
+- `yarn vitest run <path-or-pattern>` — run a single test file or pattern **without** the lint gate (e.g. `yarn vitest run UnitOfWork`, `yarn vitest run __tests__/client/AbstractClient.test.js`).
+- `yarn vitest run -t "<test name>"` — run tests matching a name.
+- `yarn lint` — `lint:types` (`tsc --noEmit`, then `tsc -p tsconfig.test.json` for the type tests) + `lint:eslint`. Run this before considering a change done.
 - `yarn lint:eslint` / `yarn lint:types` — run either half alone.
 - `yarn build` — clean, then `build:types` (`tsc --emitDeclarationOnly` → `dist/types`) and `build:js` (Rollup → ESM `dist/index.mjs` + UMD `dist/index.cjs`).
 
@@ -23,8 +23,9 @@ CI (`.github/workflows/node.js.yml`) runs `yarn lint` + `yarn test` on Node 18/2
 
 - Tests live in `__tests__/` (mirroring `src/` structure), **separate** from source. Most are `.js`, some `.ts`.
 - Shared fixtures/mocks are in `__mocks__/` (token generators, storage, serializers, mappings).
-- `setupJest.js` **locks `Date.now()`** to `NOW_TIMESTAMP_MOCK` for the whole suite — token-expiry logic depends on this, so don't assume real time in tests.
+- `setupVitest.js` **locks `Date.now()`** to `NOW_TIMESTAMP_MOCK` for the whole suite — token-expiry logic depends on this, so don't assume real time in tests.
 - HTTP is mocked with `metch-fock`.
+- Type tests are `__tests__/**/*.test-d.ts` files: `yarn lint:types` compiles them, Vitest never runs them. The other `.ts` tests are not type-checked.
 
 ## Code style
 
@@ -46,6 +47,7 @@ Entry point `src/index.ts` re-exports everything; `RestClientSdk` is the default
 
 ### Key modules
 
+- **Custom `fetch`**: never call the global `fetch` directly (ESLint `no-restricted-globals` enforces it in `src/`). Token generators go through `AbstractTokenGenerator._fetch` and repositories through `AbstractClient._fetch`. Both copy the configured `fetch` into a local variable before the call: native `fetch` throws "Illegal invocation" when called with a receiver.
 - **`Mapping` + `Mapping/ClassMetadata` + `Mapping/Attribute` + `Mapping/Relation`**: the schema. A `ClassMetadata`'s `key` is **both** the repository lookup key and what's passed to the serializer; `pathRoot` is the API endpoint (defaults to `key`). Relations (`ONE_TO_MANY`/`MANY_TO_ONE`/`MANY_TO_MANY`) are auto-registered as attributes of type `array`/`object`. `Mapping.idPrefix` is prepended to all generated URLs; `Mapping` config defaults `collectionKey: 'hydra:member'` (Hydra/API Platform shape).
 - **`AbstractClient`**: the default repository with `find/findBy/findAll/create/update/delete`. **Subclass it** and override `getPathBase`/`getEntityURI` (pass the subclass as the 3rd arg to `ClassMetadata`) for custom endpoints — see README "Overriding repository".
 - **`UnitOfWork`** (`UnitOfWork.ts`): tracks the last "clean" serialized state per entity id and, on `create`/`update`, computes a deep diff (via `deep-diff`) so **only dirty fields are sent** (handling relations recursively). **Disabled by default** — only active when `config.unitOfWorkEnabled` is true. Per-call opt-out via `repo.withUnitOfWork(false)` (find\* calls only).
