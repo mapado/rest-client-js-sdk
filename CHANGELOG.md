@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 7.6.1
+
 - Do not set the default `Content-Type: application/json` header when the request body is a `FormData`: `fetch` then sets `multipart/form-data` with its boundary itself, without needing the `'Content-Type': undefined` workaround
 
 ## 7.6.0
