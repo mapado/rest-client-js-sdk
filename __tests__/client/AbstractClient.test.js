@@ -1498,3 +1498,108 @@ describe('Test unit of work', () => {
     });
   });
 });
+
+describe('Injected fetch', () => {
+  const jsonResponse = (body, status = 200) =>
+    new Response(JSON.stringify(body), { status });
+
+  test('repository calls go through `config.fetch` instead of the global fetch', async () => {
+    const globalFetch = vi.spyOn(globalThis, 'fetch');
+    const injectedFetch = vi.fn(() =>
+      Promise.resolve(jsonResponse({ '@id': '/v2/test/8' }))
+    );
+
+    const sdk = new RestClientSdk(
+      null,
+      { path: 'api.me', scheme: 'https', fetch: injectedFetch },
+      mapping
+    );
+
+    const json = await sdk
+      .getRepository('test')
+      .find(8, {}, {}, { headers: { 'X-Foo': 'bar' } });
+
+    expect(json).toEqual({ '@id': '/v2/test/8' });
+    expect(injectedFetch).toHaveBeenCalledTimes(1);
+    const [input, params] = injectedFetch.mock.calls[0];
+    expect(getInputUrl(input)).toBe('https://api.me/v2/test/8');
+    expect(params.headers).toEqual({
+      'Content-Type': 'application/json',
+      'X-Foo': 'bar',
+    });
+    expect(globalFetch).not.toHaveBeenCalled();
+
+    globalFetch.mockRestore();
+  });
+
+  test('the token refresh on a 401 `invalid_grant` and the refetch go through the injected fetch', async () => {
+    const globalFetch = vi.spyOn(globalThis, 'fetch');
+    const injectedFetch = vi.fn((input, params) => {
+      const url = getInputUrl(input);
+
+      if (url === 'https://oauth.me/') {
+        const grantType = new URLSearchParams(params.body).get('grant_type');
+
+        return Promise.resolve(
+          jsonResponse({
+            access_token:
+              grantType === 'password'
+                ? 'an_access_token'
+                : 'a_refreshed_token',
+            expires_in: 3600,
+            token_type: 'bearer',
+            refresh_token: 'refresh_token',
+          })
+        );
+      }
+
+      if (params.headers.Authorization === 'Bearer an_access_token') {
+        return Promise.resolve(
+          new Response(null, {
+            status: 401,
+            headers: {
+              'www-authenticate':
+                'Bearer realm="Service", error="invalid_grant", error_description="The access token provided has expired."',
+            },
+          })
+        );
+      }
+
+      return Promise.resolve(jsonResponse({ '@id': '/v2/test/1' }));
+    });
+
+    const tokenGenerator = new PasswordGenerator({
+      path: 'oauth.me',
+      scheme: 'https',
+      clientId: 'clientId',
+      clientSecret: 'clientSecret',
+      fetch: injectedFetch,
+    });
+
+    const sdk = new RestClientSdk(
+      new TokenStorage(tokenGenerator, new MockStorage()),
+      { path: 'api.me', scheme: 'https', fetch: injectedFetch },
+      mapping
+    );
+
+    await sdk.tokenStorage.generateToken({ username: 'foo', password: 'bar' });
+    const json = await sdk.getRepository('test').find(1);
+
+    expect(json).toEqual({ '@id': '/v2/test/1' });
+    expect(
+      injectedFetch.mock.calls.map(([input, params]) => [
+        getInputUrl(input),
+        params.headers.Authorization ??
+          new URLSearchParams(params.body).get('grant_type'),
+      ])
+    ).toEqual([
+      ['https://oauth.me/', 'password'],
+      ['https://api.me/v2/test/1', 'Bearer an_access_token'],
+      ['https://oauth.me/', 'refresh_token'],
+      ['https://api.me/v2/test/1', 'Bearer a_refreshed_token'],
+    ]);
+    expect(globalFetch).not.toHaveBeenCalled();
+
+    globalFetch.mockRestore();
+  });
+});

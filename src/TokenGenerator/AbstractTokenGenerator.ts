@@ -17,9 +17,14 @@ interface UrlConfig {
   path: string;
   port?: string;
 }
+// accepts any config type, but a `fetch` key must be a fetch function when there is one
+type WithOptionalFetch<C> = 'fetch' extends keyof C
+  ? { fetch?: typeof fetch }
+  : unknown;
+
 abstract class AbstractTokenGenerator<
   T extends Token,
-  C,
+  C extends WithOptionalFetch<C>,
 > implements TokenGeneratorInterface<T> {
   readonly tokenGeneratorConfig: C;
 
@@ -44,6 +49,14 @@ abstract class AbstractTokenGenerator<
   ): Promise<TokenBodyReturn<T> | TokenResponse<T>>;
 
   abstract checkTokenGeneratorConfig(config: C): void;
+
+  protected _fetch(input: string, init: RequestInit): Promise<Response> {
+    // WithOptionalFetch guarantees this type, but TypeScript cannot read a key from a conditional constraint
+    const config = this.tokenGeneratorConfig as { fetch?: typeof fetch };
+    // eslint-disable-next-line no-restricted-globals -- default for the injectable fetch
+    const fetchFn = config?.fetch ?? fetch;
+    return fetchFn(input, init);
+  }
 
   /** @deprecated */
   protected _manageOauthError(response: Response): Promise<never> {

@@ -1,5 +1,5 @@
 import { fetchMock } from 'metch-fock';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import oauthClientCredentialsMock from '../../__mocks__/passwordCredentials.json';
 import {
   InternalServerError,
@@ -242,5 +242,33 @@ describe('PasswordGenerator tests', () => {
         expect(err instanceof OauthError).toEqual(true);
         expect(err.previousError instanceof UnauthorizedError).toEqual(true);
       });
+  });
+
+  test('generateToken and refreshToken use `config.fetch` when given', async () => {
+    const globalFetch = vi.spyOn(globalThis, 'fetch');
+    const injectedFetch = vi.fn(() =>
+      Promise.resolve(new Response(JSON.stringify(oauthClientCredentialsMock)))
+    );
+
+    const tokenGenerator = new PasswordGenerator({
+      ...tokenConfig,
+      fetch: injectedFetch,
+    });
+
+    await tokenGenerator.generateToken({ username: 'foo', password: 'bar' });
+    await tokenGenerator.refreshToken({ refresh_token: 'refresh_token' });
+
+    expect(
+      injectedFetch.mock.calls.map(([url, params]) => [
+        url,
+        new URLSearchParams(params.body).get('grant_type'),
+      ])
+    ).toEqual([
+      ['https://oauth.me/', 'password'],
+      ['https://oauth.me/', 'refresh_token'],
+    ]);
+    expect(globalFetch).not.toHaveBeenCalled();
+
+    globalFetch.mockRestore();
   });
 });

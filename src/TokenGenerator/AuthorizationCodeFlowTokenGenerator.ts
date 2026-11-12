@@ -9,6 +9,7 @@ type AuthorizationCodeFlowTokenGeneratorConfig = {
   redirectUri: string;
   port?: string;
   scope?: string;
+  fetch?: typeof fetch;
 };
 
 type GenerateTokenParameters = {
@@ -67,7 +68,7 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
       this.logger.logRequest({ url, ...params });
     }
 
-    return fetch(url, params);
+    return this._fetch(url, params);
   }
 
   /**
@@ -106,7 +107,7 @@ class AuthorizationCodeFlowTokenGenerator extends AbstractTokenGenerator<
       this.logger.logRequest({ url, ...params });
     }
 
-    return fetch(url, params);
+    return this._fetch(url, params);
   }
 
   checkTokenGeneratorConfig(

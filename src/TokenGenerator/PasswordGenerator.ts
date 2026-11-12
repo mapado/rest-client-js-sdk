@@ -18,6 +18,7 @@ type Config = {
   scheme: string;
   port?: string;
   scope?: string;
+  fetch?: typeof fetch;
 };
 
 type GenerateTokenParameters = {
@@ -70,7 +71,7 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
       this.logger.logRequest({ url, ...params });
     }
 
-    return fetch(url, params);
+    return this._fetch(url, params);
   }
 
   refreshToken(
@@ -108,7 +109,7 @@ class PasswordGenerator extends AbstractTokenGenerator<PasswordToken, Config> {
       this.logger.logRequest({ url, ...params });
     }
 
-    return fetch(url, params);
+    return this._fetch(url, params);
   }
 
   checkTokenGeneratorConfig(config: Config): void {

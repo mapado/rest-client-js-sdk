@@ -143,6 +143,7 @@ const config = {
   onRefreshTokenFailure: () => {
     // do something when the refresh token fails
   },
+  fetch: myFetch, // optional, defaults to the global `fetch`
 }; // path and scheme are mandatory
 
 const sdk = new RestClientSdk(tokenStorage, config, mapping);
@@ -154,6 +155,26 @@ Using TypeScript ? You should now pass the TSMetadata that you defined.
 import RestClientSdk, { Token } from 'rest-client-sdk';
 
 const sdk = new RestClientSdk<TSMetadata>(tokenStorage, config, mapping);
+```
+
+#### Custom fetch
+
+By default, the SDK calls the global `fetch`. Pass a `fetch` key with the same signature to use your own implementation, for example in React Native, where you may want a `fetch` that does not rely on JS timers, which Android pauses when the app goes to the background. The `RestClientSdk` config covers the repository calls, and each token generator takes its own `fetch` key for the token calls:
+
+```js
+const tokenGenerator = new PasswordGenerator({
+  path: 'oauth.me',
+  scheme: 'https',
+  clientId: 'my-client-id',
+  clientSecret: 'my-client-secret',
+  fetch: myFetch,
+});
+
+const sdk = new RestClientSdk(
+  new TokenStorage(tokenGenerator, storage),
+  { path: 'api.me', scheme: 'https', fetch: myFetch },
+  mapping
+);
 ```
 
 #### UnitOfWork
