@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 7.7.0
+
 - `delete` accepts query parameters as a third argument, like the other repository methods
 
 ## 7.6.1
