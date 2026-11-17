@@ -238,11 +238,17 @@ class AbstractClient<D extends MetadataDefinition> {
   /**
    * delete an entity
    *
-   * @param {Record<string, unknown>} the entity to delete
+   * @param {Record<string, unknown>} entity the entity to delete
    * @param {Record<string, unknown>} requestParams parameters that will be send as second parameter to the `fetch` call
+   * @param {Record<string, unknown>} queryParam query parameters that will be added to the request
    */
-  delete(entity: D['entity'], requestParams = {}): Promise<Response> {
-    const url = this.getEntityURI(entity);
+  delete(
+    entity: D['entity'],
+    requestParams = {},
+    queryParam: Record<string, unknown> = {}
+  ): Promise<Response> {
+    const url = new URI(this.getEntityURI(entity));
+    url.addSearch(queryParam);
     const identifier = this._getEntityIdentifier(entity);
 
     return this.authorizedFetch(url, {
