@@ -550,6 +550,25 @@ describe('Fix bugs', () => {
     });
   });
 
+  test('delete keeps the entity url when there is no query param', async () => {
+    fetchMock.delete('https://api.me/v2/tests/1', new Response('{}'));
+
+    await SomeSdk.getRepository('test').delete({ '@id': '/v2/tests/1' });
+  });
+
+  test('allow passing query params in delete', async () => {
+    fetchMock.delete(
+      'https://api.me/v2/tests/1?foo=bar&baz=1',
+      new Response('{}')
+    );
+
+    await SomeSdk.getRepository('test').delete(
+      { '@id': '/v2/tests/1' },
+      { headers: { foo: 'bar' } },
+      { foo: 'bar', baz: 1 }
+    );
+  });
+
   test('allow overriding request params', async () => {
     fetchMock((input, options) => {
       expect(options.method).toEqual('POST');
