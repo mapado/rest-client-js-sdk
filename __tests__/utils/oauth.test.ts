@@ -6,7 +6,7 @@ import {
 } from '../../src/index';
 
 describe('generateCodeChallenge', () => {
-  test('returns the S256 challenge of a known verifier (RFC 7636 appendix B)', async () => {
+  test('returns the challenge the OAuth server expects for a known verifier (RFC 7636 example)', async () => {
     await expect(
       generateCodeChallenge('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')
     ).resolves.toBe('E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM');
@@ -14,7 +14,7 @@ describe('generateCodeChallenge', () => {
 });
 
 describe('generateOAuthState', () => {
-  test('generates a different 32-character hexadecimal state on each call', () => {
+  test('generates a different 32-character hexadecimal state for each login', () => {
     const state = generateOAuthState();
 
     expect(state).toMatch(/^[0-9a-f]{32}$/);
