@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add `generatePkceCodes`, `generateCodeChallenge` and `generateOAuthState` to prepare the authorize redirect of an authorization code flow with PKCE
+
 ## 7.7.0
 
 - `delete` accepts query parameters as a third argument, like the other repository methods
