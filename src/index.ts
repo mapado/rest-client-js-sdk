@@ -40,6 +40,11 @@ import AbstractClient from './client/AbstractClient';
 import Serializer from './serializer/Serializer';
 import type SerializerInterface from './serializer/SerializerInterface';
 import { Logger, Log, LoggerHistory } from './utils/logging';
+import {
+  generateCodeChallenge,
+  generateOAuthState,
+  generatePkceCodes,
+} from './utils/oauth';
 
 export default RestClientSdk;
 export {
@@ -66,6 +71,9 @@ export {
   Attribute,
   Relation,
   Logger,
+  generateCodeChallenge,
+  generateOAuthState,
+  generatePkceCodes,
 };
 export type {
   SerializerInterface,

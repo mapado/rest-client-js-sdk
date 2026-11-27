@@ -108,7 +108,34 @@ for React Native.
 
 ##### Authorization code flow with PKCE
 
-`AuthorizationCodeFlowTokenGenerator` supports [PKCE](https://datatracker.ietf.org/doc/html/rfc7636). The SDK does not generate the `code_verifier` nor the `code_challenge`: generate them before redirecting to the authorize endpoint, then pass the verifier with the received `code`. `clientSecret` is optional, omit it for a public client.
+`AuthorizationCodeFlowTokenGenerator` supports [PKCE](https://datatracker.ietf.org/doc/html/rfc7636). `clientSecret` is optional, omit it for a public client.
+
+Before redirecting to the authorize endpoint, generate a `state` and the PKCE codes, and store the `state` and the verifier:
+
+```js
+import { generateOAuthState, generatePkceCodes } from 'rest-client-sdk';
+
+const state = generateOAuthState();
+// null when `crypto.subtle` is unavailable (page served over http):
+// either refuse to log in, or go on without PKCE
+const pkce = await generatePkceCodes();
+
+await storage.setItem('state', state);
+await storage.setItem('codeVerifier', pkce.codeVerifier);
+
+const searchParams = new URLSearchParams({
+  response_type: 'code',
+  client_id: 'my-client-id',
+  redirect_uri: 'https://my.app/callback',
+  state,
+  code_challenge: pkce.codeChallenge,
+  code_challenge_method: 'S256',
+});
+
+window.location.href = `https://oauth.me/authorize?${searchParams}`;
+```
+
+On the callback, check that the received `state` is the stored one, then pass the verifier with the received `code`:
 
 ```js
 import {
