@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 7.8.0
+
 - Add `generatePkceCodes`, `generateCodeChallenge` and `generateOAuthState` to prepare the authorize redirect of an authorization code flow with PKCE
 
 ## 7.7.0
